@@ -287,34 +287,50 @@ export default function Home() {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[600px] bg-gradient-to-b from-cyan-900/20 via-purple-900/10 to-transparent blur-3xl -z-10 pointer-events-none"></div>
       
       <div className="relative z-10 container mx-auto px-6 py-12 max-w-6xl">
-        <header className="flex justify-between items-center mb-24 drop-shadow-sm">
+        <header className="flex justify-between items-center mb-16 md:mb-24 drop-shadow-sm w-full gap-2 md:gap-4 px-2 sm:px-0 relative">
+          
+          {/* TRÁI: Logo Trường */}
+          <motion.div 
+             initial={{ opacity: 0, x: -20 }}
+             animate={{ opacity: 1, x: 0 }}
+             transition={{ duration: 0.8, ease: "easeOut" }}
+             className="flex flex-1 justify-start items-center shrink-0 z-10"
+          >
+             {/* eslint-disable-next-line @next/next/no-img-element */}
+             <img src="/vietanh-logo.png" alt="Trường Việt Anh" className="h-16 sm:h-20 md:h-[80px] w-auto object-contain drop-shadow-md" />
+          </motion.div>
+
+          {/* GIỮA: Logo Funlab Challenge */}
           <motion.div 
              initial={{ opacity: 0, scale: 0.9 }}
              animate={{ opacity: 1, scale: 1 }}
              transition={{ duration: 0.8, ease: "easeOut" }}
-             className="flex items-center gap-4 relative group cursor-pointer"
+             className="flex flex-[1.5] sm:flex-1 justify-center items-center relative group cursor-pointer z-20 shrink max-w-[60%] sm:max-w-none"
           >
-            {/* Glow Aura Effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-cyan-500 blur-3xl opacity-0 group-hover:opacity-50 transition-all duration-700 rounded-[3rem] scale-100 group-hover:scale-110"></div>
-            
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-cyan-500 blur-xl md:blur-3xl opacity-0 group-hover:opacity-50 transition-all duration-700 rounded-full scale-100 group-hover:scale-110"></div>
             <Image 
               src="/logo.png" 
               alt="FUNLAB CHALLENGE Logo" 
-              width={1000} 
-              height={240} 
-              className="h-[240px] w-auto object-contain relative z-10 transition-all duration-500 group-hover:-translate-y-2 drop-shadow-xl group-hover:drop-shadow-[0_0_25px_rgba(168,85,247,0.6)]"
+              width={600} 
+              height={150} 
+              className="h-20 sm:h-24 md:h-[120px] lg:h-[140px] w-auto object-contain relative z-10 transition-all duration-500 group-hover:-translate-y-1 drop-shadow-lg group-hover:drop-shadow-[0_0_25px_rgba(168,85,247,0.6)]"
               priority
             />
           </motion.div>
+
+          {/* PHẢI: Logo CLB + Nút Admin */}
           <motion.nav
              initial={{ opacity: 0, x: 20 }}
              animate={{ opacity: 1, x: 0 }}
              transition={{ duration: 0.8, delay: 0.2 }}
-             className="relative group flex items-center justify-end"
+             className="flex flex-1 items-center justify-end gap-2 sm:gap-4 shrink-0 z-10 relative"
           >
-            <Link href="/login">
+             {/* eslint-disable-next-line @next/next/no-img-element */}
+             <img src="/science-club-logo.png" alt="Science Club" className="h-16 sm:h-20 md:h-[80px] w-auto object-contain drop-shadow-md" />
+
+            <Link href="/login" className="hidden sm:block">
               <button 
-                className="relative flex items-center justify-center w-12 h-12 rounded-full bg-slate-900/40 backdrop-blur-2xl shadow-[0_0_20px_rgba(0,0,0,0.5)] hover:shadow-[0_0_30px_rgba(34,211,238,0.3)] transition-all duration-500 overflow-hidden group/btn border border-white/5"
+                className="relative flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full bg-slate-900/40 backdrop-blur-2xl shadow-[0_0_20px_rgba(0,0,0,0.5)] hover:shadow-[0_0_30px_rgba(34,211,238,0.3)] transition-all duration-500 overflow-hidden group/btn border border-white/5"
                 aria-label="Hệ Thống Quản Trị"
               >
                 {/* Rotating Border Beam */}
@@ -322,7 +338,7 @@ export default function Home() {
                 {/* Inner Cutout */}
                 <div className="absolute inset-[1px] rounded-full bg-slate-900/90 backdrop-blur-3xl flex items-center justify-center z-10 transition-colors group-hover/btn:bg-slate-900/70">
                   {/* Lock Icon */}
-                  <svg className="w-5 h-5 text-slate-400 group-hover/btn:text-cyan-300 transition-colors drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 md:w-5 md:h-5 text-slate-400 group-hover/btn:text-cyan-300 transition-colors drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                     <circle cx="12" cy="15" r="1.5" fill="currentColor"></circle>
                   </svg>
@@ -331,8 +347,8 @@ export default function Home() {
             </Link>
 
             {/* Secret Entry Tooltip */}
-            <div className="absolute right-0 top-full mt-4 w-max px-4 py-2 bg-slate-900/90 backdrop-blur-md text-cyan-50 text-sm font-medium rounded-xl border border-cyan-500/20 shadow-[0_10px_30px_rgba(0,0,0,0.8)] opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 z-50">
-              Chỉ dành cho Ban Tổ chức Funlab
+            <div className="absolute right-0 top-[110%] w-max px-4 py-2 bg-slate-900/90 backdrop-blur-md text-cyan-50 text-sm font-medium rounded-xl border border-cyan-500/20 shadow-[0_10px_30px_rgba(0,0,0,0.8)] opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 z-50 hidden sm:block">
+              Chỉ dành cho Admin
               <div className="absolute -top-2 right-4 w-4 h-4 bg-slate-900/90 border-t border-l border-cyan-500/20 rotate-45 transform"></div>
             </div>
           </motion.nav>
