@@ -1,79 +1,87 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
-import { LeaderboardEntry } from "@/lib/database.types";
+import { createClient } from "@/utils/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 
 export function LiveLeaderboard({ episodeId }: { episodeId: number }) {
-  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
+  const [entries, setEntries] = useState<any[]>([]);
+  const supabase = createClient();
 
   useEffect(() => {
-    // Initial fetch
+    // Hàm tải dữ liệu Leaderboard
     const fetchLeaderboard = async () => {
-      // Setup mock data fallback if Supabase url is placeholder
-      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL.includes("your_supabase")) {
-        setEntries([
-          { id: 1, episode_id: episodeId, student_name: "Initial Player", score: 1000, created_at: new Date().toISOString() }
-        ]);
+      const { data, error } = await supabase
+        .from("episode_scores")
+        .select("id, user_id, score, time_in_seconds, created_at")
+        .eq("episode_id", episodeId)
+        .order("score", { ascending: false })
+        .order("time_in_seconds", { ascending: true })
+        .order("created_at", { ascending: true })
+        .limit(10);
+      
+      if (error) {
+        console.error("Lỗi lấy dữ liệu Leaderboard:", error);
         return;
       }
 
-      const { data } = await supabase
-        .from("leaderboard")
-        .select("*")
-        .eq("episode_id", episodeId)
-        .order("score", { ascending: false })
-        .limit(10);
-      
-      if (data) setEntries(data);
+      if (data && data.length > 0) {
+        // Lấy danh sách user_id thật (bỏ qua guest)
+        const realUserIds = data.map((d: any) => d.user_id).filter((id: string) => id && !id.startsWith('guest-'));
+        
+        let profilesData: any[] = [];
+        if (realUserIds.length > 0) {
+          const { data: profs } = await supabase.from('profiles').select('id, full_name, class_name').in('id', realUserIds);
+          if (profs) profilesData = profs;
+        }
+
+        const formatted = data.map((item: any) => {
+          const profile = profilesData.find(p => p.id === item.user_id);
+          return {
+            id: item.id,
+            score: item.score,
+            created_at: item.created_at,
+            full_name: profile?.full_name || 'Học giả Ẩn danh',
+            class_name: profile?.class_name || 'Khách'
+          };
+        });
+        setEntries(formatted);
+      } else {
+        setEntries([]);
+      }
     };
 
+    // Tải lần đầu tiên khi Component được mount
     fetchLeaderboard();
 
-    // Setup Local Mock Listener when real DB is unavailable
-    const handleMockInsert = (e: any) => {
-      const newEntry = e.detail;
-      playSound();
-      setEntries(prev => {
-        const next = [...prev, newEntry].sort((a, b) => b.score - a.score).slice(0, 10);
-        return next;
-      });
-    };
-    window.addEventListener("mock_leaderboard_insert", handleMockInsert);
-
-    // Realtime Supabase Subscription
+    // Thiết lập kênh Realtime lắng nghe thay đổi điểm số của Tập này
     const channel = supabase
-      .channel("leaderboard_changes")
+      .channel(`live_leaderboard_${episodeId}`)
       .on(
         "postgres_changes",
         {
-          event: "INSERT",
+          event: "*", // Lắng nghe cả INSERT và UPDATE (do logic upsert cao điểm nhất)
           schema: "public",
-          table: "leaderboard",
+          table: "episode_scores",
           filter: `episode_id=eq.${episodeId}`,
         },
-        (payload) => {
-          const newEntry = payload.new as LeaderboardEntry;
+        () => {
+          // Bất cứ khi nào có thay đổi, lập tức fetch lại để lấy dữ liệu JOIN mới nhất
           playSound();
-          setEntries(prev => {
-            const next = [...prev, newEntry].sort((a, b) => b.score - a.score).slice(0, 10);
-            return next;
-          });
+          fetchLeaderboard();
         }
       )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
-      window.removeEventListener("mock_leaderboard_insert", handleMockInsert);
     };
-  }, [episodeId]);
+  }, [episodeId, supabase]);
 
   const playSound = () => {
-    // Free notification sound simulating leaderboard "level up / ting"
+    // Âm thanh thông báo khi có người mới lọt vào Top hoặc đổi điểm
     const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3");
-    audio.play().catch(e => console.log("Audio autoplay blocked by browser policy without user gesture", e));
+    audio.play().catch(e => console.log("Trình duyệt chặn autoplay âm thanh", e));
   };
 
   return (
@@ -103,7 +111,7 @@ export function LiveLeaderboard({ episodeId }: { episodeId: number }) {
 
             return (
               <motion.div
-                key={entry.id || entry.created_at}
+                key={entry.id}
                 layout
                 initial={{ opacity: 0, x: -50, scale: 0.9 }}
                 animate={{ opacity: 1, x: 0, scale: 1 }}
@@ -120,10 +128,12 @@ export function LiveLeaderboard({ episodeId }: { episodeId: number }) {
                   }`}>
                     {isTop1 ? '🥇' : isTop2 ? '🥈' : isTop3 ? '🥉' : index + 1}
                   </div>
-                  <span className="font-bold text-xl">{entry.student_name}</span>
+                  <span className="font-bold text-lg sm:text-xl">
+                    [Top {index + 1}] {entry.full_name} <span className="text-sm font-medium opacity-70">({entry.class_name})</span>
+                  </span>
                 </div>
-                <div className="font-mono font-black text-3xl tracking-tighter">
-                  {entry.score.toLocaleString()}
+                <div className="font-mono font-black text-2xl sm:text-3xl tracking-tighter shrink-0 ml-2">
+                  {entry.score} <span className="text-sm font-bold opacity-60">Điểm</span>
                 </div>
               </motion.div>
             );
@@ -132,7 +142,7 @@ export function LiveLeaderboard({ episodeId }: { episodeId: number }) {
         
         {entries.length === 0 && (
           <div className="text-center p-12 text-slate-500 font-medium bg-slate-800/30 rounded-2xl border border-slate-700/30 border-dashed">
-            Waiting for players to submit scores...
+            Bảng Vàng đang chờ những cái tên đầu tiên khắc lên...
           </div>
         )}
       </div>

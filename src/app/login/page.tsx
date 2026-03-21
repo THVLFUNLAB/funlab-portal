@@ -1,109 +1,117 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
-import Link from "next/link";
-import Image from "next/image";
+import { useState } from 'react';
+import { createClient } from '@/utils/supabase/client';
+import { motion } from 'framer-motion';
+import { Hexagon, Loader2, Orbit, Fingerprint, ShieldAlert } from 'lucide-react';
 
 export default function LoginPage() {
+  const supabase = createClient();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    setError(null);
+    
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        },
+      },
+    });
+
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+    }
+  };
+
   return (
-    <main className="min-h-screen bg-transparent text-slate-100 flex items-center justify-center relative overflow-hidden font-sans">
-      {/* Sci-fi Video Background (Reused for consistency) */}
-      <div className="absolute inset-0 -z-20 w-full h-full overflow-hidden">
-        <video 
-          autoPlay loop muted playsInline
-          className="absolute inset-0 w-full h-full object-cover blur-[8px]"
-        >
-          <source src="/bg-tech.mp4" type="video/mp4" />
-        </video>
-        <div className="absolute inset-0 bg-black/75 pointer-events-none"></div>
+    <div className="min-h-screen bg-slate-950 flex flex-col justify-center items-center relative overflow-hidden font-sans text-slate-200">
+      {/* Sci-Fi Background Elements */}
+      <div className="absolute inset-0 z-0">
+         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40rem] h-[40rem] bg-cyan-600/10 blur-[150px] rounded-full pointer-events-none"></div>
+         <div className="absolute inset-0 bg-[linear-gradient(rgba(34,211,238,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.03)_1px,transparent_1px)] bg-[size:60px_60px] opacity-30 pointer-events-none"></div>
       </div>
 
-      {/* Decorative Ambient Lighting */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-tr from-yellow-500/10 via-green-500/5 to-blue-500/10 blur-[100px] -z-10 pointer-events-none rounded-full"></div>
-
-      <div className="w-full max-w-md px-6 relative z-10 mb-12">
-        <motion.div 
-          initial={{ opacity: 0, y: 30, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.8, type: "spring", bounce: 0.4 }}
-          className="bg-slate-900/40 backdrop-blur-3xl border border-white/5 rounded-[2.5rem] p-10 shadow-[0_20px_50px_rgba(0,0,0,0.6)] relative group overflow-hidden"
-        >
-          {/* Subtle Outer Glow linking to typing interaction */}
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-cyan-500/5 to-transparent opacity-0 group-focus-within:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="relative z-10 w-full max-w-lg px-6"
+      >
+        <div className="bg-slate-900/60 backdrop-blur-3xl border border-cyan-500/30 rounded-[2.5rem] shadow-[0_0_80px_rgba(6,182,212,0.15)] overflow-hidden relative group">
           
-          <div className="relative z-10 flex flex-col items-center">
+          {/* Neon Top Bar */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_20px_rgba(34,211,238,1)]"></div>
+          
+          <div className="p-10 md:p-14 flex flex-col items-center">
             
-            {/* Minimal Logo Display */}
-            <div className="mb-10 text-center">
-              <Link href="/">
-                <motion.div 
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="mx-auto w-16 h-16 rounded-2xl bg-slate-800/80 border border-slate-700 shadow-[0_0_20px_rgba(0,0,0,0.5)] flex items-center justify-center mb-6 cursor-pointer relative overflow-hidden"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-tr from-[#FBBF24] via-[#F97316] to-[#22C55E] opacity-20"></div>
-                  <Image src="/logo.png" alt="Funlab Icon" width={40} height={40} className="object-contain" />
-                </motion.div>
-              </Link>
-              
-              {/* 3D Multi-color Gradient Title matching Master Prompt */}
-              <h1 
-                className="text-4xl font-black tracking-tighter bg-clip-text text-transparent mb-2"
-                style={{
-                  backgroundImage: "linear-gradient(to right, #FBBF24, #F97316, #22C55E, #3B82F6)",
-                  filter: "drop-shadow(0px 2px 2px rgba(0,0,0,0.8))"
-                }}
-              >
-                SYSTEM ACCESS
-              </h1>
-              <p className="text-slate-400 font-medium tracking-widest uppercase text-xs">
-                Trung tâm điều hành Funlab
-              </p>
+            {/* Sci-Fi Logo Lock */}
+            <div className="flex flex-col items-center mb-10 text-center relative">
+               <motion.div 
+                 animate={{ rotate: 360 }}
+                 transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                 className="absolute inset-0 w-24 h-24 bg-cyan-500/10 rounded-full blur-xl -translate-y-2 translate-x-3"
+               />
+               <div className="w-20 h-20 bg-slate-950 rounded-2xl border border-cyan-700/50 flex items-center justify-center shadow-[inset_0_0_20px_rgba(34,211,238,0.2)] relative mb-6">
+                  <Hexagon className="w-10 h-10 text-cyan-400 relative z-10" />
+                  <Orbit className="absolute w-full h-full text-cyan-500/40 animate-[spin_8s_linear_infinite]" />
+               </div>
+               
+               <h2 className="text-3xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-500 uppercase">
+                 CỔNG ĐỊNH DANH
+               </h2>
+               <p className="text-cyan-500/70 text-sm mt-3 font-bold tracking-[0.2em] uppercase">
+                 FUNLAB CHALLENGE
+               </p>
             </div>
 
-            <form className="space-y-6 w-full" onSubmit={(e) => e.preventDefault()}>
-              <div className="space-y-2 relative">
-                <label className="text-xs font-bold text-slate-300 uppercase tracking-widest ml-1 mb-2 block">
-                  Clearance Code
-                </label>
-                <div className="relative group/input">
-                  <input 
-                    type="password" 
-                    placeholder="Nhập mã truy cập..."
-                    className="w-full bg-slate-950/60 border border-slate-700/50 rounded-xl px-5 py-4 text-cyan-50 placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all shadow-inner font-mono tracking-widest text-lg"
-                  />
-                  {/* Blinking Pulse Light Indicator */}
-                  <div className="absolute right-5 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-red-500/80 group-focus-within/input:bg-cyan-500 group-focus-within/input:shadow-[0_0_8px_rgba(34,211,238,0.8)] shadow-[0_0_8px_rgba(239,68,68,0.8)] transition-all duration-300"></div>
-                </div>
-              </div>
+            {error && (
+               <div className="w-full mb-6 bg-red-500/10 border border-red-500/50 text-red-400 text-xs p-3 rounded-xl flex border-dashed items-center gap-2">
+                 <ShieldAlert className="w-5 h-5 shrink-0" />
+                 <span>{error}</span>
+               </div>
+            )}
 
-              <motion.button 
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="w-full relative py-4 mt-2 rounded-xl font-bold text-white shadow-lg overflow-hidden group/btn"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-[#FBBF24] via-[#F97316] via-[#22C55E] to-[#3B82F6] opacity-90 group-hover/btn:opacity-100 transition-opacity"></div>
-                {/* Button Shiny Sweep effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700 ease-in-out"></div>
-                <span className="relative z-10 tracking-widest drop-shadow-md uppercase">
-                  Xác Thực
-                </span>
-              </motion.button>
-            </form>
-            
+            {/* Giant Google Button */}
+            <motion.button 
+              onClick={handleGoogleLogin}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              disabled={loading}
+              className="w-full py-5 bg-slate-950/80 border-2 border-cyan-500/50 hover:bg-cyan-950/40 rounded-2xl flex items-center justify-center gap-4 transition-all shadow-[0_0_30px_rgba(6,182,212,0.2)] hover:shadow-[0_0_40px_rgba(6,182,212,0.5)] group/btn relative overflow-hidden"
+            >
+              <span className="absolute w-1/4 h-full bg-cyan-400/20 skew-x-12 -left-20 group-hover/btn:animate-[shimmer_1s_ease-in-out_infinite]"></span>
+              
+              {loading ? (
+                <div className="flex items-center gap-3">
+                  <Loader2 className="w-6 h-6 animate-spin text-cyan-400" />
+                  <span className="text-cyan-300 font-bold tracking-widest uppercase">Đang KẾT NỐI...</span>
+                </div>
+              ) : (
+                <>
+                  <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21.35 11.1H12.18V13.83H18.69C18.36 17.64 15.19 19.27 12.19 19.27C8.36 19.27 5 16.25 5 12C5 7.9 8.2 4.73 12.2 4.73C15.29 4.73 17.1 6.7 17.1 6.7L19 4.72C19 4.72 16.56 2 12.1 2C6.42 2 2.03 6.8 2.03 12C2.03 17.05 6.16 22 12.25 22C17.6 22 21.5 18.33 21.5 12.91C21.5 11.76 21.35 11.1 21.35 11.1Z"/>
+                  </svg>
+                  <span className="text-white font-black text-lg tracking-widest uppercase">Đăng nhập tài khoản Google</span>
+                </>
+              )}
+            </motion.button>
+
+            <div className="mt-8 flex items-center justify-center gap-2 text-slate-500 text-xs font-medium bg-slate-900/50 px-4 py-2 rounded-full border border-white/5">
+              <Fingerprint className="w-4 h-4 text-cyan-500/50" />
+              Chỉ dùng tài khoản thật sự để được vinh danh
+            </div>
+
           </div>
-        </motion.div>
-        
-        {/* Helper Links */}
-        <div className="mt-8 text-center">
-          <Link href="/" className="text-sm font-medium tracking-wide text-slate-500 hover:text-cyan-400 transition-colors flex items-center justify-center gap-2">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-            </svg>
-            Quay lại Cổng Thông Tin
-          </Link>
         </div>
-      </div>
-    </main>
+      </motion.div>
+    </div>
   );
 }
