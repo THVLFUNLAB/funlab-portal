@@ -344,7 +344,7 @@ export default function Home() {
              className="flex flex-1 justify-start items-center shrink-0 z-10"
           >
              {/* eslint-disable-next-line @next/next/no-img-element */}
-             <img src="/vietanh-logo.png" alt="Trường Việt Anh" className="h-16 sm:h-20 md:h-[80px] w-auto object-contain drop-shadow-md" />
+             <img src="/vietanh-logo.png" alt="Trường Việt Anh" className="h-20 sm:h-28 md:h-[110px] w-auto object-contain drop-shadow-2xl brightness-110" />
           </motion.div>
 
           {/* GIỮA: Logo Funlab Challenge */}
@@ -374,7 +374,7 @@ export default function Home() {
              className="flex flex-1 items-center justify-end gap-3 sm:gap-6 shrink-0 z-50 relative"
           >
              {/* eslint-disable-next-line @next/next/no-img-element */}
-             <img src="/science-club-logo.png" alt="Science Club" className="h-12 sm:h-16 md:h-[60px] w-auto object-contain drop-shadow-md hidden sm:block" />
+             <img src="/science-club-logo.png" alt="Science Club" className="h-16 sm:h-20 md:h-[85px] w-auto object-contain drop-shadow-2xl hidden sm:block brightness-110" />
 
             {isAuthLoading ? (
                <div className="w-32 h-10 bg-slate-800/50 rounded-full animate-pulse"></div>
