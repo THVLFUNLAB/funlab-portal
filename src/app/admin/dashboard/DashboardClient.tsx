@@ -10,7 +10,7 @@ import {
 import { supabase } from "@/lib/supabase";
 import { 
   Users, PlaySquare, BarChart, LogOut, Search, Settings, ShieldAlert,
-  Edit2, PlusCircle, CheckCircle, XCircle, Activity, Trophy, Bot, Plus, Save, X, Image as ImageIcon, Video, FileText
+  Edit2, PlusCircle, CheckCircle, XCircle, Activity, Trophy, Bot, Plus, Save, X, Image as ImageIcon, Video, FileText, Trash2
 } from 'lucide-react';
 
 export default function AdminDashboardClient() {
@@ -131,6 +131,27 @@ export default function AdminDashboardClient() {
     } else alert("Lỗi: " + res.error);
   };
 
+  const handleDeleteUser = async (userId: string, userName: string) => {
+    if (confirm(`Thầy có chắc muốn xóa tài khoản này và mọi kết quả thi của em ấy (${userName}) không? Thao tác này không thể hoàn tác!`)) {
+      try {
+        const res = await fetch('/api/admin/delete-user', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId })
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert("Đã xóa sĩ tử thành công!");
+          loadData();
+        } else {
+          alert("Lỗi khi xóa: " + data.error);
+        }
+      } catch (err: any) {
+        alert("Lỗi kết nối API: " + err.message);
+      }
+    }
+  };
+
   if (loading) return (
      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
         <div className="text-red-500 flex flex-col items-center animate-pulse">
@@ -222,6 +243,12 @@ export default function AdminDashboardClient() {
                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-900/30 text-emerald-400 border border-emerald-900 hover:bg-emerald-800 rounded-lg text-xs font-bold transition-colors"
                                  >
                                     <PlusCircle className="w-3.5 h-3.5" /> PHẠT/THƯỞNG
+                                 </button>
+                                 <button 
+                                   onClick={() => handleDeleteUser(p.id, p.full_name)} 
+                                   className="flex items-center gap-1.5 px-3 py-1.5 bg-red-900/30 text-red-500 border border-red-900 hover:bg-red-800 rounded-lg text-xs font-bold transition-colors"
+                                 >
+                                    <Trash2 className="w-3.5 h-3.5" /> XÓA
                                  </button>
                               </td>
                             </tr>

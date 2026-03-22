@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import Link from "next/link";
 import { Settings } from "lucide-react";
 import FloatingChatbot from "@/components/FloatingChatbot";
+import MandatoryProfileModal from "@/components/MandatoryProfileModal";
 import "./globals.css";
 
 const notoSerif = Noto_Serif({
@@ -40,6 +41,9 @@ export default async function RootLayout({
 
         {/* Trợ lý Funlab */}
         <FloatingChatbot />
+
+        {/* Bắt buộc cập nhật thông tin */}
+        <MandatoryProfileModal />
       </body>
     </html>
   );

@@ -38,15 +38,10 @@ export async function GET(request: Request) {
     }
 
     if (data.session?.user) {
-      // Kiểm tra ngay lập tức xem user đã thiết lập Họ Tên hay chưa
-      const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', data.session.user.id).single();
-      if (!profile || !profile.full_name) {
-        // Lần đầu đăng nhập -> Ép redirect về Desktop Setup
-        return NextResponse.redirect(`${origin}/profile/setup`)
-      }
+      // Logic Modal toàn cục trong RootLayout sẽ tự động kiểm tra profile khi về Trang chủ
     }
   }
 
-  // Đã có đủ thông tin -> Chuyển hướng về Trang chủ
+  // Chuyển hướng về Trang chủ
   return NextResponse.redirect(`${origin}/`)
 }
