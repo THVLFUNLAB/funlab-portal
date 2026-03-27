@@ -57,6 +57,7 @@ export interface GamePayload {
   timeInSeconds: number;
   level: string;
   answersLog: any[];
+  stemLink?: string;
 }
 
 export interface ScoreResultV2 {

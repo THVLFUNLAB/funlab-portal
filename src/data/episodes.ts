@@ -126,5 +126,13 @@ export const episodes: Episode[] = [
         penalty: "Lực từ của nam châm rất quan trọng, nhưng năng lượng điện đòi hỏi một yếu tố không thể thiếu: động năng (sự di chuyển)!"
       }
     ]
+  },
+  {
+    id: 7,
+    title: "TẬP 7: CHIẾN DỊCH CỨU HỎA - PHÙ THỦY HÓA HỌC",
+    duration: "15 phút",
+    desc: "Khám phá phản ứng hóa học giữa Baking Soda và Giấm để tạo ra 'Chiếc bơm tàng hình' và dập tắt đám cháy.",
+    youtubeId: "RACbCcHf", // Placeholder, user can update this in Admin
+    quizList: [] // This game uses its own QUESTION_DB
   }
 ];

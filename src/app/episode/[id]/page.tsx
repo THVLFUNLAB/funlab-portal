@@ -15,6 +15,7 @@ import Tap3Game from "@/components/games/Tap3Game";
 import Tap4Game from "@/components/games/Tap4Game";
 import Tap5Game from "@/components/games/Tap5Game";
 import Tap6Bantayvohinh from "@/components/games/Tap6Bantayvohinh";
+import Tap7ChienDichCuuHoa from "@/components/games/Tap7ChienDichCuuHoa";
 
 // TỪ ĐIỂN MAPPER GAME - Thêm các tập khác vào đây
 const GAME_COMPONENTS: Record<number, React.ElementType> = {
@@ -24,6 +25,7 @@ const GAME_COMPONENTS: Record<number, React.ElementType> = {
   4: Tap4Game,
   5: Tap5Game,
   6: Tap6Bantayvohinh,
+  7: Tap7ChienDichCuuHoa,
 };
 
 export default function EpisodePage() {

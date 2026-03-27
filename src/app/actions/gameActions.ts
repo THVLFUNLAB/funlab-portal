@@ -51,7 +51,8 @@ export async function saveGameScore(
         score: validScore,
         time_in_seconds: payload.timeInSeconds,
         level: payload.level,
-        answers_log: payload.answersLog
+        answers_log: payload.answersLog,
+        stem_link: payload.stemLink
       });
 
     if (insertError) {

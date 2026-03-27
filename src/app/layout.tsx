@@ -14,7 +14,7 @@ const notoSerif = Noto_Serif({
 
 export const metadata: Metadata = {
   title: "Funlab",
-  description: "Trang web của Thầy Hậu Vật lý đẹp trai",
+  description: "Trang web của VA SCIENCE CLUB - TH-THCS-THPT VIỆT ANH 2",
 };
 
 export default async function RootLayout({
@@ -29,7 +29,7 @@ export default async function RootLayout({
     <html lang="en">
       <body className={`${notoSerif.variable} font-serif antialiased bg-slate-950 text-slate-50 relative`}>
         {children}
-        
+
         {/* Lối Báo Động Quản Trị Viên */}
         <div className="fixed bottom-6 left-6 z-[9999] opacity-80 hover:opacity-100 transition-all duration-300 pointer-events-auto">
           <Link href={isAdmin ? "/admin/dashboard" : "/admin/login"} aria-label="Quản Trị Viên">
