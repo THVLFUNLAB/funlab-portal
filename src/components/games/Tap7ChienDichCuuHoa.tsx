@@ -290,7 +290,7 @@ export default function Tap7ChienDichCuuHoa({ onGameComplete }: Tap7Props) {
   };
 
   return (
-    <div className="w-full h-full min-h-[600px] bg-orange-50 text-slate-800 flex flex-col items-center p-4 sm:p-6 overflow-y-auto relative font-sans custom-scrollbar">
+    <div className="w-full h-full min-h-[600px] bg-orange-50 text-slate-800 flex flex-col items-center p-4 sm:p-6 overflow-y-auto relative font-sans custom-scrollbar game-safe-bottom">
       {/* Cảnh nền sáng sủa, năng động */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-red-100 blur-[80px] rounded-full pointer-events-none"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-orange-100 blur-[80px] rounded-full pointer-events-none"></div>

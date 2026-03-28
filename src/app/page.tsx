@@ -232,7 +232,7 @@ const PremiumSlogan = ({ text }: { text: string }) => {
     >
       {/* Base Layer: Beautiful Multi-Color Gradient matching the Logo + 3D Shadow Stack */}
       <h2 
-        className="text-3xl md:text-5xl lg:text-[2.6rem] xl:text-5xl font-black tracking-tighter md:whitespace-nowrap bg-clip-text text-transparent relative z-10 leading-tight"
+        className="text-2xl sm:text-3xl md:text-5xl lg:text-[2.6rem] xl:text-5xl font-black tracking-tighter md:whitespace-nowrap bg-clip-text text-transparent relative z-10 leading-tight break-words overflow-hidden"
         style={{
           backgroundImage: "linear-gradient(to right, #FBBF24, #F97316, #22C55E, #3B82F6)",
           WebkitBackgroundClip: "text",
@@ -246,7 +246,7 @@ const PremiumSlogan = ({ text }: { text: string }) => {
       {/* Dynamic Layer: The Smooth Shiny Sweep */}
       <motion.h2 
         aria-hidden="true"
-        className="absolute inset-0 z-20 text-3xl md:text-5xl lg:text-[2.6rem] xl:text-5xl font-black tracking-tighter md:whitespace-nowrap bg-clip-text text-transparent pointer-events-none leading-tight"
+        className="absolute inset-0 z-20 text-2xl sm:text-3xl md:text-5xl lg:text-[2.6rem] xl:text-5xl font-black tracking-tighter md:whitespace-nowrap bg-clip-text text-transparent pointer-events-none leading-tight"
         style={{
           // A bright white diagonal beam to sweep across
           backgroundImage: "linear-gradient(75deg, transparent 40%, rgba(255,255,255,0.95) 50%, transparent 60%)",
@@ -309,7 +309,7 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-transparent text-slate-100 selection:bg-cyan-500 selection:text-white pb-20 relative overflow-hidden font-sans">
+    <main className="min-h-screen bg-transparent text-slate-100 selection:bg-cyan-500 selection:text-white pb-24 md:pb-20 main-safe-bottom relative overflow-hidden font-sans">
       {/* Sci-fi Video Background */}
       <div className="absolute inset-0 -z-20 w-full h-full overflow-hidden">
         <video 
@@ -461,7 +461,7 @@ export default function Home() {
                         : 'bg-slate-800/40 border-slate-700/30 hover:bg-slate-800/80 hover:border-cyan-500/30 hover:shadow-[0_0_20px_rgba(34,211,238,0.1)]'
                     }`}>
                        {/* Thumbnail / Image Map */}
-                       <div className={`w-full sm:w-24 h-32 sm:h-auto rounded-xl flex-shrink-0 overflow-hidden relative border ${isCompleted ? 'border-green-500/30 bg-slate-900/50' : 'border-slate-700/50 bg-slate-900'}`}>
+                       <div className={`w-full sm:w-24 shrink-0 rounded-xl flex-shrink-0 overflow-hidden relative border aspect-[4/3] sm:aspect-auto sm:h-auto ${isCompleted ? 'border-green-500/30 bg-slate-900/50' : 'border-slate-700/50 bg-slate-900'}`}>
                         {isCompleted && (
                           <div className="absolute top-1.5 right-1.5 bg-green-500/90 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-1 z-20 backdrop-blur-sm shadow-[0_0_10px_rgba(34,197,94,0.5)]">
                             <CheckCircle className="w-2.5 h-2.5" /> XONG

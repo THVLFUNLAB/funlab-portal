@@ -99,7 +99,9 @@ export default function MandatoryProfileModal() {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 sm:p-6 overflow-y-auto custom-scrollbar">
+      {/* [FIX 4] Outer container: overflow-y-auto để modal scroll được trên màn hình nhỏ
+           pb-safe-lg đảm bảo nội dung không bị home indicator iPhone che */}
+      <div className="fixed inset-0 z-[10000] flex items-start justify-center p-4 sm:p-6 overflow-y-auto custom-scrollbar pb-safe-lg">
         {/* Backdrop lấp lánh và mờ ảo */}
         <motion.div 
           initial={{ opacity: 0 }} 
@@ -112,12 +114,14 @@ export default function MandatoryProfileModal() {
         <motion.div 
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          className="relative z-10 w-full max-w-2xl bg-slate-900/40 border border-cyan-500/30 rounded-[2.5rem] shadow-[0_0_80px_rgba(34,211,238,0.2)] overflow-hidden"
+          className="relative z-10 w-full max-w-2xl bg-slate-900/40 border border-cyan-500/30 rounded-[2.5rem] shadow-[0_0_80px_rgba(34,211,238,0.2)] overflow-hidden my-auto"
         >
           {/* Neon Top Bar */}
           <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_20px_rgba(34,211,238,0.8)]"></div>
           
-          <div className="p-8 md:p-12">
+          {/* [FIX 4] paddingBottom dùng max() đảm bảo luôn có ít nhất 2rem
+               + env(safe-area-inset-bottom) cho thiết bị tràn viền */}
+          <div className="p-8 md:p-12" style={{ paddingBottom: 'max(2rem, calc(2rem + env(safe-area-inset-bottom)))' }}>
             <header className="text-center mb-10">
                <motion.div 
                  animate={{ rotate: [0, 5, -5, 0] }}
@@ -204,11 +208,12 @@ export default function MandatoryProfileModal() {
               </div>
 
               {/* Submit Button */}
+              {/* [FIX 4] min-h-[56px] đảm bảo touch target >= 44px theo Apple HIG */}
               <motion.button 
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 disabled={submitting}
-                className="w-full py-6 bg-gradient-to-r from-cyan-600 to-blue-700 hover:from-cyan-500 hover:to-blue-600 rounded-3xl font-black tracking-[0.3em] text-white uppercase shadow-[0_15px_35px_rgba(6,182,212,0.35)] transition-all flex items-center justify-center gap-4 border border-cyan-400/20"
+                className="w-full py-5 min-h-[56px] bg-gradient-to-r from-cyan-600 to-blue-700 hover:from-cyan-500 hover:to-blue-600 rounded-3xl font-black tracking-[0.3em] text-white uppercase shadow-[0_15px_35px_rgba(6,182,212,0.35)] transition-all flex items-center justify-center gap-4 border border-cyan-400/20 disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 {submitting ? (
                   <Loader2 className="w-6 h-6 animate-spin" />

@@ -225,7 +225,7 @@ export default function Tap4Game({ onGameComplete }: Tap4GameProps) {
   };
 
   return (
-    <div className="w-full min-h-screen bg-slate-950 text-slate-200 flex flex-col items-center p-4 overflow-auto relative font-sans">
+    <div className="w-full min-h-screen bg-slate-950 text-slate-200 flex flex-col items-center p-4 overflow-auto relative font-sans game-safe-bottom">
       <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(8,145,178,0.1),transparent)] pointer-events-none"></div>
       
       <div className="w-full max-w-2xl relative z-10 flex flex-col flex-1">

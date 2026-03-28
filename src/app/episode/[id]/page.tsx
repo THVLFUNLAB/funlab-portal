@@ -159,7 +159,7 @@ export default function EpisodePage() {
         </div>
         
         {/* Scrollable Main Area containing Video + Leaderboard + Logs */}
-        <div className="flex-1 p-6 flex flex-col justify-start max-w-2xl mx-auto w-full overflow-y-auto overflow-x-hidden custom-scrollbar">
+        <div className="flex-1 p-6 flex flex-col justify-start max-w-2xl mx-auto w-full overflow-y-auto overflow-x-hidden custom-scrollbar pb-20 md:pb-6">
           {/* YouTube Video Embed */}
           <div className="w-full aspect-video rounded-3xl overflow-hidden shadow-2xl shadow-purple-900/20 border border-slate-700 relative group bg-black mb-8 shrink-0">
             <iframe 
@@ -203,7 +203,7 @@ export default function EpisodePage() {
       </div>
 
       {/* Right Column: Dynamic Game Component Mapper */}
-      <div className="w-full md:w-1/2 h-[60vh] md:h-screen bg-slate-950 flex flex-col relative shadow-[-10px_0_30px_rgba(0,0,0,0.8)] z-20 border-t md:border-t-0 border-slate-800">
+      <div className="w-full md:w-1/2 min-h-[50vh] md:h-screen bg-slate-950 flex flex-col relative shadow-[-10px_0_30px_rgba(0,0,0,0.8)] z-20 border-t md:border-t-0 border-slate-800">
 
         {/* Toast Notification */}
         {toast && (
