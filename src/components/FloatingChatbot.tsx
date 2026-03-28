@@ -7,20 +7,19 @@ import { useChat } from '@ai-sdk/react';
 export default function FloatingChatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
-  
-  // SỬ DỤNG MANUAL STATE VÌ SDK AI V6 KHÔNG CÓ INPUT TRONG useChat
   const [chatInput, setChatInput] = useState('');
-  
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // useChat from @ai-sdk/react 3.0.118 + ai 6.0.134
-  // Helper này chỉ cung cấp sendMessage và messages, không có input/handleInputChange sẵn.
-  const { messages, status, error, sendMessage } = useChat({
+  // useChat from @ai-sdk/react 3.0.118 does not have `input` or `handleInputChange`
+  // We extract `messages`, `status`, `error`, and `sendMessage`
+  const chat = useChat({
     api: '/api/chat',
     initialMessages: [
       { id: 'welcome', role: 'assistant', content: 'Xin chào Sĩ tử! Thầy có thể giúp gì cho con? 🎓' }
     ]
   } as any);
+
+  const { messages, status, error, sendMessage } = chat as any;
 
   // Auto scroll
   useEffect(() => {
@@ -42,14 +41,12 @@ export default function FloatingChatbot() {
     }
   }, []);
 
-  // XỬ LÝ GỬI TIN NHẮN THỦ CÔNG
   const handleLocalSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = chatInput.trim();
     if (!trimmed || status === 'streaming') return;
     
-    // SDK V6 dùng sendMessage thay vì append/handleSubmit truyền thống
-    // Ép kiểu as any để qua mặt cấu trúc phức tạp của SDK V6 này
+    // Yêu cầu chuẩn của AI SDK v6 (Truyền object, không phải string)
     sendMessage({ role: 'user', content: trimmed } as any);
     setChatInput('');
   };
@@ -116,7 +113,7 @@ export default function FloatingChatbot() {
             {error && (
               <div className="p-2 text-center">
                 <span className="text-red-400 text-[10px] bg-red-900/10 px-2 py-1 rounded">
-                  Lỗi kết nối AI: {error?.message || 'Không xác định'}
+                  Lỗi kết nối AI: {error?.message || String(error)}
                 </span>
               </div>
             )}
