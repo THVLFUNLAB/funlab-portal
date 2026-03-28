@@ -1,8 +1,8 @@
 import { google } from "@ai-sdk/google";
 import { streamText } from "ai";
 
-// Ưu tiên Edge Runtime để Vercel không bị nghẽn Stream
-export const runtime = 'edge'; 
+// Chuyển runtime sang nodejs để tương thích 100% với các Node modules ẩn của Google SDK
+export const runtime = 'nodejs'; 
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
@@ -39,8 +39,8 @@ export async function POST(req: Request) {
     console.error(error);
     console.error("==============================================================");
     return new Response(
-      JSON.stringify({ error: "Lỗi gọi Gemini: " + (error?.message || "Unknown error") }), 
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      "Lỗi gọi Gemini: " + (error?.message || "Hết hạn ngạch / Sai cấu hình Vercel"), 
+      { status: 500 }
     );
   }
 }
