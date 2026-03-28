@@ -1,7 +1,6 @@
 import { google } from "@ai-sdk/google";
 import { streamText } from "ai";
 
-// Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
@@ -9,13 +8,10 @@ export async function POST(req: Request) {
     const { messages } = await req.json();
 
     if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
-      console.error("[/api/chat] CRITICAL ERROR: Lỗi thiếu GOOGLE_GENERATIVE_AI_API_KEY trên Vercel. Hãy kiểm tra tab Environment Variables.");
-      return new Response(
-        "Lệnh thất bại. Thầy Hậu đang bận (Lỗi thiếu API Key, hãy báo admin thêm vào Vercel).", 
-        { status: 500 }
-      );
+      throw new Error("Thiếu biến môi trường GOOGLE_GENERATIVE_AI_API_KEY trên Vercel");
     }
 
+    // Khởi tạo luồng dữ liệu với Gemini 1.5 Flash
     const result = streamText({
       model: google("gemini-1.5-flash"),
       messages,
@@ -23,19 +19,18 @@ export async function POST(req: Request) {
         "Bạn là Trợ lý Funlab, một chuyên gia Vật lý vui tính của Thầy Hậu. Bạn sẽ giúp học sinh giải đáp các thắc mắc về 10 tập thử thách của Funlab Challenge. Hãy trả lời bằng tiếng Việt, ngắn gọn và cực kỳ thân thiện.",
     });
 
-    return result.toTextStreamResponse();
+    // Bắt buộc return bằng toDataStreamResponse() cho Vercel AI SDK (useChat)
+    return result.toDataStreamResponse({
+      headers: {
+        'Cache-Control': 'no-cache, no-transform',
+      }
+    });
   } catch (error: any) {
-    // Vercel Server Runtime Logs
-    console.error("============= CHATBOT API CRITICAL ERROR =============");
-    console.error("Message:", error?.message);
-    console.error("Stack:", error?.stack);
-    console.error("Full Error Object:", JSON.stringify(error, null, 2));
-    console.error("======================================================");
-
-    // Trả lỗi Text rõ ràng về cho hook useChat() của Client
-    // Vercel AI SDK sẽ lấy String này làm nội dung của `error.message` trên client
+    // Bắt và in ra console rõ ràng để Runtime Logs Vercel lưu lại
+    console.error("Lỗi gọi Gemini:", error);
+    
     return new Response(
-      `Hệ thống trợ lý đang bận cục bộ. Mã lỗi: ${error?.message || '500 Server Error'}. Hãy thử lại sau!`, 
+      error.message || "Lỗi xử lý API Gemini nội bộ", 
       { status: 500 }
     );
   }
