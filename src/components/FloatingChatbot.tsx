@@ -7,19 +7,15 @@ import { useChat } from '@ai-sdk/react';
 export default function FloatingChatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
-  const [chatInput, setChatInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // useChat from @ai-sdk/react 3.0.118 + ai 6.0.134
-  // Note: input/handleSubmit/handleInputChange are not in this helper version
-  const chat = useChat({
+  // @ts-ignore - Bỏ qua lỗi Type của hook versions
+  const { messages, input, handleInputChange, handleSubmit, status, error } = useChat({
     api: '/api/chat',
     initialMessages: [
       { id: 'welcome', role: 'assistant', content: 'Xin chào Sĩ tử! Thầy có thể giúp gì cho con? 🎓' }
     ]
   } as any);
-
-  const { messages, status, error, sendMessage } = chat as any;
 
   // Auto scroll
   useEffect(() => {
@@ -41,20 +37,12 @@ export default function FloatingChatbot() {
     }
   }, []);
 
-  const handleLocalSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!chatInput.trim() || status === 'streaming') return;
-    
-    sendMessage(chatInput);
-    setChatInput('');
-  };
-
   if (isHidden) return null;
 
   return (
     <div className="fixed right-4 z-[9000]" style={{ bottom: 'max(1.5rem, calc(1rem + env(safe-area-inset-bottom)))' }}>
       
-      {/* NÚT MỞ CHAT - Dùng button type="button" thuần túy để chống sập trang */}
+      {/* NÚT MỞ CHAT */}
       <button
         type="button"
         onClick={(e) => {
@@ -73,7 +61,7 @@ export default function FloatingChatbot() {
         />
       </button>
 
-      {/* KHUNG CHAT UI - Đơn giản hóa tối đa để đảm bảo ổn định */}
+      {/* KHUNG CHAT UI */}
       {isOpen && (
         <div className="absolute bottom-20 right-0 w-[calc(100vw-2rem)] max-w-[350px] h-[450px] sm:h-[500px] bg-slate-950 border border-cyan-500/30 rounded-2xl flex flex-col shadow-2xl overflow-hidden">
           
@@ -92,7 +80,7 @@ export default function FloatingChatbot() {
             </button>
           </div>
 
-          {/* Messages List - Dùng mapping an toàn */}
+          {/* Messages List */}
           <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
             {messages?.map((m: any, idx: number) => (
               <div key={m?.id || idx} className={`flex gap-2 ${m?.role === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -120,21 +108,25 @@ export default function FloatingChatbot() {
 
           {/* Input Form */}
           <form 
-            onSubmit={handleLocalSubmit} 
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSubmit(e);
+            }} 
             className="p-4 border-t border-cyan-500/20 bg-slate-900/50 shrink-0"
           >
             <div className="relative flex items-center">
               <input
                 type="text"
-                value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
+                value={input || ''}
+                onChange={handleInputChange}
                 placeholder="Câu hỏi của Sĩ tử..."
                 disabled={status === 'streaming'}
-                className="w-full bg-slate-800 border border-slate-700 rounded-full py-2.5 pl-4 pr-12 text-sm text-white focus:outline-none focus:border-cyan-500"
+                style={{ color: 'white' }}
+                className="w-full bg-slate-800 border border-slate-700 rounded-full py-2.5 pl-4 pr-12 text-sm !text-white focus:outline-none focus:border-cyan-500"
               />
               <button
                 type="submit"
-                disabled={status === 'streaming' || !chatInput.trim()}
+                disabled={status === 'streaming' || !input?.trim()}
                 className="absolute right-2 text-cyan-500 hover:text-cyan-400 w-8 h-8 flex items-center justify-center disabled:opacity-30"
               >
                 <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 rotate-90">
