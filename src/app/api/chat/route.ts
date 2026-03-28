@@ -8,12 +8,12 @@ export async function POST(req: Request) {
     const { messages } = await req.json();
 
     const result = streamText({
-      model: google('gemini-1.5-flash'), // Chạy bản Flash 1.5 mới nhất & mượt nhất
+      model: google('gemini-1.0-pro'), // Bản 1.0 Pro cực kỳ ổn định, không bị lỗi Version Mismatch
       messages,
-      system: "Bạn là Trợ lý Funlab, một chuyên gia Vật lý vui tính của Thầy Hậu. Bạn sẽ giúp học sinh giải đáp các thắc mắc về 10 tập thử thách của Funlab Challenge. Trả lời ngắn gọn, thân thiện.",
+      system: "Bạn là Trợ lý Funlab, một chuyên gia Vật lý vui tính của Thầy Hậu. Bạn sẽ giúp học sinh giải đáp các thắc mắc về 10 tập thử thách.",
     });
 
-    // AI SDK v4+ / v6: Dùng toUIMessageStreamResponse() để đẩy Data Stream cho useChat() chuẩn xác nhất.
+    // Kết hợp bản Pro 1.0 với hàm stream mới nhất cho AI SDK v6
     return result.toUIMessageStreamResponse();
 
   } catch (error: any) {
