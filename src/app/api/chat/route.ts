@@ -31,7 +31,8 @@ export async function POST(req: Request) {
     });
 
     console.log("[Backend] Kết nối Gemini thành công, đang đẩy Stream về Client...");
-    return result.toTextStreamResponse();
+    // Ép sang (result as any) để gọi toDataStreamResponse() vì bản SDK này có thể đang bị lệch type
+    return (result as any).toDataStreamResponse();
 
   } catch (error: any) {
     // Bắt lỗi đồng bộ trước khi stream kịp bắt đầu (vd: sai cú pháp khởi tạo)

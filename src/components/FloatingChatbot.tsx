@@ -7,27 +7,26 @@ import { useChat } from '@ai-sdk/react';
 export default function FloatingChatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
+  const [chatInput, setChatInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // @ts-ignore - Bỏ qua lỗi Type của hook versions
-  // @ts-ignore - Bỏ qua lỗi Type của hook versions
-  const { messages, input, handleInputChange, handleSubmit, isLoading, error } = useChat({
+  // useChat from @ai-sdk/react 3.0.118 + ai 6.0.134
+  // Note: input/handleSubmit/handleInputChange are not in this helper version
+  const chat = useChat({
     api: '/api/chat',
     initialMessages: [
       { id: 'welcome', role: 'assistant', content: 'Xin chào Sĩ tử! Thầy có thể giúp gì cho con? 🎓' }
     ]
   } as any);
 
+  const { messages, status, error, sendMessage } = chat as any;
+
   // Auto scroll
   useEffect(() => {
-    try {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    } catch (e) {
-      console.error("Scroll error:", e);
-    }
-  }, [messages, isLoading, error]);
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
-  // Ẩn khi có modal
+  // Observer ẩn chatbot khi có profile modal
   useEffect(() => {
     try {
       const observer = new MutationObserver(() => {
@@ -38,26 +37,30 @@ export default function FloatingChatbot() {
       observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
       return () => observer.disconnect();
     } catch (e) {
-      console.error("Observer error:", e);
+      console.error(e);
     }
   }, []);
+
+  const handleLocalSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!chatInput.trim() || status === 'streaming') return;
+    
+    sendMessage(chatInput);
+    setChatInput('');
+  };
 
   if (isHidden) return null;
 
   return (
-    <div
-      className="fixed right-4 z-[9000]"
-      style={{ bottom: 'max(1.5rem, calc(1rem + env(safe-area-inset-bottom)))' }}
-    >
-      {/* Nút bấm nổi */}
+    <div className="fixed right-4 z-[9000]" style={{ bottom: 'max(1.5rem, calc(1rem + env(safe-area-inset-bottom)))' }}>
+      
+      {/* NÚT MỞ CHAT - Dùng button type="button" thuần túy để chống sập trang */}
       <button
-        id="chatbot-trigger"
         type="button"
         onClick={(e) => {
           e.preventDefault();
           setIsOpen(!isOpen);
         }}
-        aria-label="Mở Trợ lý Funlab"
         className="p-1 rounded-full bg-cyan-500/20 hover:scale-110 transition-transform duration-300 backdrop-blur-md border border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.5)] flex items-center justify-center w-[60px] h-[60px]"
       >
         <Image
@@ -65,23 +68,18 @@ export default function FloatingChatbot() {
           alt="Trợ lý Funlab"
           width={60}
           height={60}
-          className="rounded-full !w-auto !h-auto min-w-full"
+          className="rounded-full w-auto h-auto min-w-full"
           priority
         />
       </button>
 
-      {/* Khung Chat */}
+      {/* KHUNG CHAT UI - Đơn giản hóa tối đa để đảm bảo ổn định */}
       {isOpen && (
-        <div className="absolute bottom-20 right-0 w-[calc(100vw-2rem)] max-w-[350px] h-[450px] sm:h-[500px] bg-slate-950 border border-cyan-500/30 rounded-2xl flex flex-col shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4">
+        <div className="absolute bottom-20 right-0 w-[calc(100vw-2rem)] max-w-[350px] h-[450px] sm:h-[500px] bg-slate-950 border border-cyan-500/30 rounded-2xl flex flex-col shadow-2xl overflow-hidden">
           
           {/* Header */}
           <div className="p-4 border-b border-cyan-500/20 bg-cyan-950/20 flex justify-between items-center shrink-0">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full overflow-hidden border border-cyan-400 flex items-center justify-center shrink-0">
-                <Image src="/images/chat_icon.png" alt="Icon" width={32} height={32} className="!w-auto !h-auto min-w-full" />
-              </div>
-              <span className="font-bold text-cyan-400 text-sm">Trợ lý Funlab</span>
-            </div>
+            <span className="font-bold text-cyan-400 text-sm">Trợ lý Funlab</span>
             <button
               type="button"
               onClick={(e) => {
@@ -94,81 +92,50 @@ export default function FloatingChatbot() {
             </button>
           </div>
 
-          {/* Messages */}
+          {/* Messages List - Dùng mapping an toàn */}
           <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
-            {messages?.map((m: any, index: number) => {
-              const safeContent = m?.content ? m.content : (m?.role === 'assistant' ? 'Hệ thống AI đang bảo trì cục bộ (Lỗi Quota/Key). Xin Sĩ tử thông cảm đợi admin fix nhé! 🙏' : '...');
-              return (
-                <div key={m?.id || index} className={`flex gap-2 ${m?.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  {m?.role === 'assistant' && (
-                    <div className="w-6 h-6 rounded-full overflow-hidden border border-cyan-500/50 shrink-0 mt-0.5 flex items-center justify-center">
-                      <Image src="/images/chat_icon.png" alt="Bot" width={24} height={24} className="!w-auto !h-auto min-w-full" />
-                    </div>
-                  )}
-                  <div className={`max-w-[80%] px-3 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${m?.role === 'user' ? 'bg-cyan-600 text-white rounded-tr-sm' : 'bg-slate-800 text-slate-200 rounded-tl-sm'}`}>
-                    {safeContent}
+            {messages?.map((m: any, idx: number) => (
+              <div key={m?.id || idx} className={`flex gap-2 ${m?.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                {m?.role === 'assistant' && (
+                  <div className="w-6 h-6 rounded-full overflow-hidden border border-cyan-500/50 shrink-0 mt-0.5 flex items-center justify-center bg-slate-800">
+                    <Image src="/images/chat_icon.png" alt="Bot" width={24} height={24} className="w-auto h-auto min-w-full" />
                   </div>
-                </div>
-              );
-            })}
-
-            {/* Error UI từ useChat */}
-            {error && (
-              <div className="flex justify-center my-4 animate-in fade-in zoom-in-95">
-                <div className="bg-red-950/80 border border-red-500/50 text-red-500 px-4 py-3 rounded-xl text-xs flex flex-col gap-1 max-w-[90%] shadow-lg">
-                  <div className="flex items-center gap-2 font-bold">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                    <span>Lỗi Hệ Thống!</span>
-                  </div>
-                  <span className="opacity-90 leading-relaxed font-mono">
-                    Lỗi kết nối AI: {error?.message || 'Hệ thống AI từ chối kết nối.'}
-                  </span>
+                )}
+                <div className={`max-w-[80%] px-3 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${m?.role === 'user' ? 'bg-cyan-600 text-white rounded-tr-sm' : 'bg-slate-800 text-slate-200 rounded-tl-sm'}`}>
+                  {m?.content || '...'}
                 </div>
               </div>
-            )}
+            ))}
 
-            {/* Typing indicator */}
-            {isLoading && !error && (
-              <div className="flex gap-2 justify-start">
-                <div className="w-6 h-6 rounded-full overflow-hidden border border-cyan-500/50 shrink-0 mt-0.5 flex items-center justify-center">
-                  <Image src="/images/chat_icon.png" alt="Bot" width={24} height={24} className="!w-auto !h-auto min-w-full" />
-                </div>
-                <div className="bg-slate-800 px-4 py-3 rounded-2xl rounded-tl-sm flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                </div>
+            {/* Hiển thị lỗi tối giản */}
+            {error && (
+              <div className="p-2 text-center">
+                <span className="text-red-400 text-[10px] bg-red-900/10 px-2 py-1 rounded">
+                  Lỗi kết nối AI: {error?.message || 'Không xác định'}
+                </span>
               </div>
             )}
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Form Input */}
+          {/* Input Form */}
           <form 
-            onSubmit={(e) => {
-              if (isLoading || !input.trim()) {
-                e.preventDefault();
-                return;
-              }
-              handleSubmit(e);
-            }} 
+            onSubmit={handleLocalSubmit} 
             className="p-4 border-t border-cyan-500/20 bg-slate-900/50 shrink-0"
           >
             <div className="relative flex items-center">
               <input
                 type="text"
-                value={input}
-                onChange={handleInputChange}
-                placeholder="Hỏi thầy về Funlab..."
-                disabled={isLoading}
-                className="w-full bg-slate-800 border border-slate-700 rounded-full py-2.5 pl-4 pr-12 text-sm text-white min-h-[44px] focus:outline-none focus:border-cyan-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-slate-500"
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                placeholder="Câu hỏi của Sĩ tử..."
+                disabled={status === 'streaming'}
+                className="w-full bg-slate-800 border border-slate-700 rounded-full py-2.5 pl-4 pr-12 text-sm text-white focus:outline-none focus:border-cyan-500"
               />
               <button
                 type="submit"
-                disabled={isLoading || !input.trim()}
-                className="absolute right-2 text-cyan-500 hover:text-cyan-400 transition-colors w-8 h-8 flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed"
+                disabled={status === 'streaming' || !chatInput.trim()}
+                className="absolute right-2 text-cyan-500 hover:text-cyan-400 w-8 h-8 flex items-center justify-center disabled:opacity-30"
               >
                 <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 rotate-90">
                   <path d="M3.4 20.4l17.45-8.48a1 1 0 000-1.84L3.4 1.6a1 1 0 00-1.39 1.3l2.57 7.51a1 1 0 010 .6l-2.57 7.51a1 1 0 001.39 1.3z" />
@@ -176,6 +143,7 @@ export default function FloatingChatbot() {
               </button>
             </div>
           </form>
+
         </div>
       )}
     </div>
