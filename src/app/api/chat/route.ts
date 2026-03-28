@@ -7,20 +7,20 @@ export async function POST(req: Request) {
   try {
     const { messages } = await req.json();
 
-    // KHÔNG DÙNG await ở đây để giữ nguyên đối tượng Result có chứa các hàm Stream
+    // Sử dụng Unified SDK v6 chuẩn xác nhất
     const result = streamText({
-      model: google('gemini-1.5-flash'), // Chạy bản Flash 1.5
+      model: google('gemini-1.5-flash'),
       messages,
       system: "Bạn là Trợ lý Funlab, một chuyên gia Vật lý vui tính của Thầy Hậu. Trả lời thân thiện bằng tiếng Việt.",
     });
 
-    // Sử dụng hàm chuẩn của SDK v6 (đã kiểm tra có trong type definitions)
+    // AI SDK v6: Dùng toUIMessageStreamResponse() để đẩy Data Stream cho useChat()
     return result.toUIMessageStreamResponse();
 
   } catch (error: any) {
-    console.error("Lỗi API Route (Unified SDK):", error);
+    console.error("Lỗi API Route:", error);
     return new Response(
-      JSON.stringify({ error: error.message || "Lỗi giao tiếp với AI" }), 
+      JSON.stringify({ error: error.message || "Lỗi máy chủ AI" }), 
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
