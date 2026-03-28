@@ -11,8 +11,9 @@ export async function POST(req: Request) {
       messages,
     });
     
-    // @ts-ignore - Bypass TS compiler checking if ai packages are temporarily out-of-sync
-    return result.toDataStreamResponse();
+    // Theo chuẩn mới nhất của SDK (v5+), DataStream đã bị loại bỏ.
+    // Dùng TextStream để đảm bảo tương thích hoàn hảo.
+    return result.toTextStreamResponse();
   } catch (error: any) {
     console.error("Lỗi API Route:", error);
     return new Response(error.message || "Lỗi máy chủ", { status: 500 });
