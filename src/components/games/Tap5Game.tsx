@@ -312,7 +312,7 @@ export default function FunLabBreathingChallenge({ onGameComplete }: Tap5GamePro
 
   // --- MAIN RENDER ---
   return (
-    <div className="w-full min-h-screen bg-slate-950 text-slate-200 font-sans flex flex-col items-center p-4 sm:p-6 overflow-auto relative">
+    <div className="w-full min-h-screen bg-slate-950 text-slate-200 font-sans flex flex-col items-center p-4 sm:p-6 overflow-auto relative game-safe-bottom">
       
       {/* Background Decor */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-cyan-900/20 blur-[100px] rounded-full pointer-events-none"></div>
@@ -348,22 +348,26 @@ export default function FunLabBreathingChallenge({ onGameComplete }: Tap5GamePro
             <div className="w-20 h-20 bg-slate-900 border-2 border-cyan-500 rounded-2xl flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(34,211,238,0.2)]">
               <Activity className="text-cyan-400" size={40} />
             </div>
-            <h1 className="text-3xl sm:text-4xl font-black text-white mb-2 text-center">CHUYÊN ĐỀ CƠ HOÀNH</h1>
-            <p className="text-cyan-500 uppercase tracking-[0.2em] text-xs sm:text-sm font-bold mb-10 text-center">Bí mật chiếc bơm sinh học</p>
+            {/* [FIX 3] game-main-title: không bị cắt trên màn hình nhỏ */}
+            <h1 className="game-main-title font-black text-white mb-2 text-center">CHUYÊN ĐỀ CƠ HOÀNH</h1>
+            <p className="text-cyan-500 uppercase tracking-[0.2em] text-xs sm:text-sm font-bold mb-6 md:mb-10 text-center">Bí mật chiếc bơm sinh học</p>
             
-            <div className="bg-slate-900 border border-slate-800 p-6 sm:p-8 rounded-3xl w-full max-w-md shadow-2xl">
+            {/* [FIX 1] game-welcome-card + bottom-sheet-container */}
+            <div className="game-welcome-card bg-slate-900 border border-slate-800 p-6 sm:p-8 rounded-3xl w-full max-w-md shadow-2xl bottom-sheet-container">
               <label className="block text-xs uppercase tracking-widest text-slate-400 mb-3 font-bold">Chọn Bảng Đấu Của Bạn</label>
-              <div className="grid grid-cols-2 gap-4 mb-8">
-                <button onClick={() => setLevel('THCS')} className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${level === 'THCS' ? 'bg-cyan-950 border-cyan-500 text-cyan-300 shadow-[0_0_15px_rgba(34,211,238,0.2)]' : 'bg-slate-950 border-slate-800 text-slate-500 hover:border-slate-600'}`}>
+              {/* [FIX 1] level-selector-grid */}
+              <div className="level-selector-grid mb-6 md:mb-8">
+                <button onClick={() => setLevel('THCS')} className={`level-btn flex flex-col items-center gap-2 ${level === 'THCS' ? 'bg-cyan-950 border-cyan-500 text-cyan-300 shadow-[0_0_15px_rgba(34,211,238,0.2)]' : 'bg-slate-950 border-slate-800 text-slate-500 hover:border-slate-600'}`}>
                   <ShieldCheck size={24} />
                   <span className="font-black">THCS</span>
                 </button>
-                <button onClick={() => setLevel('THPT')} className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${level === 'THPT' ? 'bg-blue-950 border-blue-500 text-blue-300 shadow-[0_0_15px_rgba(59,130,246,0.2)]' : 'bg-slate-950 border-slate-800 text-slate-500 hover:border-slate-600'}`}>
+                <button onClick={() => setLevel('THPT')} className={`level-btn flex flex-col items-center gap-2 ${level === 'THPT' ? 'bg-blue-950 border-blue-500 text-blue-300 shadow-[0_0_15px_rgba(59,130,246,0.2)]' : 'bg-slate-950 border-slate-800 text-slate-500 hover:border-slate-600'}`}>
                   <Brain size={24} />
                   <span className="font-black">THPT</span>
                 </button>
               </div>
-              <button onClick={handleStart} className="w-full py-4 bg-cyan-600 hover:bg-cyan-500 text-slate-950 rounded-xl font-black text-lg uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(34,211,238,0.4)] hover:shadow-[0_0_30px_rgba(34,211,238,0.6)]">
+              {/* [FIX 4] game-start-btn: touch target >= 44px */}
+              <button onClick={handleStart} className="game-start-btn w-full bg-cyan-600 hover:bg-cyan-500 text-slate-950 rounded-xl font-black text-lg uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(34,211,238,0.4)] hover:shadow-[0_0_30px_rgba(34,211,238,0.6)]">
                 Vào Thi Đấu
               </button>
             </div>

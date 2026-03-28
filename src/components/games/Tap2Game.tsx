@@ -243,16 +243,25 @@ export default function Tap2Game({ onGameComplete }: Tap2GameProps) {
             <div className="w-20 h-20 bg-cyan-900/30 border-2 border-cyan-500 rounded-[2rem] flex items-center justify-center mb-6 shadow-[0_0_40px_rgba(34,211,238,0.15)] animate-pulse">
               <Layers className="text-cyan-400" size={40} />
             </div>
-            <h1 className="text-4xl font-black text-white mb-2 uppercase tracking-tighter italic">SỨC MẠNH VÔ VÕ</h1>
-            <p className="text-cyan-500 text-xs font-black mb-10 tracking-[0.4em] uppercase">Chuyên đề: Áp suất chất rắn</p>
+            <h1 className="game-main-title font-black text-white mb-2 uppercase tracking-tighter italic">SỨC MẠNH VÔ VÕ</h1>
+            <p className="text-cyan-500 text-xs font-black mb-6 md:mb-10 tracking-[0.4em] uppercase">Chuyên đề: Áp suất chất rắn</p>
             
-            <div className="bg-slate-900 p-8 rounded-[2.5rem] border border-slate-800 w-full shadow-2xl relative">
-              <div className="grid grid-cols-2 gap-3 mb-8">
+            {/* [FIX 1] game-welcome-card + bottom-sheet-container: padding co lại trên mobile */}
+            <div className="game-welcome-card bg-slate-900 p-8 rounded-[2.5rem] border border-slate-800 w-full shadow-2xl relative bottom-sheet-container">
+              {/* [FIX 1] level-selector-grid: 2 cột Flexbox, không dính đáy */}
+              <div className="level-selector-grid mb-6 md:mb-8">
                 {['THCS', 'THPT'].map(l => (
-                  <button key={l} onClick={() => setLevel(l)} className={`p-5 rounded-2xl border-2 transition-all font-black text-lg ${level === l ? 'border-cyan-500 bg-cyan-950 text-white' : 'border-slate-800 text-slate-500 hover:border-slate-700'}`}>{l}</button>
+                  <button
+                    key={l}
+                    onClick={() => setLevel(l)}
+                    className={`level-btn ${level === l ? 'border-cyan-500 bg-cyan-950 text-white' : 'border-slate-800 text-slate-500 hover:border-slate-700'}`}
+                  >
+                    {l}
+                  </button>
                 ))}
               </div>
-              <button onClick={handleStart} className="w-full py-5 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-2xl font-black text-xl shadow-xl transition-all uppercase tracking-widest flex items-center justify-center gap-2">BẮT ĐẦU NHIỆM VỤ <ArrowRight size={24}/></button>
+              {/* [FIX 4] game-start-btn: touch target >= 44px */}
+              <button onClick={handleStart} className="game-start-btn w-full bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-2xl font-black text-xl shadow-xl transition-all uppercase tracking-widest flex items-center justify-center gap-2">BẮT ĐẦU NHIỆM VỤ <ArrowRight size={24}/></button>
             </div>
           </div>
         )}

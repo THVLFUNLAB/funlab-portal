@@ -38,14 +38,14 @@ const QUESTION_BANK = {
     ],
     [
       { id: 'p3_1', cogLevel: 3, type: 'mcq', question: "Trộn CuSO4 và NaCl rồi đốt, màu nào sẽ lấn át?", options: ["Tím", "Vàng", "Xanh lá", "Không cháy"], correct: 1, explain: "Natri có cường độ phát xạ mạnh và mắt người rất nhạy với màu vàng." },
-      { id: 'p3_2', cogLevel: 3, question: "Chất oxy hóa trong thuốc nổ đen truyền thống là gì?", options: ["KNO3", "Lưu huỳnh", "Than củi", "CuSO4"], correct: 0, explain: "Kali Nitrat cung cấp oxy dồi dào cho phản ứng." }
+      { id: 'p3_2', cogLevel: 3, type: 'mcq', question: "Chất oxy hóa trong thuốc nổ đen truyền thống là gì?", options: ["KNO3", "Lưu huỳnh", "Than củi", "CuSO4"], correct: 0, explain: "Kali Nitrat cung cấp oxy dồi dào cho phản ứng." }
     ],
     [
       { id: 'p4_1', cogLevel: 4, type: 'ordering', question: "Sắp xếp giai đoạn vụ nổ pháo hoa tầm cao:", items: ["Kích nổ thuốc đẩy", "Ngòi nổ chậm bắt cháy", "Thuốc nổ văng kích nổ tâm", "Các ngôi sao cháy sáng"], correctOrder: [0, 1, 2, 3] },
       { id: 'p4_2', cogLevel: 4, type: 'ordering', question: "Quy trình phân tích quang phổ ngọn lửa:", items: ["Làm sạch que bằng axit", "Nhúng vào muối kim loại", "Đưa vào ngọn lửa đèn", "Quan sát qua kính lọc"], correctOrder: [0, 1, 2, 3] }
     ],
     [
-      { id: 'p5_1', cogLevel: 5, type: 'fill_blank', question: "Năng lượng photon tỉ lệ {0} với tần số và tỉ lệ {1} with bước sóng.", options: ["thuận", "nghịch", "cộng", "trừ"], correct: ["thuận", "nghịch"] },
+      { id: 'p5_1', cogLevel: 5, type: 'fill_blank', question: "Năng lượng photon tỉ lệ {0} với tần số và tỉ lệ {1} với bước sóng.", options: ["thuận", "nghịch", "cộng", "trừ"], correct: ["thuận", "nghịch"] },
       { id: 'p5_2', cogLevel: 5, type: 'fill_blank', question: "Phản ứng pháo hoa là phản ứng {0} năng lượng dưới dạng {1} và ánh sáng.", options: ["tỏa", "nhiệt", "thu", "hóa năng"], correct: ["tỏa", "nhiệt"] }
     ]
   ]
@@ -227,7 +227,7 @@ export default function Tap4Game({ onGameComplete }: Tap4GameProps) {
   return (
     <div className="w-full min-h-screen bg-slate-950 text-slate-200 flex flex-col items-center p-4 overflow-auto relative font-sans game-safe-bottom">
       <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(8,145,178,0.1),transparent)] pointer-events-none"></div>
-      
+
       <div className="w-full max-w-2xl relative z-10 flex flex-col flex-1">
         {gameState !== 'welcome' && (
           <div className="flex justify-between items-center mb-6 py-4 border-b border-slate-800">
@@ -244,20 +244,31 @@ export default function Tap4Game({ onGameComplete }: Tap4GameProps) {
           </div>
         )}
 
+        {/* [FIX 1] Welcome screen: Flexbox, safe area, level selector không dính đáy */}
         {gameState === 'welcome' && (
           <div className="flex-1 flex flex-col items-center justify-center text-center py-8">
             <div className="w-20 h-20 bg-cyan-900/30 border-2 border-cyan-500 rounded-3xl flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(34,211,238,0.2)]">
               <Bomb className="text-cyan-400" size={40} />
             </div>
-            <h1 className="text-4xl font-black text-white mb-2 uppercase tracking-tighter">Vũ Điệu Ánh Sáng</h1>
-            <p className="text-cyan-500 text-sm font-bold mb-10 tracking-widest uppercase">Giải mã bí ẩn pháo hoa</p>
-            <div className="bg-slate-900 p-8 rounded-[2rem] border border-slate-800 w-full shadow-2xl">
-              <div className="grid grid-cols-2 gap-3 mb-8">
+            {/* [FIX 3] game-main-title: tự co trên mobile nhỏ, không bị cắt */}
+            <h1 className="game-main-title font-black text-white mb-2 uppercase tracking-tighter">Vũ Điệu Ánh Sáng</h1>
+            <p className="text-cyan-500 text-sm font-bold mb-6 md:mb-10 tracking-widest uppercase">Giải mã bí ẩn pháo hoa</p>
+            {/* [FIX 1] game-welcome-card + bottom-sheet-container */}
+            <div className="game-welcome-card bg-slate-900 p-8 rounded-[2rem] border border-slate-800 w-full shadow-2xl bottom-sheet-container">
+              {/* [FIX 1] level-selector-grid: 2 cột Flexbox, không dính đáy */}
+              <div className="level-selector-grid mb-6 md:mb-8">
                 {['THCS', 'THPT'].map(l => (
-                  <button key={l} onClick={() => setLevel(l)} className={`p-4 rounded-2xl border-2 transition-all font-black ${level === l ? 'border-cyan-500 bg-cyan-950 text-white' : 'border-slate-800 text-slate-500'}`}>{l}</button>
+                  <button
+                    key={l}
+                    onClick={() => setLevel(l)}
+                    className={`level-btn ${level === l ? 'border-cyan-500 bg-cyan-950 text-white' : 'border-slate-800 text-slate-500'}`}
+                  >
+                    {l}
+                  </button>
                 ))}
               </div>
-              <button onClick={handleStart} className="w-full py-4 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl font-black text-lg shadow-lg">KHỞI HÀNH</button>
+              {/* [FIX 4] game-start-btn: touch target >= 44px */}
+              <button onClick={handleStart} className="game-start-btn w-full bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl font-black text-lg shadow-lg">KHỞI HÀNH</button>
             </div>
           </div>
         )}
@@ -269,7 +280,8 @@ export default function Tap4Game({ onGameComplete }: Tap4GameProps) {
                 <div key={idx} className={`h-1 flex-1 rounded-full transition-all duration-500 ${idx <= currentIndex ? 'bg-cyan-500' : 'bg-slate-800'}`}></div>
               ))}
             </div>
-            <h3 className="text-xl font-bold text-white mb-8">{questions[currentIndex].question}</h3>
+            {/* [FIX 3] game-question-title: text xuống dòng tự nhiên */}
+            <h3 className="game-question-title font-bold text-white mb-8">{questions[currentIndex].question}</h3>
             <div className="flex-1">
               {questions[currentIndex].type === 'mcq' && renderMCQ(questions[currentIndex])}
               {questions[currentIndex].type === 'ordering' && renderOrdering(questions[currentIndex])}
@@ -284,7 +296,7 @@ export default function Tap4Game({ onGameComplete }: Tap4GameProps) {
                     (questions[currentIndex].type === 'ordering' && orderSelected.length !== questions[currentIndex].items.length) ||
                     (questions[currentIndex].type === 'fill_blank' && (fillBlankSelected.length === 0 || fillBlankSelected.includes(null)))
                   }
-                  className="w-full py-4 bg-cyan-600 disabled:bg-slate-800 disabled:text-slate-600 text-white rounded-xl font-black uppercase transition-all"
+                  className="game-start-btn w-full bg-cyan-600 disabled:bg-slate-800 disabled:text-slate-600 text-white rounded-xl font-black uppercase transition-all"
                 >
                   Xác nhận
                 </button>
@@ -293,7 +305,7 @@ export default function Tap4Game({ onGameComplete }: Tap4GameProps) {
                   <div className={`p-4 rounded-xl border ${isCorrectCurrent ? 'bg-emerald-900/30 border-emerald-500 text-emerald-100' : 'bg-rose-900/30 border-rose-500 text-rose-100'}`}>
                     <p className="text-sm italic">{questions[currentIndex].explain || "Chính xác!"}</p>
                   </div>
-                  <button onClick={handleNext} className="w-full py-4 bg-white text-slate-900 rounded-xl font-black flex justify-center items-center gap-2">TIẾP TỤC <ArrowRight size={20}/></button>
+                  <button onClick={handleNext} className="game-start-btn w-full bg-white text-slate-900 rounded-xl font-black flex justify-center items-center gap-2">TIẾP TỤC <ArrowRight size={20}/></button>
                 </div>
               )}
             </div>
@@ -308,7 +320,7 @@ export default function Tap4Game({ onGameComplete }: Tap4GameProps) {
               <p className="text-4xl font-black text-cyan-400">{score}<span className="text-lg text-slate-600">/50</span></p>
               <p className="text-slate-500 text-xs uppercase mt-2 font-bold tracking-widest">Tổng điểm đạt được</p>
             </div>
-            <button onClick={submitFinal} className="w-full py-4 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl font-black uppercase shadow-lg">Lưu điểm</button>
+            <button onClick={submitFinal} className="game-start-btn w-full bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl font-black uppercase shadow-lg">Lưu điểm</button>
           </div>
         )}
 

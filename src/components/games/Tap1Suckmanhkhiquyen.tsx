@@ -284,18 +284,32 @@ export default function Tap1Suckmanhkhiquyen({ onGameComplete }: Tap1Props) {
             <div className="w-20 h-20 bg-cyan-900/30 border-2 border-cyan-500 rounded-[2rem] flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(34,211,238,0.2)] animate-pulse">
               <Zap className="text-cyan-400" size={40} />
             </div>
-            <h1 className="text-4xl font-black text-white mb-2 uppercase tracking-tighter">SỨC MẠNH KHÍ QUYỂN</h1>
-            <p className="text-cyan-500 text-xs font-black mb-10 tracking-[0.4em] uppercase">Hệ thống điều khiển áp suất</p>
+            {/* [FIX 3] game-main-title: tự co, không bị cắt trên mobile nhỏ */}
+            <h1 className="game-main-title font-black text-white mb-2 uppercase tracking-tighter">SỨC MẠNH KHÍ QUYỂN</h1>
+            <p className="text-cyan-500 text-xs font-black mb-6 md:mb-10 tracking-[0.4em] uppercase">Hệ thống điều khiển áp suất</p>
             
-            <div className="bg-slate-900 p-8 rounded-[2.5rem] border border-slate-800 w-full shadow-2xl relative overflow-hidden">
+            {/* [FIX 1] game-welcome-card: padding co lại trên mobile */}
+            <div className="game-welcome-card bg-slate-900 p-8 rounded-[2.5rem] border border-slate-800 w-full shadow-2xl relative overflow-hidden bottom-sheet-container">
               <div className="absolute top-0 right-0 p-4 opacity-5"><Thermometer size={100} /></div>
               <label className="block text-[10px] uppercase tracking-widest text-slate-500 mb-4 font-black">Kích hoạt bảng đấu</label>
-              <div className="grid grid-cols-2 gap-3 mb-8">
+              {/* [FIX 1] level-selector-grid: 2 cột Flexbox/Grid, không dính đáy */}
+              <div className="level-selector-grid mb-6 md:mb-8">
                 {['THCS', 'THPT'].map(l => (
-                  <button key={l} onClick={() => setLevel(l)} className={`p-5 rounded-2xl border-2 transition-all font-black text-lg ${level === l ? 'border-cyan-500 bg-cyan-950 text-white shadow-[0_0_15px_rgba(34,211,238,0.2)]' : 'border-slate-800 text-slate-500 hover:border-slate-700'}`}>{l}</button>
+                  <button
+                    key={l}
+                    onClick={() => setLevel(l)}
+                    className={`level-btn ${
+                      level === l
+                        ? 'border-cyan-500 bg-cyan-950 text-white shadow-[0_0_15px_rgba(34,211,238,0.2)]'
+                        : 'border-slate-800 text-slate-500 hover:border-slate-700'
+                    }`}
+                  >
+                    {l}
+                  </button>
                 ))}
               </div>
-              <button onClick={handleStart} className="w-full py-5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-2xl font-black text-xl shadow-xl transition-all active:scale-95 flex items-center justify-center gap-2 uppercase tracking-widest">BẮT ĐẦU NHIỆM VỤ <Play size={20} fill="currentColor"/></button>
+              {/* [FIX 4] game-start-btn: touch target >= 44px */}
+              <button onClick={handleStart} className="game-start-btn w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-2xl font-black text-xl shadow-xl transition-all active:scale-95 flex items-center justify-center gap-2 uppercase tracking-widest">BẮT ĐẦU NHIỆM VỤ <Play size={20} fill="currentColor"/></button>
             </div>
           </div>
         )}

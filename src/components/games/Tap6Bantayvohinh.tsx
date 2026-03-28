@@ -375,7 +375,8 @@ export default function Tap6Bantayvohinh({ onGameComplete }: Tap6Props) {
                   </div>
                 </div>
 
-                <button onClick={startMission} className="w-full mt-8 py-4 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl font-black tracking-widest transition-all shadow-[0_0_20px_rgba(8,145,178,0.4)] active:scale-95 flex items-center justify-center gap-2 group">
+                {/* [FIX 4] game-start-btn: touch target >= 44px, pb-safe-lg: safe area đáy */}
+                <button onClick={startMission} className="game-start-btn w-full mt-8 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl font-black tracking-widest transition-all shadow-[0_0_20px_rgba(8,145,178,0.4)] active:scale-95 flex items-center justify-center gap-2 group pb-safe">
                   KHỞI HÀNH <Droplets className="w-5 h-5 group-hover:animate-bounce" />
                 </button>
               </motion.div>

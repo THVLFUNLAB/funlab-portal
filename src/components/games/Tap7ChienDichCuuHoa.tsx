@@ -326,7 +326,8 @@ export default function Tap7ChienDichCuuHoa({ onGameComplete }: Tap7Props) {
             <h1 className="text-4xl font-black text-red-600 mb-2 uppercase tracking-tighter drop-shadow-sm">CHIẾN DỊCH CỨU HỎA</h1>
             <p className="text-orange-600 text-sm font-bold mb-8 tracking-[0.2em] uppercase">Vận dụng hóa học & áp suất</p>
             
-            <div className="bg-white p-8 rounded-[2rem] border border-orange-100 w-full shadow-xl relative overflow-hidden">
+            {/* [FIX 1] game-welcome-card + bottom-sheet-container: padding co lại trên mobile */}
+            <div className="game-welcome-card bg-white p-8 rounded-[2rem] border border-orange-100 w-full shadow-xl relative overflow-hidden bottom-sheet-container">
               <div className="space-y-4 mb-6 text-left">
                 <div className="flex flex-col bg-red-50/50 border border-red-100 p-4 rounded-xl relative overflow-hidden">
                     <span className="text-[10px] font-bold text-red-500 uppercase tracking-widest mb-1 flex items-center gap-1">
@@ -337,13 +338,14 @@ export default function Tap7ChienDichCuuHoa({ onGameComplete }: Tap7Props) {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 mb-8">
+              {/* [FIX 1] level-selector-grid: 2 cột, không dính đáy màn hình */}
+              <div className="level-selector-grid mb-6 md:mb-8">
                 {['THCS', 'THPT'].map(l => (
                   <button key={l} 
                     onClick={() => {
                         if (allowedLevel === null || allowedLevel === l) setLevel(l);
                     }} 
-                    className={`p-4 rounded-xl border-2 transition-all font-black text-lg relative overflow-hidden ${
+                    className={`level-btn transition-all font-black relative overflow-hidden ${
                         level === l ? 'border-red-500 bg-red-50 text-red-600 shadow-md' : 'border-slate-100 bg-white text-slate-300'
                     } ${allowedLevel !== null && allowedLevel !== l ? 'opacity-40 grayscale cursor-not-allowed' : 'hover:border-red-200'}`}>
                     {l}
@@ -356,10 +358,11 @@ export default function Tap7ChienDichCuuHoa({ onGameComplete }: Tap7Props) {
                 ))}
               </div>
 
+              {/* [FIX 4] game-start-btn: touch target >= 44px */}
               <button 
                 onClick={handleStart} 
                 disabled={!playerName}
-                className="w-full py-5 bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-500 hover:to-orange-400 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-black text-xl shadow-lg shadow-red-500/30 transition-all active:scale-95 flex items-center justify-center gap-2 uppercase tracking-widest"
+                className="game-start-btn w-full bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-500 hover:to-orange-400 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-black text-xl shadow-lg shadow-red-500/30 transition-all active:scale-95 flex items-center justify-center gap-2 uppercase tracking-widest"
               >
                 XUẤT PHÁT <Play size={20} fill="currentColor"/>
               </button>

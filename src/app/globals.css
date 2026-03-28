@@ -6,8 +6,13 @@
 }
 
 /* ============================================================
-   MOBILE RESPONSIVE FOUNDATION — FUNLAB PORTAL
-   Fixes: Safe Area · Z-index · Image Ratio · Text Overflow · Breathing Room
+   MOBILE RESPONSIVE FOUNDATION — FUNLAB PORTAL v2.0
+   Fixes:
+     [FIX 1] Popup/Bottom-Sheet Level Selector — Flexbox, Safe Area
+     [FIX 2] Banner & QR Code — object-fit:contain, Flexbox Column
+     [FIX 3] Text Overflow — word-wrap, ellipsis, line-clamp
+     [FIX 4] Safe Area Utilities + Touch Targets
+     [MEDIA]  @media (max-width: 600px) chuẩn cho Mobile dọc
    ============================================================ */
 
 /* ─── Custom Base Styles ──────────────────────────────────── */
@@ -20,8 +25,8 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-noto-serif), ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
 }
 
-/* ─── [FIX 3] Text Overflow — toàn cục trên Mobile ──────── */
-/* Ngăn văn bản dài tràn khỏi container trên màn hình nhỏ   */
+/* ─── [FIX 3] Text Overflow — Toàn cục trên Mobile ─────────
+   Ngăn văn bản dài tràn khỏi container trên màn hình nhỏ     */
 @media (max-width: 768px) {
   body {
     word-break: break-word;
@@ -34,11 +39,12 @@ h1, h2, h3, h4, h5, h6 {
   h3 {
     word-break: break-word;
     overflow-wrap: break-word;
+    white-space: normal;
   }
 }
 
-/* ─── [FIX 1a] Vùng an toàn cuối trang — FloatingChatbot ── */
-/* Áp dụng cho <main> trang chủ & episode, tránh nút chat che nội dung */
+/* ─── [FIX 1a] Vùng an toàn cuối trang — FloatingChatbot ───
+   Áp dụng cho <main> trang chủ & episode, tránh nút chat che nội dung */
 .main-safe-bottom {
   padding-bottom: max(5rem, calc(4rem + env(safe-area-inset-bottom)));
 }
@@ -48,11 +54,10 @@ h1, h2, h3, h4, h5, h6 {
   padding-bottom: max(4rem, calc(3rem + env(safe-area-inset-bottom)));
 }
 
-/* ─── [FIX 1b] Z-index Tầng Hệ Thống ────────────────────── */
-/*
+/* ─── [FIX 1b] Z-index Tầng Hệ Thống ────────────────────────
  * Tầng Z-index (thấp → cao):
  *   z-10   : các element thông thường
- *   z-50   : dropdown, tooltip
+ *   z-50   : dropdown, tooltip  
  *   z-[80] : toast notification trong episode page
  *   z-[9000]: FloatingChatbot — bị MandatoryProfileModal che
  *   z-[10000]: MandatoryProfileModal — luôn trên cùng
@@ -61,8 +66,8 @@ h1, h2, h3, h4, h5, h6 {
  *    class game content KHÔNG có z-index > 9000
  */
 
-/* ─── [FIX 4] Safe Area Utilities — Modal & Bottom Sheet ─── */
-/* Dùng cho nút bấm / footer / container cuối popup trên iPhone có home indicator */
+/* ─── [FIX 4] Safe Area Utilities — Modal & Bottom Sheet ────
+   Dùng cho nút bấm / footer / container cuối popup trên iPhone */
 .pb-safe {
   padding-bottom: max(1rem, env(safe-area-inset-bottom));
 }
@@ -84,7 +89,7 @@ h1, h2, h3, h4, h5, h6 {
   padding-right: max(1rem, env(safe-area-inset-right));
 }
 
-/* ─── [FIX 2] Image Responsive Utilities ────────────────── */
+/* ─── [FIX 2] Image Responsive Utilities ─────────────────── */
 
 /* Thumbnail: giữ khung, không méo — object-fit: cover */
 .img-cover {
@@ -146,11 +151,9 @@ h1, h2, h3, h4, h5, h6 {
   object-fit: cover;
 }
 
-/* ─── [FIX 2] QR Banner — dành cho Tap games ────────────── */
-/*
+/* ─── [FIX 2] QR Banner — dành cho Tap games ────────────────
  * Class dùng trong các banner chứa QR code.
- * Giữ toàn bộ nội dung QR hiển thị, không bị cắt xén.
- */
+ * Giữ toàn bộ nội dung QR hiển thị, không bị cắt xén.      */
 .qr-banner-wrapper {
   position: relative;
   width: 100%;
@@ -164,6 +167,47 @@ h1, h2, h3, h4, h5, h6 {
   height: auto;
   object-fit: contain;
   display: block;
+}
+
+/* ─── [FIX 2] Banner Nội Tuyến — Flexbox Column Layout ─────
+ * Dành cho banner phức hợp (text + QR code + ảnh minh hoạ).
+ * Thay thế absolute positioning bên trong — tự xếp cột khi hẹp. */
+.banner-flex-layout {
+  display: flex;
+  flex-direction: row;          /* Desktop: hàng ngang */
+  align-items: center;
+  gap: 1.5rem;
+  width: 100%;
+  min-width: 0;                 /* Ngăn flex item tràn */
+}
+
+.banner-flex-layout .banner-text-block {
+  flex: 1 1 auto;
+  min-width: 0;                 /* Cho phép text co lại */
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.banner-flex-layout .banner-qr-block {
+  flex: 0 0 auto;              /* QR không ép co — giữ kích thước thực */
+  width: clamp(80px, 25%, 140px);
+}
+
+.banner-flex-layout .banner-qr-block img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+/* Banner title không bị cắt */
+.banner-title {
+  font-size: clamp(0.85rem, 3vw, 1.25rem);
+  line-height: 1.4;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  hyphens: auto;
 }
 
 /* ─── [FIX 3] Text Ellipsis Utilities ───────────────────── */
@@ -197,11 +241,17 @@ h1, h2, h3, h4, h5, h6 {
   text-overflow: ellipsis;
 }
 
-/* ─── [FIX 4] Touch Target Safety ───────────────────────── */
-/*
+/* Văn bản xuống dòng tự nhiên (khi không giới hạn dòng) */
+.text-wrap-normal {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  hyphens: auto;
+}
+
+/* ─── [FIX 4] Touch Target Safety ───────────────────────────
  * Theo Apple HIG & Google Material: touch target tối thiểu 44×44px.
- * Thêm class này vào nút bấm nhỏ trên mobile.
- */
+ * Thêm class này vào nút bấm nhỏ trên mobile.               */
 .touch-safe {
   min-height: 44px;
   min-width: 44px;
@@ -210,12 +260,72 @@ h1, h2, h3, h4, h5, h6 {
   justify-content: center;
 }
 
-/* ─── Game Component: Mobile-specific overrides ─────────── */
-/*
+/* ─── [FIX 1] POPUP / BOTTOM SHEET — Level Selector ─────────
+ * Popup chọn khối lớp (THCS/THPT) trên trang game welcome.
+ * Chuyển sang Flexbox xếp cột, có safe area đáy.            */
+
+/* Container bao ngoài popup/bottom-sheet trên mobile */
+.bottom-sheet-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  /* Safe area ở đáy: tránh home indicator iPhone */
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+  /* Khoảng trống phía trên để thấy nội dung bên dưới (≈ 20% màn hình) */
+  margin-top: auto;
+}
+
+/* Nội dung bên trong bottom-sheet */
+.bottom-sheet-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+  /* Nếu quá cao, scroll được */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Tên sĩ tử — đảm bảo không dính sát đáy */
+.player-name-display {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  margin-bottom: 0.5rem;
+}
+
+/* Grid các nút THCS / THPT — tự co theo chiều rộng */
+.level-selector-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  width: 100%;
+  /* Margin dương để không dính đáy */
+  margin-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+/* Nút chọn khối (THCS / THPT) — touch-friendly */
+.level-btn {
+  /* Đảm bảo touch target ≥ 44px */
+  min-height: 52px;
+  padding: 0.875rem 1rem;
+  border-radius: 1rem;
+  border-width: 2px;
+  border-style: solid;
+  font-weight: 900;
+  font-size: 1rem;
+  text-align: center;
+  transition: all 0.2s;
+  /* Ngăn text bị cắt */
+  word-break: break-word;
+  white-space: normal;
+  line-height: 1.3;
+  cursor: pointer;
+}
+
+/* ─── Game Component: Mobile-specific overrides ─────────────
  * Các game (Tap1-7) chạy trong Right Column của episode page.
- * Trên mobile, right column stack bên dưới left column.
- * Cần đảm bảo game scroll được và có đủ không gian.
- */
+ * Trên mobile, right column stack bên dưới left column.      */
 @media (max-width: 767px) {
   /* Game root container có thể scroll tự do */
   .game-scroll-area {
@@ -241,6 +351,170 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+/* ─── [MEDIA] @media (max-width: 600px) — Mobile Dọc Chuẩn ──
+ * Áp dụng cho TẤT CẢ container bị lỗi trên điện thoại dọc.  */
+@media (max-width: 600px) {
+
+  /* --- [1] Popup / Bottom Sheet / Level Selector ----------- */
+  .bottom-sheet-container {
+    padding-bottom: max(2rem, env(safe-area-inset-bottom));
+    margin-top: 0;
+  }
+
+  .level-selector-grid {
+    grid-template-columns: 1fr 1fr;   /* Giữ 2 cột */
+    gap: 0.625rem;
+    /* Đẩy lên khỏi đáy màn hình */
+    margin-bottom: max(1.25rem, env(safe-area-inset-bottom));
+  }
+
+  .level-btn {
+    min-height: 56px;               /* Lớn hơn chút trên mobile nhỏ */
+    font-size: 0.9rem;
+    padding: 0.75rem 0.5rem;
+  }
+
+  /* Container welcome (bg-slate-900 p-8...) trong Tap games */
+  .game-welcome-card {
+    padding: 1.25rem;               /* Giảm padding trên mobile */
+    border-radius: 1.5rem;
+  }
+
+  /* Nút BẮT ĐẦU / KHỞI HÀNH — tăng touch area */
+  .game-start-btn {
+    min-height: 56px;
+    font-size: 1rem;
+    padding: 0.875rem 1rem;
+  }
+
+  /* --- [2] Banner / QR Code -------------------------------- */
+  .banner-flex-layout {
+    flex-direction: column;           /* Xếp thành cột khi hẹp */
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .banner-flex-layout .banner-qr-block {
+    width: clamp(80px, 40vw, 120px); /* Co tỉ lệ theo viewport */
+    margin: 0 auto;                  /* Căn giữa khi xếp cột */
+  }
+
+  .banner-title {
+    font-size: clamp(0.8rem, 4vw, 1rem);
+  }
+
+  /* Banner ảnh đơn thuần: đảm bảo không bị méo */
+  .banner-img-responsive {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    object-position: center;
+    display: block;
+    max-width: 100%;
+  }
+
+  /* QR code wrapper: không nhỏ quá — tối thiểu 80px để quét được */
+  .qr-banner-wrapper {
+    max-width: min(60vw, 200px);
+    margin: 0 auto;
+  }
+
+  /* --- [3] Text Overflow ----------------------------------- */
+  /* Tiêu đề tập phim (h4 trong episode card) */
+  .episode-card-title {
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+    line-height: 1.4;
+  }
+
+  /* Tiêu đề câu hỏi game (h3) — tránh bị cắt */
+  .game-question-title {
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+    font-size: clamp(0.95rem, 4.5vw, 1.125rem);
+    line-height: 1.55;
+  }
+
+  /* Tiêu đề chính (h1) trong game welcome — không bị cắt */
+  .game-main-title {
+    font-size: clamp(1.5rem, 7vw, 2.25rem);
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+    line-height: 1.2;
+  }
+
+  /* Đoạn văn dài — clamp 3 dòng với ... */
+  .description-clamp {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-word;
+  }
+
+  /* --- [4] General Container Fixes ------------------------ */
+  /* Tránh container tràn màn hình */
+  .mobile-full-width {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  /* Padding giảm trên mobile nhỏ */
+  .mobile-px-reduced {
+    padding-left: max(0.75rem, env(safe-area-inset-left));
+    padding-right: max(0.75rem, env(safe-area-inset-right));
+  }
+
+  /* Header Funlab — logo co lại hợp lý */
+  header img {
+    max-height: 56px;               /* Logo không chiếm quá nhiều không gian */
+  }
+
+  /* FloatingChatbot — đảm bảo luôn hiển thị đúng trên iPhone */
+  .floating-chatbot-trigger {
+    bottom: max(1rem, env(safe-area-inset-bottom));
+    right: max(1rem, env(safe-area-inset-right));
+  }
+
+  /* Toast notification trên mobile — không tràn ngang */
+  [class*="toast"],
+  [class*="z-[80]"] {
+    max-width: calc(100vw - 2rem);
+    left: 50%;
+    transform: translateX(-50%);
+    word-break: break-word;
+  }
+}
+
+/* ─── [MEDIA] iPhone SE / nhỏ hơn 380px ─────────────────────
+ * Màn hình cực nhỏ — co thêm font và spacing.               */
+@media (max-width: 380px) {
+  .level-btn {
+    font-size: 0.8rem;
+    padding: 0.625rem 0.375rem;
+    min-height: 52px;
+  }
+
+  .level-selector-grid {
+    gap: 0.5rem;
+  }
+
+  .game-welcome-card {
+    padding: 1rem;
+  }
+
+  .game-main-title {
+    font-size: clamp(1.25rem, 8vw, 1.75rem);
+  }
+}
+
 /* ─── Scrollbar tùy chỉnh ────────────────────────────────── */
 .custom-scrollbar::-webkit-scrollbar {
   width: 4px;
@@ -256,16 +530,20 @@ h1, h2, h3, h4, h5, h6 {
   background: rgba(34, 211, 238, 0.6);
 }
 
-/* ─── Utility: Anti-Gravity Desktop còn hoạt động ────────── */
-/*
+/* ─── Utility: Anti-Gravity Desktop còn hoạt động ──────────
  * Trên Desktop (md+), layout Anti-Gravity tự do vẫn hoạt động bình thường.
  * Trên Mobile, các class này không áp dụng nên layout sẽ fallback
- * về Flexbox/Grid stack đơn cột tự nhiên.
- */
+ * về Flexbox/Grid stack đơn cột tự nhiên.                   */
 @media (min-width: 768px) {
   /* Đảm bảo floating elements trên desktop không bị ảnh hưởng */
   .floating-chatbot-trigger {
     bottom: 1.5rem;
     right: 1rem;
+  }
+
+  /* Banner: khôi phục layout hàng ngang trên desktop */
+  .banner-flex-layout {
+    flex-direction: row;
+    align-items: center;
   }
 }
