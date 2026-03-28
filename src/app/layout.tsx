@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import Link from "next/link";
 import { Settings } from "lucide-react";
 import MandatoryProfileModal from "@/components/MandatoryProfileModal";
+import QuantumAudioRadar from "@/components/QuantumAudioRadar";
 import "./globals.css";
 
 const notoSerif = Noto_Serif({
@@ -41,6 +42,9 @@ export default async function RootLayout({
 
         {/* Bắt buộc cập nhật thông tin */}
         <MandatoryProfileModal />
+        
+        {/* Radar âm thanh */}
+        <QuantumAudioRadar />
       </body>
     </html>
   );
