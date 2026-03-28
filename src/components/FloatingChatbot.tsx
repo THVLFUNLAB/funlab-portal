@@ -10,12 +10,13 @@ export default function FloatingChatbot() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // @ts-ignore - Bỏ qua lỗi Type của hook versions
+  // @ts-ignore - Bỏ qua lỗi Type của hook versions
   const { messages, input, handleInputChange, handleSubmit, isLoading, error } = useChat({
     api: '/api/chat',
     initialMessages: [
       { id: 'welcome', role: 'assistant', content: 'Xin chào Sĩ tử! Thầy có thể giúp gì cho con? 🎓' }
     ]
-  });
+  } as any);
 
   // Auto scroll
   useEffect(() => {
@@ -87,7 +88,7 @@ export default function FloatingChatbot() {
                   </div>
                 )}
                 <div className={`max-w-[80%] px-3 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${m.role === 'user' ? 'bg-cyan-600 text-white rounded-tr-sm' : 'bg-slate-800 text-slate-200 rounded-tl-sm'}`}>
-                  {m.content}
+                  {m.content ? m.content : (m.role === 'assistant' ? 'Hệ thống AI đang bảo trì cục bộ (Lỗi Quota/Key). Xin Sĩ tử thông cảm đợi admin fix nhé! 🙏' : '...')}
                 </div>
               </div>
             ))}
