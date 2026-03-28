@@ -7,10 +7,15 @@ import { useChat } from '@ai-sdk/react';
 export default function FloatingChatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
+  
+  // SỬ DỤNG MANUAL STATE VÌ SDK AI V6 KHÔNG CÓ INPUT TRONG useChat
+  const [chatInput, setChatInput] = useState('');
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // @ts-ignore - Bỏ qua lỗi Type của hook versions
-  const { messages, input, handleInputChange, handleSubmit, status, error } = useChat({
+  // useChat from @ai-sdk/react 3.0.118 + ai 6.0.134
+  // Helper này chỉ cung cấp sendMessage và messages, không có input/handleInputChange sẵn.
+  const { messages, status, error, sendMessage } = useChat({
     api: '/api/chat',
     initialMessages: [
       { id: 'welcome', role: 'assistant', content: 'Xin chào Sĩ tử! Thầy có thể giúp gì cho con? 🎓' }
@@ -36,6 +41,18 @@ export default function FloatingChatbot() {
       console.error(e);
     }
   }, []);
+
+  // XỬ LÝ GỬI TIN NHẮN THỦ CÔNG
+  const handleLocalSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = chatInput.trim();
+    if (!trimmed || status === 'streaming') return;
+    
+    // SDK V6 dùng sendMessage thay vì append/handleSubmit truyền thống
+    // Ép kiểu as any để qua mặt cấu trúc phức tạp của SDK V6 này
+    sendMessage({ role: 'user', content: trimmed } as any);
+    setChatInput('');
+  };
 
   if (isHidden) return null;
 
@@ -108,17 +125,14 @@ export default function FloatingChatbot() {
 
           {/* Input Form */}
           <form 
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSubmit(e);
-            }} 
+            onSubmit={handleLocalSubmit} 
             className="p-4 border-t border-cyan-500/20 bg-slate-900/50 shrink-0"
           >
             <div className="relative flex items-center">
               <input
                 type="text"
-                value={input || ''}
-                onChange={handleInputChange}
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
                 placeholder="Câu hỏi của Sĩ tử..."
                 disabled={status === 'streaming'}
                 style={{ color: 'white' }}
@@ -126,7 +140,7 @@ export default function FloatingChatbot() {
               />
               <button
                 type="submit"
-                disabled={status === 'streaming' || !input?.trim()}
+                disabled={status === 'streaming' || !chatInput.trim()}
                 className="absolute right-2 text-cyan-500 hover:text-cyan-400 w-8 h-8 flex items-center justify-center disabled:opacity-30"
               >
                 <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 rotate-90">
