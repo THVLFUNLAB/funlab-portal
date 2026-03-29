@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  getDashboardData, logoutAdmin, updateUserClass, 
+  getDashboardData, logoutAdmin, updateUserProfile, 
   addSystemScore, toggleEpisodeStatus, upsertEpisodeData 
 } from '../actions';
 import { supabase } from "@/lib/supabase";
@@ -28,7 +28,7 @@ export default function AdminDashboardClient() {
   const [searchTerm, setSearchTerm] = useState('');
 
   // Modal States
-  const [classModal, setClassModal] = useState({ open: false, userId: '', userName: '', className: '' });
+  const [classModal, setClassModal] = useState({ open: false, userId: '', userName: '', fullName: '', className: '' });
   const [scoreModal, setScoreModal] = useState({ open: false, userId: '', userName: '', score: 0, reason: '' });
   const [episodeModal, setEpisodeModal] = useState({ 
     open: false, 
@@ -101,7 +101,7 @@ export default function AdminDashboardClient() {
 
   // --- MODAL SUBMIT HANDLERS ---
   const submitClassChange = async () => {
-    const res = await updateUserClass(classModal.userId, classModal.className);
+    const res = await updateUserProfile(classModal.userId, classModal.className, classModal.fullName);
     if (res.success) {
       setClassModal({ ...classModal, open: false });
       loadData();
@@ -233,10 +233,10 @@ export default function AdminDashboardClient() {
                               <td className="p-4 font-mono font-bold text-yellow-400">{scoreObj?.total_score || 0}</td>
                               <td className="p-4 flex gap-2 justify-end">
                                  <button 
-                                   onClick={() => setClassModal({ open: true, userId: p.id, userName: p.full_name, className: p.class_name || '' })} 
+                                   onClick={() => setClassModal({ open: true, userId: p.id, userName: p.full_name, fullName: p.full_name || '', className: p.class_name || '' })} 
                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-900/30 text-blue-400 border border-blue-900 hover:bg-blue-800 rounded-lg text-xs font-bold transition-colors"
                                  >
-                                    <Edit2 className="w-3.5 h-3.5" /> SỬA LỚP
+                                    <Edit2 className="w-3.5 h-3.5" /> SỬA LỚP / TÊN
                                  </button>
                                  <button 
                                    onClick={() => setScoreModal({ open: true, userId: p.id, userName: p.full_name, score: 0, reason: 'Thưởng/Phạt' })} 
@@ -363,25 +363,29 @@ export default function AdminDashboardClient() {
         )}
 
         {/* CLASS MODAL */}
-        {classModal.open && (
+         {classModal.open && (
            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
               <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} className="bg-slate-900 border border-slate-700 p-6 rounded-2xl w-full max-w-sm shadow-2xl">
                  <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl font-black text-white flex items-center gap-2"><Edit2 className="text-blue-400 w-5 h-5"/> Chuyển Lớp</h3>
+                    <h3 className="text-xl font-black text-white flex items-center gap-2"><Edit2 className="text-blue-400 w-5 h-5"/> Sửa Thông Tin</h3>
                     <button onClick={() => setClassModal({...classModal, open: false})} className="text-slate-500 hover:text-white"><X className="w-6 h-6"/></button>
                  </div>
                  <div className="mb-4">
-                    <p className="text-sm text-slate-400 mb-1">Học sinh:</p>
-                    <p className="font-bold text-lg text-blue-400">{classModal.userName}</p>
+                    <p className="text-sm text-slate-400 mb-1">ID Học sinh:</p>
+                    <p className="font-mono text-xs text-blue-400 bg-blue-900/20 p-2 rounded truncate">{classModal.userId}</p>
                  </div>
                  <div className="space-y-4 mb-6">
                     <div>
+                       <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Họ và Tên</label>
+                       <input autoFocus type="text" value={classModal.fullName} onChange={e => setClassModal({...classModal, fullName: e.target.value})} className="w-full bg-black/50 border border-slate-700 rounded-lg p-3 text-white" placeholder="VD: Nguyễn Văn A" />
+                    </div>
+                    <div>
                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Đăng ký lớp mới</label>
-                       <input autoFocus type="text" value={classModal.className} onChange={e => setClassModal({...classModal, className: e.target.value})} className="w-full bg-black/50 border border-slate-700 rounded-lg p-3 text-white" placeholder="VD: 10A1" />
+                       <input type="text" value={classModal.className} onChange={e => setClassModal({...classModal, className: e.target.value})} className="w-full bg-black/50 border border-slate-700 rounded-lg p-3 text-white" placeholder="VD: 10A1" />
                     </div>
                  </div>
                  <button onClick={submitClassChange} className="w-full p-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold flex justify-center items-center gap-2 transition-colors">
-                    <Save className="w-5 h-5" /> CẬP NHẬT LỚP
+                    <Save className="w-5 h-5" /> LƯU THAY ĐỔI
                  </button>
               </motion.div>
            </motion.div>

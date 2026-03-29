@@ -49,8 +49,11 @@ export async function getDashboardData() {
   return { profiles, episodes, systemScores, leaderboard };
 }
 
-export async function updateUserClass(userId: string, newClass: string) {
-  const { error } = await supabaseAdmin.from('profiles').update({ class_name: newClass }).eq('id', userId);
+export async function updateUserProfile(userId: string, newClass: string, newFullName: string) {
+  const { error } = await supabaseAdmin.from('profiles').update({ 
+    class_name: newClass,
+    full_name: newFullName
+  }).eq('id', userId);
   if (!error) {
     revalidatePath('/', 'layout');
     revalidatePath('/admin/dashboard');

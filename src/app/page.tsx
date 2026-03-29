@@ -374,17 +374,29 @@ export default function Home() {
              {/* eslint-disable-next-line @next/next/no-img-element */}
              <img src="/science-club-logo.png" alt="Science Club" className="h-16 sm:h-20 md:h-[85px] w-auto object-contain drop-shadow-2xl hidden sm:block brightness-110" />
 
+             {/* Nút DIỄN ĐÀN */}
+             <Link href="/forum" className="hidden md:flex items-center gap-2 text-fuchsia-400 hover:text-white font-bold text-sm tracking-wider uppercase transition-colors px-4 py-2 bg-slate-800/50 hover:bg-fuchsia-900/40 rounded-full border border-slate-700 hover:border-fuchsia-500 shadow-sm hover:shadow-[0_0_15px_rgba(232,121,249,0.4)]">
+                Diễn Đàn
+             </Link>
+
+             {/* Nút VÒM KHOA HỌC */}
+             <Link href="/vom-khoa-hoc" className="hidden md:flex items-center gap-2 text-cyan-400 hover:text-white font-bold text-sm tracking-wider uppercase transition-colors px-4 py-2 bg-slate-800/50 hover:bg-cyan-900/40 rounded-full border border-slate-700 hover:border-cyan-500 shadow-sm hover:shadow-[0_0_15px_rgba(34,211,238,0.4)]">
+                Vòm Khoa Học
+             </Link>
+
             {isAuthLoading ? (
                <div className="w-32 h-10 bg-slate-800/50 rounded-full animate-pulse"></div>
             ) : userProfile ? (
                <div className="flex items-center gap-3 bg-slate-900/60 backdrop-blur-xl border border-cyan-500/20 px-3 py-1.5 rounded-full shadow-[0_0_15px_rgba(34,211,238,0.1)]">
-                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-slate-900 shadow-inner">
-                    <UserIcon className="w-4 h-4" strokeWidth={3} />
-                 </div>
-                 <div className="flex-col hidden sm:flex pr-2 border-r border-slate-700/50">
-                   <span className="text-xs font-bold text-slate-100 leading-tight">{userProfile.full_name}</span>
-                   <span className="text-[10px] text-cyan-400 font-mono">{userProfile.class_name}</span>
-                 </div>
+                 <Link href="/profile" className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer group/profile">
+                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-slate-900 shadow-inner group-hover/profile:scale-110 transition-transform">
+                      <UserIcon className="w-4 h-4" strokeWidth={3} />
+                   </div>
+                   <div className="flex-col hidden sm:flex pr-2 border-r border-slate-700/50">
+                     <span className="text-xs font-bold text-slate-100 leading-tight group-hover/profile:text-cyan-300 transition-colors">{userProfile.full_name}</span>
+                     <span className="text-[10px] text-cyan-400 font-mono">{userProfile.class_name}</span>
+                   </div>
+                 </Link>
                  <button onClick={handleLogout} className="p-2 hover:bg-slate-800 rounded-full transition-colors group" title="Đăng xuất">
                    <LogOut className="w-4 h-4 text-slate-400 group-hover:text-red-400 transition-colors" />
                  </button>
