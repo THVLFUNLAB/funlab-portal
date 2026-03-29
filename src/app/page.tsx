@@ -61,8 +61,7 @@ const Particles = () => {
 };
 
 // --- Badge Collection Gamification Section ---
-const BadgeCollection = () => {
-  const userPoints = 250; // Giả lập học sinh đạt 250 điểm
+const BadgeCollection = ({ userPoints }: { userPoints: number }) => {
 
   const badges = [
     {
@@ -276,6 +275,7 @@ export default function Home() {
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [dbEpisodes, setDbEpisodes] = useState<any[]>([]);
   const [completedEpisodes, setCompletedEpisodes] = useState<number[]>([]);
+  const [totalScore, setTotalScore] = useState(0);
 
   useEffect(() => {
     async function loadData() {
@@ -292,6 +292,14 @@ export default function Home() {
         if (scores) {
           setCompletedEpisodes(scores.map((s: any) => s.episode_id));
         }
+
+        // 1.6 Fetch Achievement Score
+        const { data: scoreData } = await supabase
+          .from('overall_leaderboard')
+          .select('total_score')
+          .eq('user_id', session.user.id)
+          .single();
+        if (scoreData) setTotalScore(scoreData.total_score);
       }
       setIsAuthLoading(false);
 
@@ -443,7 +451,7 @@ export default function Home() {
         </section>
 
         {/* --- Phần Kho Báu Huy Hiệu Gamification --- */}
-        <BadgeCollection />
+        <BadgeCollection userPoints={totalScore} />
 
         <motion.div 
           initial={{ opacity: 0, y: 40 }}

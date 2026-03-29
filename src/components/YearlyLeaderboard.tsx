@@ -32,6 +32,7 @@ const getUserRankInfo = (score: number) => {
 export default function YearlyLeaderboard() {
   const [leaders, setLeaders] = useState<OverallScore[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
     async function fetchOverall() {
@@ -126,7 +127,7 @@ export default function YearlyLeaderboard() {
         </div>
       ) : (
         <div className="w-full flex flex-col relative z-10">
-          {leaders.map((s, index) => {
+          {(showAll ? leaders : leaders.slice(0, 10)).map((s, index) => {
             const rank = getUserRankInfo(s.total_score);
 
             return (
@@ -198,6 +199,17 @@ export default function YearlyLeaderboard() {
               </div>
             );
           })}
+
+          {leaders.length > 10 && (
+            <button 
+              onClick={() => setShowAll(!showAll)}
+              className="mt-6 py-4 w-full bg-slate-950/50 hover:bg-yellow-500/10 border border-dashed border-yellow-500/30 hover:border-yellow-500/60 rounded-2xl text-yellow-500 font-black tracking-[0.2em] uppercase transition-all duration-300 flex items-center justify-center gap-3 group/btn"
+            >
+              <Zap className={`w-5 h-5 transition-transform duration-500 ${showAll ? 'rotate-180 text-yellow-600' : 'animate-pulse text-yellow-400'}`} />
+              {showAll ? 'THU GỌN DANH SÁCH' : 'HIỂN THỊ THÊM SĨ TỬ'}
+              <Zap className={`w-5 h-5 transition-transform duration-500 ${showAll ? 'rotate-180 text-yellow-600' : 'animate-pulse text-yellow-400'}`} />
+            </button>
+          )}
         </div>
       )}
     </div>
