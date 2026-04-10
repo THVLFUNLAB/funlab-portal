@@ -7,6 +7,7 @@ import { createClient } from "@/utils/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { submitEpisodeScore } from "@/lib/scoreLogic";
 import { saveGameScore } from "@/app/actions/gameActions";
+import DynamicGameRenderer from "@/components/DynamicGameRenderer";
 
 import { episodes } from "@/data/episodes";
 import Tap1Suckmanhkhiquyen from "@/components/games/Tap1Suckmanhkhiquyen";
@@ -138,7 +139,9 @@ export default function EpisodePage() {
     }
   };
 
-  const GameComponent = GAME_COMPONENTS[episodeId];
+  const StaticGameComponent = GAME_COMPONENTS[episodeId];
+  // Dynamic fallback: nếu không có static component, dùng game_code từ DB
+  const hasDynamicGame = !StaticGameComponent && dbEpisode?.game_code;
 
   return (
     <div className="min-h-screen bg-slate-950 text-white flex flex-col md:flex-row font-sans overflow-hidden">
@@ -216,10 +219,15 @@ export default function EpisodePage() {
           </div>
         )}
 
-        {GameComponent ? (
+        {StaticGameComponent ? (
           <div className="w-full h-full overflow-hidden flex flex-col rounded-tl-none md:rounded-tl-3xl border-l border-slate-800/50 bg-black/50 z-10 relative">
-            {/* TRUYỀN HÀM XỬ LÝ ĐIỂM XUỐNG GAME COMPONENT */}
-            <GameComponent onGameComplete={handleGameComplete} />
+            {/* Static Game Component (Tập 1-7) */}
+            <StaticGameComponent onGameComplete={handleGameComplete} />
+          </div>
+        ) : hasDynamicGame ? (
+          <div className="w-full h-full overflow-hidden flex flex-col rounded-tl-none md:rounded-tl-3xl border-l border-slate-800/50 bg-black/50 z-10 relative">
+            {/* Dynamic Game Component (Tập 8+ - render từ game_code trong DB) */}
+            <DynamicGameRenderer gameCode={dbEpisode.game_code} onGameComplete={handleGameComplete} />
           </div>
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center p-8 bg-slate-900 rounded-tl-none md:rounded-tl-3xl border-l border-slate-800/50 z-10 relative">

@@ -1,16 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   getDashboardData, logoutAdmin, updateUserProfile, 
-  addSystemScore, toggleEpisodeStatus, upsertEpisodeData 
+  addSystemScore, toggleEpisodeStatus, upsertEpisodeData,
+  saveGameCode as serverSaveGameCode
 } from '../actions';
 import { supabase } from "@/lib/supabase";
+import DynamicGameRenderer from '@/components/DynamicGameRenderer';
+import QuestionTemplateGenerator from '@/components/admin/QuestionTemplateGenerator';
 import { 
   Users, PlaySquare, BarChart, LogOut, Search, Settings, ShieldAlert,
-  Edit2, PlusCircle, CheckCircle, XCircle, Activity, Trophy, Bot, Plus, Save, X, Image as ImageIcon, Video, FileText, Trash2
+  Edit2, PlusCircle, CheckCircle, XCircle, Activity, Trophy, Bot, Plus, Save, X, 
+  Image as ImageIcon, Video, FileText, Trash2, Code2, Calculator, Eye, EyeOff,
+  Wand2, ArrowUpDown, Star, Sparkles, ChevronDown, ChevronUp, Copy, Check, Play
 } from 'lucide-react';
 
 export default function AdminDashboardClient() {
@@ -37,9 +42,20 @@ export default function AdminDashboardClient() {
     thumbnail_url: '', 
     video_url: '', 
     description: '', 
-    is_active: false 
+    is_active: false,
+    game_code: '' 
   });
   const [uploadingImage, setUploadingImage] = useState(false);
+
+  // === NEW: Episode Config Panel States ===
+  const [activeEpisodeTab, setActiveEpisodeTab] = useState<'info' | 'code' | 'simulate' | 'preview'>('info');
+  const [codeSaving, setCodeSaving] = useState(false);
+  const [codeSaved, setCodeSaved] = useState(false);
+  const [showTemplateGen, setShowTemplateGen] = useState(false);
+  const [previewActive, setPreviewActive] = useState(false);
+  const [simScore, setSimScore] = useState(30);
+  const [simResult, setSimResult] = useState<any>(null);
+  const [simLoading, setSimLoading] = useState(false);
 
   const loadData = async () => {
     setLoading(true);
@@ -126,10 +142,99 @@ export default function AdminDashboardClient() {
       is_active: episodeModal.is_active
     });
     if (res.success) {
+      // Also save game_code if present
+      if (episodeModal.game_code) {
+        await serverSaveGameCode(episodeModal.id, episodeModal.game_code);
+      }
       setEpisodeModal({ ...episodeModal, open: false });
       loadData();
     } else alert("Lỗi: " + res.error);
   };
+
+  // === NEW: Save Game Code ===
+  const handleSaveGameCode = async () => {
+    setCodeSaving(true);
+    const res = await serverSaveGameCode(episodeModal.id, episodeModal.game_code);
+    setCodeSaving(false);
+    if (res.success) {
+      setCodeSaved(true);
+      setTimeout(() => setCodeSaved(false), 3000);
+    } else {
+      alert('Lỗi lưu code: ' + res.error);
+    }
+  };
+
+  // === NEW: Score Simulator ===
+  const runScoreSimulation = async () => {
+    setSimLoading(true);
+    try {
+      // Fetch current episode scores for this episode
+      const { data: epScores } = await supabase
+        .from('episode_scores')
+        .select('score')
+        .eq('episode_id', episodeModal.id)
+        .order('score', { ascending: false });
+
+      // Fetch overall leaderboard
+      const { data: overall } = await supabase
+        .from('overall_leaderboard')
+        .select('user_id, full_name, total_score')
+        .order('total_score', { ascending: false })
+        .limit(30);
+
+      // Simulate episode ranking
+      const allEpScores = (epScores || []).map(s => s.score);
+      allEpScores.push(simScore);
+      allEpScores.sort((a: number, b: number) => b - a);
+      const epRank = allEpScores.indexOf(simScore) + 1;
+      const epTotal = allEpScores.length;
+
+      // Simulate overall ranking
+      const demoCurrentTotal = 100; // Giả định user demo có 100 điểm
+      const demoNewTotal = demoCurrentTotal + simScore;
+      
+      // Determine badge
+      const getBadge = (score: number) => {
+        if (score < 50) return { title: 'Chưa xếp hạng', color: 'text-slate-500' };
+        if (score <= 150) return { title: 'Nhà Thám Hiểm Sơ Cấp', color: 'text-blue-400' };
+        if (score <= 300) return { title: 'Kỹ Sư Sáng Tạo', color: 'text-purple-400' };
+        return { title: 'Chuyên Gia Funlab', color: 'text-yellow-400' };
+      };
+
+      const oldBadge = getBadge(demoCurrentTotal);
+      const newBadge = getBadge(demoNewTotal);
+      const badgeChanged = oldBadge.title !== newBadge.title;
+
+      // Calculate overall rank change
+      const overallScores = (overall || []).map((o: any) => o.total_score);
+      const oldRank = overallScores.filter((s: number) => s > demoCurrentTotal).length + 1;
+      const newRank = overallScores.filter((s: number) => s > demoNewTotal).length + 1;
+
+      setSimResult({
+        epRank,
+        epTotal,
+        simScore,
+        demoCurrentTotal,
+        demoNewTotal,
+        oldBadge,
+        newBadge,
+        badgeChanged,
+        oldRank,
+        newRank,
+        rankChange: oldRank - newRank,
+      });
+    } catch (err: any) {
+      console.error('Simulation Error:', err);
+    }
+    setSimLoading(false);
+  };
+
+  // === NEW: Handle Template Generator Output ===
+  const handleTemplateCode = useCallback((code: string) => {
+    setEpisodeModal(prev => ({ ...prev, game_code: code }));
+    setShowTemplateGen(false);
+    setActiveEpisodeTab('code');
+  }, []);
 
   const handleDeleteUser = async (userId: string, userName: string) => {
     if (confirm(`Thầy có chắc muốn xóa tài khoản này và mọi kết quả thi của em ấy (${userName}) không? Thao tác này không thể hoàn tác!`)) {
@@ -265,15 +370,16 @@ export default function AdminDashboardClient() {
           <motion.div key="episodes" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
              <div className="flex justify-end mb-6">
                  <button 
-                    onClick={() => setEpisodeModal({ 
+                    onClick={() => { setEpisodeModal({ 
                       open: true, 
                       id: episodes.length > 0 ? Math.max(...episodes.map(e=>e.id)) + 1 : 1, 
                       title: 'Tập Mới', 
                       thumbnail_url: '', 
                       video_url: '', 
                       description: '', 
-                      is_active: false 
-                    })}
+                      is_active: false,
+                      game_code: '' 
+                    }); setActiveEpisodeTab('info'); }}
                     className="flex items-center gap-2 px-5 py-3 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl font-bold shadow-[0_0_15px_rgba(8,145,178,0.5)] transition-all"
                  >
                     <Plus className="w-5 h-5" /> THÊM TẬP MỚI
@@ -298,7 +404,7 @@ export default function AdminDashboardClient() {
                          <div className="flex items-center gap-2 text-sm text-slate-400 truncate"><Video className="w-4 h-4 shrink-0" /> Video URL: <span className="text-slate-500 font-mono text-xs truncate bg-black/30 px-2 py-1 rounded w-full">{ep.video_url || 'Chưa cấu hình'}</span></div>
                       </div>
 
-                      <button onClick={() => setEpisodeModal({ open: true, ...ep })} className="w-full flex items-center justify-center gap-2 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold border border-slate-600 transition-colors mt-auto">
+                      <button onClick={() => { setEpisodeModal({ open: true, ...ep, game_code: ep.game_code || '' }); setActiveEpisodeTab('info'); }} className="w-full flex items-center justify-center gap-2 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold border border-slate-600 transition-colors mt-auto">
                          <Settings className="w-4 h-4" /> CẤU HÌNH TẬP
                       </button>
                    </div>
@@ -391,92 +497,280 @@ export default function AdminDashboardClient() {
            </motion.div>
         )}
 
-        {/* EPISODE MODAL */}
-        {episodeModal.open && (
-           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex py-10 items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
-              <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} className="bg-slate-900 border border-slate-700 p-6 rounded-2xl w-full max-w-4xl shadow-2xl my-auto">
-                 <div className="flex justify-between items-center mb-6 border-b border-slate-800 pb-4">
-                    <h3 className="text-2xl font-black text-white flex items-center gap-3"><Settings className="text-cyan-400 w-6 h-6"/> Cấu Hình Thử Thách (Update)</h3>
-                    <button onClick={() => setEpisodeModal({...episodeModal, open: false})} className="text-slate-500 hover:text-white bg-slate-800 p-2 rounded-lg transition-colors"><X className="w-5 h-5"/></button>
-                 </div>
-                 
-                 <div className="flex flex-col md:flex-row gap-8 mb-8">
-                    {/* Cột Trái: Nhập Liệu */}
-                    <div className="flex-1 space-y-5">
-                       <div className="flex gap-4">
-                          <div className="w-1/3">
-                             <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2"><Settings className="w-3.5 h-3.5" /> ID Tập</label>
-                             <input type="number" readOnly value={episodeModal.id} className="w-full bg-black/80 border border-slate-700/50 rounded-lg p-3 text-yellow-400 font-mono font-black border-dashed" />
-                          </div>
-                          <div className="w-2/3">
-                             <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2"><Edit2 className="w-3.5 h-3.5" /> Tiêu đề Tập</label>
-                             <input type="text" value={episodeModal.title} onChange={e => setEpisodeModal({...episodeModal, title: e.target.value})} className="w-full bg-black/50 border border-slate-700 focus:border-cyan-500 rounded-lg p-3 text-white transition-colors" />
-                          </div>
-                       </div>
+         {/* EPISODE MODAL — UPGRADED */}
+         {episodeModal.open && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex py-4 items-start justify-center bg-black/90 backdrop-blur-md p-4 overflow-y-auto">
+               <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-6xl shadow-2xl my-auto">
+                  
+                  {/* Modal Header */}
+                  <div className="flex justify-between items-center p-6 border-b border-slate-800 sticky top-0 bg-slate-900/95 backdrop-blur-md z-20 rounded-t-2xl">
+                     <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-cyan-950 border border-cyan-500/30 rounded-xl flex items-center justify-center">
+                           <Settings className="text-cyan-400 w-5 h-5"/>
+                        </div>
+                        <div>
+                           <h3 className="text-xl font-black text-white">Cấu Hình Tập {episodeModal.id}</h3>
+                           <p className="text-[10px] text-slate-500 font-bold tracking-widest uppercase">Episode Configuration Console</p>
+                        </div>
+                     </div>
+                     <button onClick={() => setEpisodeModal({...episodeModal, open: false})} className="text-slate-500 hover:text-white bg-slate-800 p-2 rounded-lg transition-colors hover:bg-red-900/50">
+                        <X className="w-5 h-5"/>
+                     </button>
+                  </div>
 
-                       <div>
-                          <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2"><ImageIcon className="w-3.5 h-3.5" /> Link Thumbnail (Ảnh Bìa)</label>
-                          <div className="flex gap-2">
-                             <input type="text" readOnly value={episodeModal.thumbnail_url} className="w-full bg-black/30 border border-slate-700/50 rounded-lg p-3 text-slate-400 font-mono text-sm opacity-60 cursor-not-allowed" placeholder="URL ảnh sẽ hiện tự động..." />
-                             <input type="file" accept="image/*" id="thumbnail-upload" className="hidden" onChange={handleImageUpload} disabled={uploadingImage} />
-                             <label htmlFor="thumbnail-upload" className={`flex items-center gap-2 whitespace-nowrap bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded-lg cursor-pointer transition-colors shadow-[0_0_15px_rgba(79,70,229,0.3)] ${uploadingImage ? 'opacity-50 pointer-events-none' : ''}`}>
-                                {uploadingImage ? <span className="animate-spin text-lg">🌀</span> : <ImageIcon className="w-4 h-4" />}
-                                <span className="hidden sm:inline">{uploadingImage ? 'ĐANG TẢI...' : 'TẢI ẢNH LÊN'}</span>
-                             </label>
-                          </div>
-                       </div>
+                  {/* Tab Navigation */}
+                  <div className="flex gap-1 p-2 mx-6 mt-4 bg-slate-950/50 rounded-xl border border-slate-800 w-fit">
+                     {[
+                        { key: 'info', label: 'THÔNG TIN', icon: FileText },
+                        { key: 'code', label: 'CODE GAME', icon: Code2 },
+                        { key: 'simulate', label: 'MÔ PHỎNG ĐIỂM', icon: Calculator },
+                        { key: 'preview', label: 'XEM THỬ GAME', icon: Eye },
+                     ].map(tab => {
+                        const Icon = tab.icon;
+                        return (
+                           <button 
+                              key={tab.key} 
+                              onClick={() => setActiveEpisodeTab(tab.key as any)}
+                              className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-bold text-xs tracking-wide transition-all ${
+                                 activeEpisodeTab === tab.key 
+                                    ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-500/30' 
+                                    : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800'
+                              }`}
+                           >
+                              <Icon className="w-3.5 h-3.5" /> {tab.label}
+                           </button>
+                        );
+                     })}
+                  </div>
+                  
+                  <div className="p-6">
+                     {/* ════════ TAB 1: THÔNG TIN ════════ */}
+                     {activeEpisodeTab === 'info' && (
+                        <div className="flex flex-col md:flex-row gap-8">
+                           <div className="flex-1 space-y-5">
+                              <div className="flex gap-4">
+                                 <div className="w-1/3">
+                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2"><Settings className="w-3.5 h-3.5" /> ID Tập</label>
+                                    <input type="number" readOnly value={episodeModal.id} className="w-full bg-black/80 border border-slate-700/50 rounded-lg p-3 text-yellow-400 font-mono font-black border-dashed" />
+                                 </div>
+                                 <div className="w-2/3">
+                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2"><Edit2 className="w-3.5 h-3.5" /> Tiêu đề Tập</label>
+                                    <input type="text" value={episodeModal.title} onChange={e => setEpisodeModal({...episodeModal, title: e.target.value})} className="w-full bg-black/50 border border-slate-700 focus:border-cyan-500 rounded-lg p-3 text-white transition-colors" />
+                                 </div>
+                              </div>
+                              <div>
+                                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2"><ImageIcon className="w-3.5 h-3.5" /> Link Thumbnail</label>
+                                 <div className="flex gap-2">
+                                    <input type="text" readOnly value={episodeModal.thumbnail_url} className="w-full bg-black/30 border border-slate-700/50 rounded-lg p-3 text-slate-400 font-mono text-sm opacity-60 cursor-not-allowed" placeholder="URL ảnh sẽ hiện tự động..." />
+                                    <input type="file" accept="image/*" id="thumbnail-upload" className="hidden" onChange={handleImageUpload} disabled={uploadingImage} />
+                                    <label htmlFor="thumbnail-upload" className={`flex items-center gap-2 whitespace-nowrap bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded-lg cursor-pointer transition-colors ${uploadingImage ? 'opacity-50 pointer-events-none' : ''}`}>
+                                       {uploadingImage ? <span className="animate-spin text-lg">🌀</span> : <ImageIcon className="w-4 h-4" />}
+                                       <span className="hidden sm:inline">{uploadingImage ? 'ĐANG TẢI...' : 'TẢI ẢNH'}</span>
+                                    </label>
+                                 </div>
+                              </div>
+                              <div>
+                                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2"><Video className="w-3.5 h-3.5" /> Link Video Youtube</label>
+                                 <input type="text" value={episodeModal.video_url} onChange={e => setEpisodeModal({...episodeModal, video_url: e.target.value})} className="w-full bg-black/50 border border-slate-700 focus:border-cyan-500 rounded-lg p-3 text-slate-200 font-mono text-sm transition-colors" placeholder="https://youtube.com/watch?..." />
+                              </div>
+                              <div>
+                                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2"><FileText className="w-3.5 h-3.5" /> Mô tả</label>
+                                 <textarea rows={3} value={episodeModal.description} onChange={e => setEpisodeModal({...episodeModal, description: e.target.value})} className="w-full bg-black/50 border border-slate-700 focus:border-cyan-500 rounded-lg p-3 text-slate-200 transition-colors" placeholder="Mô tả ngắn về tập..." />
+                              </div>
+                           </div>
+                           <div className="w-full md:w-5/12 shrink-0 flex flex-col">
+                              <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Live Preview</label>
+                              <div className="w-full aspect-video rounded-xl bg-black border-2 border-slate-800 border-dashed overflow-hidden relative flex items-center justify-center group mb-4">
+                                 {episodeModal.thumbnail_url ? (
+                                    <>
+                                       <div className="absolute inset-0 bg-cyan-500/20 blur-2xl"></div>
+                                       {/* eslint-disable-next-line @next/next/no-img-element */}
+                                       <img src={episodeModal.thumbnail_url} alt="Preview" className="w-full h-full object-cover relative z-10 group-hover:scale-105 transition-transform duration-500" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                                    </>
+                                 ) : (
+                                    <div className="flex flex-col items-center justify-center text-slate-600 p-6 text-center">
+                                       <ImageIcon className="w-12 h-12 mb-3 opacity-50" />
+                                       <span className="font-black text-lg text-slate-500 uppercase tracking-widest">Tập {episodeModal.id}</span>
+                                    </div>
+                                 )}
+                              </div>
+                              <button onClick={submitEpisode} className="w-full mt-auto p-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-xl font-black text-lg tracking-widest flex justify-center items-center gap-3 transition-all shadow-[0_0_20px_rgba(8,145,178,0.4)]">
+                                 <Save className="w-6 h-6" /> LƯU CHÍNH THỨC
+                              </button>
+                           </div>
+                        </div>
+                     )}
 
-                       <div>
-                          <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2"><Video className="w-3.5 h-3.5" /> Link Video Youtube</label>
-                          <input type="text" value={episodeModal.video_url} onChange={e => setEpisodeModal({...episodeModal, video_url: e.target.value})} className="w-full bg-black/50 border border-slate-700 focus:border-cyan-500 rounded-lg p-3 text-slate-200 font-mono text-sm transition-colors" placeholder="https://youtube.com/watch?..." />
-                       </div>
+                     {/* ════════ TAB 2: CODE GAME ════════ */}
+                     {activeEpisodeTab === 'code' && (
+                        <div className="space-y-6">
+                           <div className="flex flex-wrap gap-3 items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                 <Code2 className="w-5 h-5 text-cyan-400" />
+                                 <h4 className="text-lg font-black text-white uppercase tracking-widest">Game Component Code</h4>
+                              </div>
+                              <div className="flex gap-2">
+                                 <button onClick={() => setShowTemplateGen(!showTemplateGen)} className="flex items-center gap-2 px-4 py-2 bg-purple-900/40 text-purple-400 border border-purple-700 hover:bg-purple-800 rounded-lg text-xs font-bold transition-colors">
+                                    <Wand2 className="w-3.5 h-3.5" /> {showTemplateGen ? 'ẨN FORM' : 'TẠO ĐỀ TỰ ĐỘNG'}
+                                 </button>
+                                 <button onClick={handleSaveGameCode} disabled={codeSaving} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${codeSaved ? 'bg-green-600 text-white' : 'bg-cyan-900/40 text-cyan-400 border border-cyan-700 hover:bg-cyan-800'} ${codeSaving ? 'opacity-50' : ''}`}>
+                                    {codeSaved ? <><Check className="w-3.5 h-3.5" /> ĐÃ LƯU!</> : codeSaving ? <>⏳ ĐANG LƯU...</> : <><Save className="w-3.5 h-3.5" /> LƯU CODE</>}
+                                 </button>
+                              </div>
+                           </div>
 
-                       <div>
-                          <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2"><FileText className="w-3.5 h-3.5" /> Chú thích / Mô tả</label>
-                          <textarea rows={3} value={episodeModal.description} onChange={e => setEpisodeModal({...episodeModal, description: e.target.value})} className="w-full bg-black/50 border border-slate-700 focus:border-cyan-500 rounded-lg p-3 text-slate-200 transition-colors" placeholder="Viết vài dòng giới thiệu về tập này... (nếu có)" />
-                       </div>
-                    </div>
+                           {showTemplateGen && <QuestionTemplateGenerator onCodeGenerated={handleTemplateCode} />}
 
-                    {/* Cột Phải: Preview Ảnh */}
-                    <div className="w-full md:w-5/12 shrink-0 flex flex-col">
-                       <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Live Preview (Thumbnail)</label>
-                       <div className="w-full aspect-video rounded-xl bg-black border-2 border-slate-800 border-dashed overflow-hidden relative shadow-[0_0_30px_rgba(6,182,212,0.15)] flex items-center justify-center group mb-4">
-                          {episodeModal.thumbnail_url ? (
-                             <>
-                               {/* Glow Effect phía sau ảnh */}
-                               <div className="absolute inset-0 bg-cyan-500/20 blur-2xl"></div>
-                               {/* eslint-disable-next-line @next/next/no-img-element */}
-                               <img 
-                                 src={episodeModal.thumbnail_url} 
-                                 alt="Thumbnail Preview" 
-                                 className="w-full h-full object-cover relative z-10 group-hover:scale-105 transition-transform duration-500"
-                                 onError={(e) => {
-                                   (e.target as HTMLImageElement).style.display = 'none';
-                                   (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                                 }}
-                               />
-                               <div className="hidden absolute inset-0 flex flex-col items-center justify-center p-4 text-center z-20 bg-slate-900/90">
-                                  <ShieldAlert className="w-8 h-8 text-red-500 mb-2" />
-                                  <span className="text-red-400 font-bold uppercase tracking-widest text-xs">Ảnh Lỗi / Link Hỏng</span>
-                               </div>
-                             </>
-                          ) : (
-                             <div className="flex flex-col items-center justify-center text-slate-600 p-6 text-center">
-                                <ImageIcon className="w-12 h-12 mb-3 opacity-50" />
-                                <span className="font-black text-lg text-slate-500 uppercase tracking-widest mb-1">Tập {episodeModal.id}</span>
-                                <span className="font-bold text-xs uppercase tracking-widest bg-slate-800/50 px-3 py-1 rounded-full">Chưa Cập Nhật Ảnh</span>
-                             </div>
-                          )}
-                       </div>
-                       
-                       <button onClick={submitEpisode} className="w-full mt-auto p-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-xl font-black text-lg tracking-widest flex justify-center items-center gap-3 transition-all shadow-[0_0_20px_rgba(8,145,178,0.4)] hover:shadow-[0_0_30px_rgba(8,145,178,0.6)]">
-                          <Save className="w-6 h-6" /> LƯU CHÍNH THỨC
-                       </button>
-                    </div>
-                 </div>
-              </motion.div>
-           </motion.div>
-        )}
+                           <div className="relative">
+                              <div className="absolute top-3 right-3 z-10">
+                                 <span className="text-[10px] font-mono text-slate-500 bg-slate-800/80 px-2 py-1 rounded">{(episodeModal.game_code || '').length} chars</span>
+                              </div>
+                              <textarea
+                                 value={episodeModal.game_code}
+                                 onChange={e => setEpisodeModal(prev => ({ ...prev, game_code: e.target.value }))}
+                                 rows={20}
+                                 className="w-full bg-black/80 border border-slate-700 rounded-xl p-4 text-green-400 font-mono text-sm leading-relaxed focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/30 transition-colors resize-y"
+                                 placeholder={'// Dán code game vào đây...\n// Hoặc bấm "TẠO ĐỀ TỰ ĐỘNG" để generate.\n//\n// Các biến có sẵn:\n// React, useState, useEffect, useMemo, useCallback, useRef\n// Icons (Flame, Award, Play, Star, Trophy, ...)\n// createClient (Supabase client)\n//\n// Code phải kết thúc bằng: return Game;\n\nfunction Game({ onGameComplete }) {\n  // ... logic game ...\n  return React.createElement(\'div\', null, \'Hello!\');\n}\n\nreturn Game;'}
+                                 spellCheck={false}
+                              />
+                           </div>
+
+                           <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-4">
+                              <h5 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Hướng dẫn nhanh</h5>
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-slate-500">
+                                 <div className="bg-black/30 p-3 rounded-lg">
+                                    <p className="font-bold text-cyan-400 mb-1">1. Dán code</p>
+                                    <p>Copy code game, dán vào ô trên. Kết thúc bằng <code className="text-green-400">return Game;</code></p>
+                                 </div>
+                                 <div className="bg-black/30 p-3 rounded-lg">
+                                    <p className="font-bold text-cyan-400 mb-1">2. Template</p>
+                                    <p>Bấm <span className="text-purple-400">TẠO ĐỀ TỰ ĐỘNG</span> → nhập câu hỏi → GENERATE</p>
+                                 </div>
+                                 <div className="bg-black/30 p-3 rounded-lg">
+                                    <p className="font-bold text-cyan-400 mb-1">3. Test</p>
+                                    <p>Chuyển tab <span className="text-cyan-400">XEM THỬ GAME</span> để chạy thử trước.</p>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     )}
+
+                     {/* ════════ TAB 3: MÔ PHỎNG TÍNH ĐIỂM ════════ */}
+                     {activeEpisodeTab === 'simulate' && (
+                        <div className="space-y-6">
+                           <div className="flex items-center gap-3 mb-2">
+                              <Calculator className="w-6 h-6 text-amber-400" />
+                              <h4 className="text-lg font-black text-white uppercase tracking-widest">Mô Phỏng Tính Điểm</h4>
+                           </div>
+                           <p className="text-sm text-slate-400">Nhập điểm giả định để xem tác động lên Bảng Xếp Hạng.</p>
+
+                           <div className="flex flex-col sm:flex-row gap-4 items-end">
+                              <div className="flex-1">
+                                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Điểm game giả định</label>
+                                 <div className="flex items-center gap-3">
+                                    <input type="range" min={0} max={50} value={simScore} onChange={e => setSimScore(Number(e.target.value))} className="flex-1 accent-amber-500 h-2" />
+                                    <div className="bg-black/60 border border-amber-500/30 rounded-xl px-4 py-2 text-amber-400 font-mono font-black text-2xl min-w-[80px] text-center">{simScore}</div>
+                                    <span className="text-slate-500 text-sm font-bold">/ 50</span>
+                                 </div>
+                              </div>
+                              <button onClick={runScoreSimulation} disabled={simLoading} className="flex items-center gap-2 px-6 py-3 bg-amber-600 hover:bg-amber-500 text-white rounded-xl font-bold transition-all shadow-[0_0_15px_rgba(245,158,11,0.3)] disabled:opacity-50">
+                                 {simLoading ? <>⚙️ ĐANG TÍNH...</> : <><ArrowUpDown className="w-4 h-4" /> MÔ PHỎNG</>}
+                              </button>
+                           </div>
+
+                           {simResult && (
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                                 <div className="bg-slate-800/50 border border-cyan-500/20 rounded-2xl p-6">
+                                    <h5 className="text-sm font-black text-cyan-400 uppercase tracking-widest mb-4 flex items-center gap-2"><Trophy className="w-4 h-4" /> BXH Hàng Tập {episodeModal.id}</h5>
+                                    <div className="space-y-3">
+                                       <div className="flex justify-between items-center">
+                                          <span className="text-slate-400 text-sm">Điểm:</span>
+                                          <span className="text-cyan-400 font-mono font-bold text-lg">{simResult.simScore} HP</span>
+                                       </div>
+                                       <div className="flex justify-between items-center">
+                                          <span className="text-slate-400 text-sm">Vị trí:</span>
+                                          <span className="text-white font-black text-xl">#{simResult.epRank} <span className="text-slate-500 text-sm font-normal">/ {simResult.epTotal}</span></span>
+                                       </div>
+                                    </div>
+                                 </div>
+                                 <div className="bg-slate-800/50 border border-yellow-500/20 rounded-2xl p-6">
+                                    <h5 className="text-sm font-black text-yellow-400 uppercase tracking-widest mb-4 flex items-center gap-2"><Star className="w-4 h-4" /> BXH Tổng Năm Học</h5>
+                                    <div className="space-y-3">
+                                       <div className="flex justify-between items-center">
+                                          <span className="text-slate-400 text-sm">Tổng cũ → mới:</span>
+                                          <span className="text-yellow-400 font-mono font-bold">{simResult.demoCurrentTotal} + {simResult.simScore} = {simResult.demoNewTotal}</span>
+                                       </div>
+                                       <div className="border-t border-slate-700 pt-3 flex justify-between items-center">
+                                          <span className="text-slate-400 text-sm">Danh hiệu:</span>
+                                          <div className="text-right">
+                                             <span className={`font-bold ${simResult.newBadge.color}`}>{simResult.newBadge.title}</span>
+                                             {simResult.badgeChanged && (
+                                                <div className="flex items-center gap-1 text-green-400 text-[10px] font-bold mt-1">
+                                                   <Sparkles className="w-3 h-3" /> THĂNG HẠNG!
+                                                </div>
+                                             )}
+                                          </div>
+                                       </div>
+                                       {simResult.rankChange > 0 && (
+                                          <div className="bg-green-950/50 border border-green-500/30 rounded-xl p-3 text-center">
+                                             <span className="text-green-400 font-black text-sm">📈 Tăng {simResult.rankChange} bậc</span>
+                                          </div>
+                                       )}
+                                    </div>
+                                 </div>
+                              </div>
+                           )}
+
+                           {!simResult && (
+                              <div className="text-center p-12 bg-slate-800/20 rounded-2xl border border-dashed border-slate-700/50">
+                                 <Calculator className="w-12 h-12 text-slate-700 mx-auto mb-3" />
+                                 <p className="text-slate-500 font-medium">Kéo thanh điểm và bấm <span className="text-amber-400 font-bold">MÔ PHỎNG</span>.</p>
+                              </div>
+                           )}
+                        </div>
+                     )}
+
+                     {/* ════════ TAB 4: XEM THỬ GAME ════════ */}
+                     {activeEpisodeTab === 'preview' && (
+                        <div className="space-y-4">
+                           <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                 <Eye className="w-6 h-6 text-green-400" />
+                                 <h4 className="text-lg font-black text-white uppercase tracking-widest">Live Preview</h4>
+                              </div>
+                              <button onClick={() => setPreviewActive(!previewActive)} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${previewActive ? 'bg-red-900/40 text-red-400 border border-red-700 hover:bg-red-800' : 'bg-green-900/40 text-green-400 border border-green-700 hover:bg-green-800'}`}>
+                                 {previewActive ? <><EyeOff className="w-4 h-4" /> TẮT PREVIEW</> : <><Play className="w-4 h-4" /> CHẠY THỬ GAME</>}
+                              </button>
+                           </div>
+
+                           {!episodeModal.game_code ? (
+                              <div className="text-center p-16 bg-slate-800/20 rounded-2xl border border-dashed border-slate-700/50">
+                                 <Code2 className="w-12 h-12 text-slate-700 mx-auto mb-3" />
+                                 <p className="text-slate-500 font-medium">Chưa có code. Chuyển tab <span className="text-cyan-400 font-bold">CODE GAME</span> để dán code trước.</p>
+                              </div>
+                           ) : previewActive ? (
+                              <div className="bg-black border border-green-500/30 rounded-2xl overflow-hidden shadow-[0_0_30px_rgba(34,197,94,0.1)]" style={{ minHeight: 600 }}>
+                                 <DynamicGameRenderer 
+                                    gameCode={episodeModal.game_code} 
+                                    onGameComplete={(payload) => {
+                                       alert(`[SANDBOX] Game hoàn thành!\n\nĐiểm: ${payload.score}\nThời gian: ${payload.timeInSeconds}s\nLevel: ${payload.level}\n\n(Điểm này KHÔNG được ghi vào DB)`);
+                                    }}
+                                    sandboxMode={true}
+                                 />
+                              </div>
+                           ) : (
+                              <div className="text-center p-16 bg-slate-800/20 rounded-2xl border border-dashed border-green-700/30">
+                                 <Play className="w-12 h-12 text-green-700 mx-auto mb-3" />
+                                 <p className="text-slate-500 font-medium">Bấm <span className="text-green-400 font-bold">CHẠY THỬ GAME</span> để xem thử.</p>
+                                 <p className="text-slate-600 text-xs mt-2">Sandbox: không ghi vào CSDL thật.</p>
+                              </div>
+                           )}
+                        </div>
+                     )}
+                  </div>
+               </motion.div>
+            </motion.div>
+         )}
       </AnimatePresence>
     </div>
   );

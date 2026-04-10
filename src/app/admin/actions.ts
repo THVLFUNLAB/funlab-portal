@@ -102,3 +102,15 @@ export async function upsertEpisodeData(ep: { id: number, title: string, thumbna
   }
   return { success: !error, error: error?.message };
 }
+
+export async function saveGameCode(episodeId: number, gameCode: string) {
+  const { error } = await supabaseAdmin.from('episodes').update({ 
+    game_code: gameCode,
+    updated_at: new Date().toISOString()
+  }).eq('id', episodeId);
+  if (!error) {
+    revalidatePath(`/episode/${episodeId}`);
+    revalidatePath('/admin/dashboard');
+  }
+  return { success: !error, error: error?.message };
+}
