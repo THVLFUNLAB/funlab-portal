@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import Babel from '@babel/standalone';
 import { createClient } from '@/utils/supabase/client';
 import {
   Flame, Droplets, Award, CheckCircle, ArrowRight, ShieldCheck, Play,
@@ -45,7 +46,15 @@ export default function DynamicGameRenderer({ gameCode, onGameComplete, sandboxM
     }
 
     try {
-      // Tạo sandbox function với các dependency được inject
+      // 1. Dùng babel/standalone để transpile JSX sang React.createElement (JS thuần)
+      let compiledCode = gameCode;
+      try {
+        compiledCode = Babel.transform(gameCode, { presets: ['react'] }).code || gameCode;
+      } catch (compileErr) {
+        console.warn('Lỗi biên dịch nội bộ JSX, sẽ thử chạy raw source mã nguồn gốc:', compileErr);
+      }
+
+      // 2. Tạo sandbox function với các dependency được inject
       const createGameComponent = new Function(
         'React',
         'useState',
@@ -55,7 +64,7 @@ export default function DynamicGameRenderer({ gameCode, onGameComplete, sandboxM
         'useRef',
         'Icons',
         'createClient',
-        gameCode
+        compiledCode
       );
 
       const Component = createGameComponent(
