@@ -1,23 +1,33 @@
 -- ============================================================
--- FUNLAB RECRUITMENT SUBMISSIONS — Schema v1.0
+-- FUNLAB RECRUITMENT SUBMISSIONS — Schema v2.0
 -- Chạy trong Supabase SQL Editor (Dashboard → SQL)
 -- ============================================================
 
 CREATE TABLE IF NOT EXISTS recruitment_submissions (
-  id            UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  name          TEXT NOT NULL,
-  student_class TEXT NOT NULL,
-  level         TEXT NOT NULL CHECK (level IN ('THCS', 'THPT')),
-  department    TEXT NOT NULL,
-  station1_answer TEXT,
-  station2_answer TEXT,
-  challenge_answer TEXT,
-  experience    TEXT,
-  portfolio     TEXT,
-  aspiration    TEXT,
-  agent_code    TEXT,
-  submitted_at  TIMESTAMPTZ DEFAULT NOW()
+  id                UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name              TEXT NOT NULL,
+  student_class     TEXT NOT NULL,
+  level             TEXT NOT NULL CHECK (level IN ('THCS', 'THPT')),
+  registration_type TEXT DEFAULT 'VÒM KHOA HỌC',   -- v2: VÒM KHOA HỌC / BAN CLB / CẢ HAI
+  department        TEXT NOT NULL,
+  vom_understanding TEXT,                             -- v2: Hiểu biết về Vòm Khoa Học
+  station1_answer   TEXT,
+  station2_answer   TEXT,
+  challenge_answer  TEXT,
+  experience        TEXT,
+  portfolio         TEXT,
+  aspiration        TEXT,
+  agent_code        TEXT,
+  submitted_at      TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- ─── MIGRATION: thêm cột mới vào bảng đã tồn tại ───────────
+-- (Chạy phần này nếu bảng đã được tạo từ Schema v1.0)
+ALTER TABLE recruitment_submissions
+  ADD COLUMN IF NOT EXISTS registration_type TEXT DEFAULT 'VÒM KHOA HỌC';
+
+ALTER TABLE recruitment_submissions
+  ADD COLUMN IF NOT EXISTS vom_understanding TEXT;
 
 -- Enable Row Level Security
 ALTER TABLE recruitment_submissions ENABLE ROW LEVEL SECURITY;
