@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useEffect, useState, useMemo } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { LiveLeaderboard } from "@/components/LiveLeaderboard";
 import { createClient } from "@/utils/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { submitEpisodeScore } from "@/lib/scoreLogic";
 import { saveGameScore } from "@/app/actions/gameActions";
 import DynamicGameRenderer from "@/components/DynamicGameRenderer";
+import { LogIn, Lock } from "lucide-react";
 
 import { episodes } from "@/data/episodes";
 import Tap1Suckmanhkhiquyen from "@/components/games/Tap1Suckmanhkhiquyen";
@@ -30,14 +31,18 @@ const GAME_COMPONENTS: Record<number, React.ElementType> = {
 };
 
 export default function EpisodePage() {
-  const supabase = createClient();
+  // [FIX T-01] useMemo cho supabase client
+  const supabase = useMemo(() => createClient(), []);
   const params = useParams();
+  const router = useRouter();
   const episodeId = Number(params.id) || 1;
   const [messages, setMessages] = useState<string[]>([]);
   const [badgeUnlock, setBadgeUnlock] = useState<string | null>(null);
   const [showSuccessCelebration, setShowSuccessCelebration] = useState<{name: string, score: number} | null>(null);
   const [toast, setToast] = useState<{type: 'success' | 'error' | 'warning', message: string} | null>(null);
-  
+  // [P3-02] Auth state
+  const [authLoading, setAuthLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [currentProfile, setCurrentProfile] = useState<any>(null);
   const [dbEpisode, setDbEpisode] = useState<any>(null);
@@ -47,16 +52,19 @@ export default function EpisodePage() {
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) {
-         setCurrentUser(user);
-         supabase.from('profiles').select('*').eq('id', user.id).single().then(({data}) => {
-            if (data) setCurrentProfile(data);
-         });
+        setCurrentUser(user);
+        setIsAuthenticated(true);
+        supabase.from('profiles').select('*').eq('id', user.id).single().then(({data}) => {
+          if (data) setCurrentProfile(data);
+        });
       }
+      // [P3-02] Dù có user hay không cũng tắt loading
+      setAuthLoading(false);
     });
 
     // Fetch live episode data from DB
     supabase.from('episodes').select('*').eq('id', episodeId).single().then(({data}) => {
-       if (data) setDbEpisode(data);
+      if (data) setDbEpisode(data);
     });
   }, [episodeId]);
 
@@ -103,25 +111,17 @@ export default function EpisodePage() {
     const { score, timeInSeconds, level, answersLog } = payload;
 
     const logMsg = `[Game Completed] Player: ${studentName}, Score: ${score}, Time: ${timeInSeconds}s, Level: ${level}`;
-    console.log(logMsg);
     setMessages(prev => [logMsg, ...prev].slice(0, 5));
 
     setShowSuccessCelebration({ name: studentName, score });
     setTimeout(() => setShowSuccessCelebration(null), 5000);
 
-    // --- Luồng mới: dùng Server Action saveGameScore (Bỏ hoàn toàn Mock Mode) ---
-    let validUserId = currentUser?.id;
-    if (!validUserId) {
-      if (typeof window !== 'undefined') {
-         validUserId = localStorage.getItem('funlab_guest_id');
-         if (!validUserId || validUserId.startsWith('guest')) {
-           validUserId = crypto.randomUUID ? crypto.randomUUID() : '00000000-0000-4000-8000-' + Date.now().toString(16).padEnd(12, '0');
-           localStorage.setItem('funlab_guest_id', validUserId);
-         }
-      } else {
-         validUserId = '00000000-0000-4000-8000-' + Date.now().toString(16).padEnd(12, '0');
-      }
+    // [P3-02] Chỉ submit nếu đã đăng nhập — không dùng guest ID nữa
+    if (!currentUser?.id) {
+      showToast('warning', '⚠️ Bạn cần đăng nhập để lưu điểm!');
+      return;
     }
+    const validUserId = currentUser.id;
 
     const res = await saveGameScore(validUserId, episodeId, payload);
     
@@ -140,8 +140,59 @@ export default function EpisodePage() {
   };
 
   const StaticGameComponent = GAME_COMPONENTS[episodeId];
-  // Dynamic fallback: nếu không có static component, dùng game_code từ DB
   const hasDynamicGame = !StaticGameComponent && dbEpisode?.game_code;
+
+  // [P3-02] Auth loading screen
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-14 h-14 rounded-full border-4 border-slate-800 border-t-cyan-500 animate-spin mx-auto" />
+          <p className="text-slate-400 font-mono text-sm tracking-widest animate-pulse">ĐANG XÁC THỰC...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // [P3-02] Auth gate — hiển thị màn hình khóa nếu chưa đăng nhập
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(6,182,212,0.06)_0%,transparent_60%)] pointer-events-none" />
+        <motion.div
+          initial={{ opacity: 0, y: 20, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          className="max-w-sm w-full text-center space-y-6"
+        >
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-cyan-950/50 border border-cyan-500/30 shadow-[0_0_30px_rgba(6,182,212,0.2)]">
+            <Lock className="w-9 h-9 text-cyan-400" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-black text-white tracking-tight mb-2">Cần Đăng Nhập</h1>
+            <p className="text-slate-400 text-sm leading-relaxed">
+              Bạn cần có tài khoản Funlab để tham gia chơi game và ghi điểm vào bảng xếp hạng.
+            </p>
+          </div>
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={() => router.push(`/login?next=/episode/${episodeId}`)}
+              className="flex items-center justify-center gap-2 w-full px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold transition-all shadow-[0_8px_24px_rgba(6,182,212,0.3)] hover:-translate-y-0.5"
+            >
+              <LogIn className="w-4 h-4" />
+              Đăng Nhập Ngay
+            </button>
+            <button
+              onClick={() => router.push('/')}
+              className="flex items-center justify-center gap-2 w-full px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold transition-colors border border-slate-700"
+            >
+              ← Về Trang Chủ
+            </button>
+          </div>
+          <p className="text-xs text-slate-600 font-mono">FUNLAB CHALLENGE · VA SCIENCE CLUB</p>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-950 text-white flex flex-col md:flex-row font-sans overflow-hidden">

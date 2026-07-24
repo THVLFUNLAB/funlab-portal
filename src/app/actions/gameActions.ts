@@ -76,18 +76,35 @@ export async function saveGameScore(
       };
     }
 
-    // --- STEP 4: Revalidate ---
+    // --- STEP 4: Tự động cấp Badge nếu đủ điều kiện [P3-05] ---
+    // Lấy tổng điểm mới nhất từ overall_leaderboard
+    const { data: lb } = await supabase
+      .from("overall_leaderboard")
+      .select("total_score")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (lb?.total_score != null) {
+      // Gọi DB function để cấp badge (upsert — an toàn khi gọi nhiều lần)
+      await supabase.rpc("grant_badge_if_eligible", {
+        p_user_id: userId,
+        p_total_score: lb.total_score,
+      });
+    }
+
+    // --- STEP 5: Revalidate ---
     revalidatePath(`/episode/${episodeId}`);
-    revalidatePath('/leaderboard'); // User specifically asked for this path
-    revalidatePath('/', 'layout'); // Refresh homepage leaderboard if applicable
+    revalidatePath('/leaderboard');
+    revalidatePath('/', 'layout');
+    revalidatePath('/profile');
 
     return {
       success: true,
       message: `Chúc mừng! Bạn đạt ${validScore} điểm. Kết quả đã được ghi nhận.`
     };
 
-  } catch (error: any) {
-    console.error('Action Error:', error);
-    return { success: false, error: error.message || 'Lỗi không xác định.' };
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : 'Lỗi không xác định.';
+    return { success: false, error: msg };
   }
 }

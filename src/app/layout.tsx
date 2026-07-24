@@ -5,7 +5,9 @@ import Link from "next/link";
 import { Settings } from "lucide-react";
 import MandatoryProfileModal from "@/components/MandatoryProfileModal";
 import QuantumAudioRadar from "@/components/QuantumAudioRadar";
-import "@/lib/suppress-logs"; // [FIX P-06] Tắt console.log trong production
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import "@/lib/suppress-logs";
 import "./globals.css";
 
 
@@ -82,6 +84,11 @@ export default async function RootLayout({
 
         {/* Radar âm thanh */}
         <QuantumAudioRadar />
+
+        {/* [P3-01] Vercel Analytics — theo dõi traffic & hành vi người dùng */}
+        <Analytics />
+        {/* [P3-01] Speed Insights — đo Core Web Vitals (LCP, FCP, CLS) */}
+        <SpeedInsights />
       </body>
     </html>
   );

@@ -405,6 +405,10 @@ export default function Home() {
                      <span className="text-[10px] text-cyan-400 font-mono">{userProfile.class_name}</span>
                    </div>
                  </div>
+                 {/* [P3-04] Link đến trang Profile */}
+                 <Link href="/profile" className="p-2 hover:bg-slate-800 rounded-full transition-colors group" title="Hồ sơ cá nhân">
+                   <CheckCircle className="w-4 h-4 text-cyan-400 group-hover:text-cyan-300 transition-colors" />
+                 </Link>
                  <button onClick={handleLogout} className="p-2 hover:bg-slate-800 rounded-full transition-colors group" title="Đăng xuất">
                    <LogOut className="w-4 h-4 text-slate-400 group-hover:text-red-400 transition-colors" />
                  </button>
