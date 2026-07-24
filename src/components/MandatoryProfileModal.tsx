@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, ShieldCheck, Loader2, Sparkles, GraduationCap, ChevronRight } from 'lucide-react';
@@ -26,7 +27,9 @@ const CLASS_GROUPS = [
 ];
 
 export default function MandatoryProfileModal() {
-  const supabase = createClient();
+  // [FIX T-01] useMemo đảm bảo supabase client không tạo mới mỗi render
+  const supabase = useMemo(() => createClient(), []);
+  const router = useRouter();
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -90,8 +93,9 @@ export default function MandatoryProfileModal() {
       setSubmitting(false);
     } else {
       setShow(false);
-      // Có thể reload hoặc thông báo thành công
-      window.location.reload();
+      // [FIX T-03] Dùng router.refresh() thay vì window.location.reload()
+      // router.refresh() chỉ re-fetch server data, không xóa client state hay gây nhấp nháy
+      router.refresh();
     }
   };
 

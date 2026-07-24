@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: var(--font-noto-serif), ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  /* [FIX T-07] font-sans → Inter (sans-serif thực sự), font-serif → Noto Serif cho heading */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-serif: var(--font-noto-serif), ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
 }
 

@@ -17,13 +17,21 @@ const supabaseAdmin = createClient(
 
 export async function verifyAdminCode(formData: FormData) {
   const code = formData.get('code') as string;
-  const expectedCode = process.env.NEXT_PUBLIC_ADMIN_CODE || 'funlab2024';
-  
+
+  // [FIX S-01] Chỉ dùng biến SERVER-ONLY (không có NEXT_PUBLIC_)
+  // Biến NEXT_PUBLIC_ bị nhúng vào bundle client → lộ mật khẩu admin
+  const expectedCode = process.env.ADMIN_SECRET_CODE;
+  if (!expectedCode) {
+    console.error('[Admin] ADMIN_SECRET_CODE chưa được cấu hình trong .env.local / Vercel env');
+    return { success: false, error: 'Hệ thống chưa được cấu hình. Liên hệ admin.' };
+  }
+
   if (code === expectedCode) {
-    (await cookies()).set('admin_token', code, { 
-        httpOnly: true, 
-        secure: process.env.NODE_ENV === 'production', 
-        maxAge: 60 * 60 * 24 // 1 ngày
+    (await cookies()).set('admin_token', 'authenticated', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24, // 1 ngày
     });
     return { success: true };
   }
