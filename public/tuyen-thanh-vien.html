@@ -710,12 +710,28 @@ function loadChallengeQuestions() {
     }
     document.getElementById('deptBadge').innerHTML = '<i class="fa-solid fa-bolt mr-1"></i> KHỐI ' + studentData.level + ': ' + studentData.department.toUpperCase();
     const box = document.getElementById('challengeBox');
-    let html = '<div class="p-4 bg-cyan-950/30 border-l-4 border-cyan-400 rounded-r-lg mb-4"><h3 class="font-semibold text-cyan-200 text-xs sm:text-base leading-relaxed">"' + currentActiveData.question + '"</h3></div><div class="space-y-3">';
+    box.innerHTML = '';
+
+    // Câu hỏi
+    const qDiv = document.createElement('div');
+    qDiv.className = 'p-4 bg-cyan-950/30 border-l-4 border-cyan-400 rounded-r-lg mb-4';
+    qDiv.innerHTML = '<h3 class="font-semibold text-cyan-200 text-xs sm:text-base leading-relaxed">"' + currentActiveData.question + '"</h3>';
+    box.appendChild(qDiv);
+
+    // Các lựa chọn — dùng DOM element, tránh inline onclick với dấu nháy kép
+    const optDiv = document.createElement('div');
+    optDiv.className = 'space-y-3';
     currentActiveData.options.forEach(function(o) {
-        html += '<button type="button" onclick="selectChallengeOption(' + JSON.stringify(o.key) + ')" class="quiz-btn w-full p-3.5 sm:p-4 rounded-lg bg-slate-900/80 border border-cyan-800/60 hover:border-cyan-400 text-left text-slate-200 font-sans transition flex items-center justify-between group text-xs sm:text-sm"><span><strong class="font-mono text-cyan-400 mr-2">' + o.key + '.</strong> ' + o.text + '</span><i class="fa-solid fa-chevron-right text-cyan-500 opacity-0 group-hover:opacity-100 transition"></i></button>';
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'quiz-btn w-full p-3.5 sm:p-4 rounded-lg bg-slate-900/80 border border-cyan-800/60 hover:border-cyan-400 text-left text-slate-200 font-sans transition flex items-center justify-between group text-xs sm:text-sm';
+        btn.innerHTML = '<span><strong class="font-mono text-cyan-400 mr-2">' + o.key + '.</strong> ' + o.text + '</span><i class="fa-solid fa-chevron-right text-cyan-500 opacity-0 group-hover:opacity-100 transition"></i>';
+        btn.addEventListener('click', (function(key) {
+            return function() { selectChallengeOption(key); };
+        })(o.key));
+        optDiv.appendChild(btn);
     });
-    html += '</div>';
-    box.innerHTML = html;
+    box.appendChild(optDiv);
 }
 
 function selectChallengeOption(key) {
