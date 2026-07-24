@@ -395,22 +395,24 @@ export default function Home() {
             {isAuthLoading ? (
                <div className="w-32 h-10 bg-slate-800/50 rounded-full animate-pulse"></div>
             ) : userProfile ? (
-               <div className="flex items-center gap-3 bg-slate-900/60 backdrop-blur-xl border border-cyan-500/20 px-3 py-1.5 rounded-full shadow-[0_0_15px_rgba(34,211,238,0.1)]">
-                 <div className="flex items-center gap-2 cursor-default group/profile">
-                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-slate-900 shadow-inner group-hover/profile:scale-110 transition-transform">
-                      <UserIcon className="w-4 h-4" strokeWidth={3} />
-                   </div>
-                   <div className="flex-col hidden sm:flex pr-2 border-r border-slate-700/50">
-                     <span className="text-xs font-bold text-slate-100 leading-tight group-hover/profile:text-cyan-300 transition-colors">{userProfile.full_name}</span>
-                     <span className="text-[10px] text-cyan-400 font-mono">{userProfile.class_name}</span>
-                   </div>
+               <div className="flex items-center gap-2 bg-slate-900/60 backdrop-blur-xl border border-cyan-500/20 px-3 py-1.5 rounded-full shadow-[0_0_15px_rgba(34,211,238,0.1)]">
+                 {/* Avatar với initials */}
+                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-white font-black text-[11px] shadow-inner shrink-0 select-none">
+                   {userProfile.full_name?.split(' ').map((w: string) => w[0]).slice(-2).join('').toUpperCase() || '?'}
                  </div>
-                 {/* [P3-04] Link đến trang Profile */}
-                 <Link href="/profile" className="p-2 hover:bg-slate-800 rounded-full transition-colors group" title="Hồ sơ cá nhân">
-                   <CheckCircle className="w-4 h-4 text-cyan-400 group-hover:text-cyan-300 transition-colors" />
+                 {/* Tên + lớp — truncate nếu quá dài */}
+                 <div className="hidden sm:flex flex-col max-w-[90px] pr-2 border-r border-slate-700/50">
+                   <span className="text-xs font-bold text-slate-100 leading-tight truncate">{userProfile.full_name}</span>
+                   <span className="text-[10px] text-cyan-400 font-mono">{userProfile.class_name}</span>
+                 </div>
+                 {/* Nút Hồ Sơ rõ ràng hơn */}
+                 <Link href="/profile" className="flex items-center gap-1 px-2.5 py-1.5 hover:bg-slate-800 rounded-full transition-colors text-cyan-400 hover:text-cyan-300" title="Hồ sơ cá nhân">
+                   <UserIcon className="w-3.5 h-3.5" />
+                   <span className="text-[11px] font-bold hidden md:inline">Hồ Sơ</span>
                  </Link>
-                 <button onClick={handleLogout} className="p-2 hover:bg-slate-800 rounded-full transition-colors group" title="Đăng xuất">
-                   <LogOut className="w-4 h-4 text-slate-400 group-hover:text-red-400 transition-colors" />
+                 {/* Nút đăng xuất */}
+                 <button onClick={handleLogout} className="p-1.5 hover:bg-slate-800 rounded-full transition-colors group" title="Đăng xuất">
+                   <LogOut className="w-3.5 h-3.5 text-slate-400 group-hover:text-red-400 transition-colors" />
                  </button>
                </div>
             ) : (
