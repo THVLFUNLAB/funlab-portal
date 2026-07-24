@@ -122,7 +122,15 @@ export default async function RecruitAdminPage({
             Tổng hợp đơn đăng ký tuyển thành viên CLB Khoa Học
           </p>
         </div>
-        <div style={{ display: "flex", gap: 10 }}>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          {/* [M-02] Nút xuất CSV — tải ngay về máy thầy, mở được bằng Excel */}
+          <a
+            href={`/api/admin/export-recruitment${params.level ? `?level=${params.level}` : ''}${params.dept ? `&dept=${params.dept}` : ''}${params.q ? `&q=${params.q}` : ''}`}
+            download
+            style={{ padding: "8px 14px", borderRadius: 6, border: "1px solid rgba(34,197,94,0.4)", color: "#4ade80", fontSize: 12, textDecoration: "none", fontFamily: "monospace", display: "flex", alignItems: "center", gap: 6, background: "rgba(21,128,61,0.1)" }}
+          >
+            ⬇ Xuất CSV ({rows.length} đơn)
+          </a>
           <Link href="/tuyen-thanh-vien" style={{ padding: "8px 14px", borderRadius: 6, border: "1px solid rgba(0,240,255,0.3)", color: "#22d3ee", fontSize: 12, textDecoration: "none", fontFamily: "monospace" }}>
             ← Xem Form Tuyển
           </Link>

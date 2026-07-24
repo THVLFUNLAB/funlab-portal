@@ -7,17 +7,29 @@ import { createClient } from "@/utils/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { submitEpisodeScore } from "@/lib/scoreLogic";
 import { saveGameScore } from "@/app/actions/gameActions";
-import DynamicGameRenderer from "@/components/DynamicGameRenderer";
 import { LogIn, Lock } from "lucide-react";
+import dynamic from "next/dynamic";
 
 import { episodes } from "@/data/episodes";
-import Tap1Suckmanhkhiquyen from "@/components/games/Tap1Suckmanhkhiquyen";
-import Tap2Game from "@/components/games/Tap2Game";
-import Tap3Game from "@/components/games/Tap3Game";
-import Tap4Game from "@/components/games/Tap4Game";
-import Tap5Game from "@/components/games/Tap5Game";
-import Tap6Bantayvohinh from "@/components/games/Tap6Bantayvohinh";
-import Tap7ChienDichCuuHoa from "@/components/games/Tap7ChienDichCuuHoa";
+
+// [L-06] Lazy load game components — chỉ tải khi học sinh thực sự vào tập đó
+//         Tiết kiệm ~200KB bundle size ban đầu
+const GameLoading = () => (
+  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 300, gap: 12, color: "#22d3ee", fontFamily: "monospace" }}>
+    <div style={{ width: 24, height: 24, border: "3px solid #22d3ee", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+    <span>Đang tải thử thách...</span>
+    <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+  </div>
+);
+
+const Tap1Suckmanhkhiquyen   = dynamic(() => import("@/components/games/Tap1Suckmanhkhiquyen"),   { loading: GameLoading, ssr: false });
+const Tap2Game               = dynamic(() => import("@/components/games/Tap2Game"),               { loading: GameLoading, ssr: false });
+const Tap3Game               = dynamic(() => import("@/components/games/Tap3Game"),               { loading: GameLoading, ssr: false });
+const Tap4Game               = dynamic(() => import("@/components/games/Tap4Game"),               { loading: GameLoading, ssr: false });
+const Tap5Game               = dynamic(() => import("@/components/games/Tap5Game"),               { loading: GameLoading, ssr: false });
+const Tap6Bantayvohinh       = dynamic(() => import("@/components/games/Tap6Bantayvohinh"),       { loading: GameLoading, ssr: false });
+const Tap7ChienDichCuuHoa    = dynamic(() => import("@/components/games/Tap7ChienDichCuuHoa"),    { loading: GameLoading, ssr: false });
+const DynamicGameRenderer    = dynamic(() => import("@/components/DynamicGameRenderer"),          { loading: GameLoading, ssr: false });
 
 // TỪ ĐIỂN MAPPER GAME - Thêm các tập khác vào đây
 const GAME_COMPONENTS: Record<number, React.ElementType> = {

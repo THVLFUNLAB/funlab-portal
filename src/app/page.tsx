@@ -473,7 +473,13 @@ export default function Home() {
                 <h3 className="text-2xl md:text-3xl font-bold flex items-center gap-3 text-slate-100">
                   <span className="text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]">▶</span> Các Tập FUNLAB Mới
                 </h3>
-                <button className="text-cyan-400 text-xs sm:text-sm font-bold tracking-widest uppercase hover:text-cyan-300 transition-colors bg-cyan-500/10 px-4 md:px-5 py-2 md:py-3 rounded-full border border-cyan-500/20 min-h-[44px]">Xem Tất Cả</button>
+                <div className="flex items-center gap-3">
+                  {/* Link đến Bảng Vàng Xếp Hạng */}
+                  <Link href="/leaderboard" className="flex items-center gap-1.5 text-amber-400 text-xs sm:text-sm font-bold tracking-widest uppercase hover:text-amber-300 transition-colors bg-amber-500/10 px-4 md:px-5 py-2 md:py-3 rounded-full border border-amber-500/20 min-h-[44px]">
+                    🏆 Bảng Vàng
+                  </Link>
+                  <button className="text-cyan-400 text-xs sm:text-sm font-bold tracking-widest uppercase hover:text-cyan-300 transition-colors bg-cyan-500/10 px-4 md:px-5 py-2 md:py-3 rounded-full border border-cyan-500/20 min-h-[44px]">Xem Tất Cả</button>
+                </div>
               </div>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 h-full auto-rows-max">
