@@ -13,360 +13,424 @@
     <script>
         tailwind.config = {
             darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        cyber: { bg:'#030712', panel:'rgba(8,15,30,0.92)', border:'#00f0ff', blue:'#00f0ff', green:'#10b981', neonGreen:'#00ff66', purple:'#a855f7', amber:'#f59e0b', rose:'#f43f5e' }
-                    },
-                    fontFamily: { orbitron:['Orbitron','sans-serif'], mono:['JetBrains Mono','monospace'], sans:['Inter','sans-serif'] }
-                }
-            }
+            theme: { extend: { fontFamily: { orbitron:['Orbitron','sans-serif'], mono:['JetBrains Mono','monospace'], sans:['Inter','sans-serif'] } } }
         }
     </script>
     <style>
         body { background-color:#030712; color:#e2e8f0; font-family:'Inter',sans-serif; overflow-x:hidden; -webkit-tap-highlight-color:transparent; }
         .cyber-grid { background-size:36px 36px; background-image:linear-gradient(to right,rgba(0,240,255,0.04) 1px,transparent 1px),linear-gradient(to bottom,rgba(0,240,255,0.04) 1px,transparent 1px); }
-        .tech-card { background:rgba(8,15,30,0.92); border:1px solid rgba(0,240,255,0.3); box-shadow:0 0 25px rgba(0,240,255,0.12),inset 0 0 15px rgba(0,240,255,0.04); backdrop-filter:blur(16px); position:relative; }
-        .tech-card::before { content:''; position:absolute; top:-2px; left:-2px; width:14px; height:14px; border-top:2px solid #00f0ff; border-left:2px solid #00f0ff; }
-        .tech-card::after { content:''; position:absolute; bottom:-2px; right:-2px; width:14px; height:14px; border-bottom:2px solid #00f0ff; border-right:2px solid #00f0ff; }
-        .glow-blue { text-shadow:0 0 12px rgba(0,240,255,0.8),0 0 24px rgba(0,240,255,0.4); }
+        .tech-card { background:rgba(8,15,30,0.94); border:1px solid rgba(0,240,255,0.3); box-shadow:0 0 30px rgba(0,240,255,0.1),inset 0 0 20px rgba(0,240,255,0.03); backdrop-filter:blur(20px); position:relative; }
+        .tech-card::before { content:''; position:absolute; top:-2px; left:-2px; width:16px; height:16px; border-top:2px solid #00f0ff; border-left:2px solid #00f0ff; pointer-events:none; }
+        .tech-card::after  { content:''; position:absolute; bottom:-2px; right:-2px; width:16px; height:16px; border-bottom:2px solid #00f0ff; border-right:2px solid #00f0ff; pointer-events:none; }
+        .glow-blue  { text-shadow:0 0 12px rgba(0,240,255,0.8),0 0 24px rgba(0,240,255,0.4); }
         .glow-green { text-shadow:0 0 12px rgba(0,255,102,0.8),0 0 24px rgba(0,255,102,0.4); }
-        .btn-cyber { position:relative; background:linear-gradient(135deg,rgba(0,240,255,0.2) 0%,rgba(16,185,129,0.2) 100%); border:1px solid #00f0ff; transition:all 0.3s cubic-bezier(0.4,0,0.2,1); overflow:hidden; }
-        .btn-cyber:hover:not(:disabled) { background:linear-gradient(135deg,rgba(0,240,255,0.4) 0%,rgba(16,185,129,0.4) 100%); box-shadow:0 0 25px rgba(0,240,255,0.6); transform:translateY(-2px); }
+        .btn-cyber { position:relative; background:linear-gradient(135deg,rgba(0,240,255,0.18),rgba(16,185,129,0.18)); border:1px solid #00f0ff; transition:all 0.3s cubic-bezier(0.4,0,0.2,1); overflow:hidden; cursor:pointer; }
+        .btn-cyber::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(0,240,255,0.35),rgba(16,185,129,0.35)); opacity:0; transition:opacity 0.3s; }
+        .btn-cyber:hover:not(:disabled)::before { opacity:1; }
+        .btn-cyber:hover:not(:disabled) { box-shadow:0 0 30px rgba(0,240,255,0.5); transform:translateY(-2px); }
         .btn-cyber:active:not(:disabled) { transform:translateY(1px); }
-        .scanlines::after { content:" "; display:block; position:absolute; top:0; left:0; bottom:0; right:0; background:linear-gradient(rgba(18,16,16,0) 50%,rgba(0,0,0,0.25) 50%),linear-gradient(90deg,rgba(255,0,0,0.02),rgba(0,255,0,0.01),rgba(0,0,255,0.02)); z-index:20; background-size:100% 3px,6px 100%; pointer-events:none; }
-        ::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-track { background:#050a14; } ::-webkit-scrollbar-thumb { background:#00f0ff; border-radius:3px; }
-        .screen-transition { transition:opacity 0.4s ease,transform 0.4s ease; }
-        .screen-hidden { opacity:0; transform:translateY(20px); pointer-events:none; display:none !important; }
-        .screen-active { opacity:1; transform:translateY(0); display:block !important; }
-        .role-card { border:1px solid rgba(0,240,255,0.2); transition:all 0.25s ease; cursor:pointer; }
-        .role-card:hover, .role-card.selected { border-color:#00f0ff; background:rgba(0,240,255,0.15); box-shadow:0 0 15px rgba(0,240,255,0.35); }
-        @keyframes pulseGlow { 0%,100% { box-shadow:0 0 15px rgba(0,240,255,0.3); } 50% { box-shadow:0 0 30px rgba(0,240,255,0.7); } }
+        .btn-cyber:disabled { opacity:0.45; cursor:not-allowed; }
+        .btn-cyber > * { position:relative; z-index:1; }
+        .scanlines::after { content:" "; display:block; position:absolute; top:0; left:0; bottom:0; right:0; background:linear-gradient(rgba(18,16,16,0) 50%,rgba(0,0,0,0.2) 50%); z-index:20; background-size:100% 3px; pointer-events:none; }
+        ::-webkit-scrollbar { width:5px; } ::-webkit-scrollbar-track { background:#050a14; } ::-webkit-scrollbar-thumb { background:linear-gradient(#00f0ff,#10b981); border-radius:3px; }
+        .screen-hidden { display:none !important; }
+        .screen-active  { display:block !important; animation:fadeUp 0.4s ease; }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
+        .role-card { border:1px solid rgba(0,240,255,0.2); transition:all 0.25s ease; cursor:pointer; user-select:none; }
+        .role-card:hover  { border-color:rgba(0,240,255,0.7); background:rgba(0,240,255,0.1); }
+        .role-card.selected { border-color:#00f0ff; background:rgba(0,240,255,0.18); box-shadow:0 0 18px rgba(0,240,255,0.4); }
+        .quiz-btn { transition:all 0.2s ease; user-select:none; }
+        .quiz-btn:hover  { transform:translateX(3px); }
+        .quiz-btn.selected-ans { border-color:#10b981 !important; background:rgba(16,185,129,0.15) !important; }
+        .quiz-btn.wrong-ans    { border-color:#f59e0b !important; background:rgba(245,158,11,0.1) !important; }
+        @keyframes pulseGlow { 0%,100% { box-shadow:0 0 15px rgba(0,240,255,0.3); } 50% { box-shadow:0 0 35px rgba(0,240,255,0.75); } }
         .pulse-border { animation:pulseGlow 2.5s infinite; }
+        .agent-tag { display:none; }
+        .agent-tag.visible { display:flex; }
     </style>
 </head>
-<body class="min-h-screen cyber-grid flex flex-col justify-between selection:bg-cyan-500 selection:text-black relative scanlines">
+<body class="min-h-screen cyber-grid flex flex-col selection:bg-cyan-500 selection:text-black relative scanlines">
 <canvas id="bgCanvas" class="fixed inset-0 pointer-events-none z-0 opacity-40"></canvas>
 
-<header class="relative z-10 w-full p-4 border-b border-cyan-900/50 bg-slate-950/80 backdrop-blur-md flex justify-between items-center px-4 md:px-8">
-    <div class="flex items-center space-x-3">
-        <div class="w-3 h-3 rounded-full bg-cyan-400 animate-ping"></div>
-        <span class="font-orbitron font-bold text-sm md:text-xl tracking-wider text-cyan-400 glow-blue">VA SCIENCE CLUB <span class="text-emerald-400">| FUNLAB RECRUIT</span></span>
+<!-- HEADER -->
+<header class="relative z-10 w-full border-b border-cyan-900/50 bg-slate-950/90 backdrop-blur-md flex justify-between items-center px-4 py-3 md:px-8 gap-3">
+    <div class="flex items-center gap-3">
+        <div class="w-3 h-3 rounded-full bg-cyan-400 animate-ping shrink-0"></div>
+        <span class="font-orbitron font-bold text-sm md:text-lg tracking-wider text-cyan-400 glow-blue whitespace-nowrap">VA SCIENCE CLUB <span class="text-emerald-400">| FUNLAB RECRUIT</span></span>
     </div>
-    <div class="flex items-center space-x-2 md:space-x-3 font-mono text-xs text-slate-400">
-        <div class="hidden sm:flex items-center space-x-2 bg-slate-900/80 px-3 py-1 rounded border border-cyan-800">
+    <div class="flex items-center gap-2 md:gap-3 font-mono text-xs text-slate-400 shrink-0">
+        <!-- Agent tag (hiện sau screen 1) -->
+        <div id="agentTagHeader" class="agent-tag items-center gap-1.5 bg-slate-900/80 px-2.5 py-1 rounded border border-emerald-700 text-emerald-300 text-[11px]">
+            <i class="fa-solid fa-id-badge text-emerald-400"></i>
+            <span id="agentTagName">--</span>
+        </div>
+        <div class="hidden sm:flex items-center gap-2 bg-slate-900/80 px-3 py-1 rounded border border-cyan-800">
             <i class="fa-solid fa-microchip text-emerald-400 text-xs"></i>
             <span>TRẠM: <span class="text-cyan-300">VIỆT ANH 2</span></span>
         </div>
-        <button onclick="openAdminModal()" class="px-3 py-1 rounded bg-amber-950/70 border border-amber-500/80 hover:bg-amber-900 text-amber-300 transition flex items-center gap-1.5 shadow-[0_0_10px_rgba(245,158,11,0.2)]">
+        <button id="btnOpenAdmin" class="px-3 py-1.5 rounded bg-amber-950/70 border border-amber-500/80 hover:bg-amber-900 text-amber-300 transition-all flex items-center gap-1.5 shadow-[0_0_10px_rgba(245,158,11,0.2)]">
             <i class="fa-solid fa-user-shield text-amber-400"></i>
-            <span class="text-xs font-mono font-bold">GÓC GIÁO VIÊN</span>
+            <span class="text-xs font-mono font-bold hidden sm:inline">GÓC GIÁO VIÊN</span>
         </button>
-        <button id="audioToggle" onclick="toggleAudio()" class="px-3 py-1 rounded bg-slate-900 border border-slate-700 hover:border-cyan-400 text-cyan-400 transition flex items-center gap-1.5">
+        <button id="btnToggleAudio" class="px-2.5 py-1.5 rounded bg-slate-900 border border-slate-700 hover:border-cyan-400 text-cyan-400 transition-all flex items-center gap-1.5">
             <i id="audioIcon" class="fa-solid fa-volume-high"></i>
-            <span class="hidden md:inline text-xs font-mono">ÂM THANH</span>
         </button>
     </div>
 </header>
 
-<main class="relative z-10 flex-grow flex flex-col items-center justify-center p-3 sm:p-6 my-auto">
-    <div class="w-full max-w-3xl mb-4 sm:mb-6">
-        <div class="flex justify-between items-center text-xs font-mono mb-2 text-cyan-400/80 px-1">
-            <span id="stageLabel">PHASE 01: XÁC THỰC ID & KHỐI LỚP</span>
+<!-- PROGRESS BAR -->
+<div class="relative z-10 w-full px-4 md:px-8 pt-4 pb-2">
+    <div class="max-w-3xl mx-auto">
+        <div class="flex justify-between items-center text-xs font-mono mb-1.5 text-cyan-400/80">
+            <span id="stageLabel">PHASE 01: XÁC THỰC ID &amp; KHỐI LỚP</span>
             <span id="stagePercent">20% COMPLETE</span>
         </div>
         <div class="w-full h-2 bg-slate-900 border border-cyan-900/50 rounded-full overflow-hidden p-0.5">
-            <div id="progressBar" class="h-full bg-gradient-to-r from-cyan-500 via-purple-500 to-emerald-400 rounded-full transition-all duration-500 w-1/5 shadow-[0_0_10px_#00f0ff]"></div>
+            <div id="progressBar" class="h-full bg-gradient-to-r from-cyan-500 via-purple-500 to-emerald-400 rounded-full transition-all duration-700 shadow-[0_0_10px_#00f0ff]" style="width:20%"></div>
         </div>
     </div>
+</div>
 
-    <div class="w-full max-w-3xl">
-        <!-- SCREEN 1 -->
-        <div id="screen1" class="tech-card p-5 sm:p-8 md:p-10 rounded-xl screen-transition screen-active">
-            <div class="text-center mb-6">
-                <div class="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-cyan-950/60 border border-cyan-400 mb-3 sm:mb-4 shadow-[0_0_20px_rgba(0,240,255,0.3)]">
-                    <i class="fa-solid fa-atom text-3xl sm:text-4xl text-cyan-400 animate-pulse"></i>
-                </div>
-                <h1 class="font-orbitron font-black text-xl sm:text-2xl md:text-3xl text-white tracking-wide uppercase mb-1">PHI VỤ FUNLAB</h1>
-                <p class="font-mono text-cyan-400 text-xs sm:text-sm tracking-widest uppercase glow-blue">Tuyển Chọn Đồng Đội Trạm Nghiên Cứu Khoa Học Việt Anh 2</p>
+<!-- MAIN -->
+<main class="relative z-10 flex-grow flex flex-col items-center justify-start p-3 sm:p-6 pb-6">
+  <div class="w-full max-w-3xl">
+
+    <!-- ═══ SCREEN 1: IDENTITY ═══ -->
+    <div id="screen1" class="tech-card p-5 sm:p-8 md:p-10 rounded-xl screen-active">
+        <div class="text-center mb-6">
+            <div class="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-cyan-950/60 border border-cyan-400 mb-3 shadow-[0_0_25px_rgba(0,240,255,0.35)]">
+                <i class="fa-solid fa-atom text-3xl sm:text-4xl text-cyan-400 animate-pulse"></i>
             </div>
-            <form id="identityForm" onsubmit="handleScreen1Submit(event)" class="space-y-5 sm:space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block font-mono text-xs text-cyan-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-id-badge mr-1"></i> Họ và Tên Học Sinh <span class="text-rose-500">*</span></label>
-                        <input type="text" id="studentName" required autocomplete="off" class="w-full bg-slate-950/80 border border-cyan-800 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 rounded-lg px-4 py-3 text-white font-sans placeholder-slate-600 outline-none transition" placeholder="Nhập đầy đủ Họ và Tên">
-                    </div>
-                    <div>
-                        <label class="block font-mono text-xs text-cyan-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-graduation-cap mr-1"></i> Lớp Hiện Tại <span class="text-rose-500">*</span></label>
-                        <input type="text" id="studentClass" required autocomplete="off" oninput="detectGradeLevel()" class="w-full bg-slate-950/80 border border-cyan-800 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 rounded-lg px-4 py-3 text-white font-sans placeholder-slate-600 outline-none transition" placeholder="Ví dụ: 6A1, 8A2, 10A1, 11A3">
-                    </div>
-                </div>
-                <div class="p-4 bg-amber-950/30 border border-amber-500/50 rounded-xl space-y-2">
-                    <label class="block font-mono text-xs text-amber-300 uppercase tracking-wider font-bold"><i class="fa-solid fa-compass-drafting mr-1 text-amber-400"></i> HÌNH THỨC NGUYỆN VỌNG ĐĂNG KÝ <span class="text-rose-500">*</span></label>
-                    <p class="text-[11px] text-slate-300 font-sans">* Chương trình <strong class="text-amber-300">VÒM KHOA HỌC</strong> (08:00 - 10:00 Sáng T7) do GV Tổ Tự Nhiên tổ chức dành cho HS THCS tự tay làm thí nghiệm thật.</p>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 font-mono text-xs">
-                        <label class="flex items-center gap-2 p-2.5 rounded bg-slate-900 border border-amber-800 hover:border-amber-400 cursor-pointer text-amber-200">
-                            <input type="radio" name="regType" value="VÒM KHOA HỌC" checked onchange="selectRegType(this.value)" class="accent-amber-400">
-                            <span>1. VÒM KHOA HỌC (Sáng T7)</span>
-                        </label>
-                        <label class="flex items-center gap-2 p-2.5 rounded bg-slate-900 border border-cyan-800 hover:border-cyan-400 cursor-pointer text-cyan-200">
-                            <input type="radio" name="regType" value="BAN CLB KHOA HỌC" onchange="selectRegType(this.value)" class="accent-cyan-400">
-                            <span>2. BAN / VỊ TRÍ CLB</span>
-                        </label>
-                        <label class="flex items-center gap-2 p-2.5 rounded bg-slate-900 border border-emerald-800 hover:border-emerald-400 cursor-pointer text-emerald-200">
-                            <input type="radio" name="regType" value="CẢ HAI (VÒM & CLB)" onchange="selectRegType(this.value)" class="accent-emerald-400">
-                            <span>3. ĐĂNG KÝ CẢ HAI</span>
-                        </label>
-                    </div>
+            <h1 class="font-orbitron font-black text-xl sm:text-2xl md:text-3xl text-white tracking-wide uppercase mb-1">PHI VỤ FUNLAB</h1>
+            <p class="font-mono text-cyan-400 text-xs sm:text-sm tracking-widest glow-blue">Tuyển Chọn Đồng Đội Trạm Nghiên Cứu Khoa Học Việt Anh 2</p>
+        </div>
+        <form id="identityForm" class="space-y-5 sm:space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block font-mono text-xs text-cyan-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-id-badge mr-1"></i> Họ và Tên Học Sinh <span class="text-rose-500">*</span></label>
+                    <input type="text" id="studentName" required autocomplete="name" class="w-full bg-slate-950/80 border border-cyan-800 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/50 rounded-lg px-4 py-3 text-white font-sans placeholder-slate-600 outline-none transition" placeholder="Nhập đầy đủ Họ và Tên">
                 </div>
                 <div>
-                    <div class="flex justify-between items-center mb-2">
-                        <label class="block font-mono text-xs text-cyan-400 uppercase tracking-wider"><i class="fa-solid fa-sitemap mr-1"></i> Vị Trí / Ban Ứng Tuyển Cụ Thể <span class="text-rose-500">*</span></label>
-                        <span id="levelBadge" class="px-2 py-0.5 rounded text-[10px] font-mono bg-cyan-950 border border-cyan-500 text-cyan-300">ĐANG PHÂN LỚP...</span>
-                    </div>
-                    <div id="roleCardsContainer" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
+                    <label class="block font-mono text-xs text-cyan-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-graduation-cap mr-1"></i> Lớp Hiện Tại <span class="text-rose-500">*</span></label>
+                    <input type="text" id="studentClass" required autocomplete="off" class="w-full bg-slate-950/80 border border-cyan-800 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/50 rounded-lg px-4 py-3 text-white font-sans placeholder-slate-600 outline-none transition" placeholder="Ví dụ: 6A1, 8A2, 10A1, 11A3">
                 </div>
-                <div id="screen1Error" class="hidden text-rose-400 text-xs font-mono bg-rose-950/40 border border-rose-800 p-3 rounded"></div>
-                <button type="submit" class="btn-cyber w-full py-3.5 sm:py-4 rounded-lg font-orbitron font-bold text-white tracking-wider flex items-center justify-center space-x-2 text-sm sm:text-base">
-                    <i class="fa-solid fa-fingerprint text-lg text-cyan-300"></i>
-                    <span>XÁC THỰC ID & BẮT ĐẦU HÀNH TRÌNH</span>
-                </button>
-            </form>
-        </div>
+            </div>
+            <!-- Hình thức -->
+            <div class="p-4 bg-amber-950/30 border border-amber-500/50 rounded-xl space-y-2">
+                <label class="block font-mono text-xs text-amber-300 uppercase tracking-wider font-bold"><i class="fa-solid fa-compass-drafting mr-1 text-amber-400"></i> HÌNH THỨC NGUYỆN VỌNG ĐĂNG KÝ <span class="text-rose-500">*</span></label>
+                <p class="text-[11px] text-slate-300 font-sans">* Chương trình <strong class="text-amber-300">VÒM KHOA HỌC</strong> (08:00–10:00 Sáng T7) do GV Tổ Tự Nhiên tổ chức — HS THCS tự tay làm thí nghiệm thật.</p>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 font-mono text-xs" id="regTypeGroup">
+                    <label class="reg-type-label flex items-center gap-2 p-2.5 rounded bg-slate-900 border border-amber-800 hover:border-amber-400 cursor-pointer text-amber-200 transition-all selected-rt">
+                        <input type="radio" name="regType" value="VÒM KHOA HỌC" checked class="accent-amber-400"> 1. VÒM KHOA HỌC (Sáng T7)
+                    </label>
+                    <label class="reg-type-label flex items-center gap-2 p-2.5 rounded bg-slate-900 border border-cyan-800 hover:border-cyan-400 cursor-pointer text-cyan-200 transition-all">
+                        <input type="radio" name="regType" value="BAN CLB KHOA HỌC" class="accent-cyan-400"> 2. BAN / VỊ TRÍ CLB
+                    </label>
+                    <label class="reg-type-label flex items-center gap-2 p-2.5 rounded bg-slate-900 border border-emerald-800 hover:border-emerald-400 cursor-pointer text-emerald-200 transition-all">
+                        <input type="radio" name="regType" value="CẢ HAI (VÒM &amp; CLB)" class="accent-emerald-400"> 3. ĐĂNG KÝ CẢ HAI
+                    </label>
+                </div>
+            </div>
+            <!-- Vị trí / Ban -->
+            <div>
+                <div class="flex justify-between items-center mb-2">
+                    <label class="block font-mono text-xs text-cyan-400 uppercase tracking-wider"><i class="fa-solid fa-sitemap mr-1"></i> Vị Trí / Ban Ứng Tuyển <span class="text-rose-500">*</span></label>
+                    <span id="levelBadge" class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-900 border border-slate-700 text-slate-400">ĐANG PHÂN LỚP...</span>
+                </div>
+                <div id="roleCardsContainer" class="grid grid-cols-2 md:grid-cols-4 gap-3 min-h-[80px]">
+                    <div class="col-span-2 md:col-span-4 text-center text-slate-500 font-mono text-xs p-4 border border-dashed border-slate-700 rounded-lg">Nhập lớp học để hiển thị vị trí phù hợp...</div>
+                </div>
+            </div>
+            <div id="screen1Error" class="hidden text-rose-400 text-xs font-mono bg-rose-950/40 border border-rose-800 p-3 rounded flex items-center gap-2">
+                <i class="fa-solid fa-triangle-exclamation"></i><span id="screen1ErrorMsg"></span>
+            </div>
+            <button type="submit" id="btnScreen1Submit" class="btn-cyber w-full py-3.5 sm:py-4 rounded-lg font-orbitron font-bold text-white tracking-wider flex items-center justify-center gap-2 text-sm sm:text-base">
+                <i class="fa-solid fa-fingerprint text-lg text-cyan-300"></i>
+                <span>XÁC THỰC ID &amp; BẮT ĐẦU HÀNH TRÌNH</span>
+            </button>
+        </form>
+    </div>
 
-        <!-- SCREEN 2 -->
-        <div id="screen2" class="tech-card p-5 sm:p-8 md:p-10 rounded-xl screen-transition screen-hidden">
-            <div class="flex justify-between items-center mb-4 sm:mb-6 border-b border-cyan-900/50 pb-3 sm:pb-4">
+    <!-- ═══ SCREEN 2: STATION 1 ═══ -->
+    <div id="screen2" class="tech-card p-5 sm:p-8 md:p-10 rounded-xl screen-hidden">
+        <div class="flex justify-between items-center mb-4 sm:mb-6 border-b border-cyan-900/50 pb-3 sm:pb-4">
+            <div>
+                <span class="text-xs font-mono text-purple-400 uppercase"><i class="fa-solid fa-wifi mr-1"></i> TRẠM 01: HỆ SINH THÁI KHOA HỌC</span>
+                <h2 class="font-orbitron text-lg sm:text-2xl font-bold text-white">TRUYỀN THÔNG &amp; MÃ MẬT FUNLAB</h2>
+            </div>
+            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded bg-purple-950/50 border border-purple-500/50 flex items-center justify-center shrink-0">
+                <i class="fa-solid fa-satellite-dish text-xl sm:text-2xl text-purple-400 animate-pulse"></i>
+            </div>
+        </div>
+        <div class="mb-5 p-4 rounded-xl bg-gradient-to-r from-amber-950/90 via-slate-950 to-purple-950/90 border-2 border-amber-400/80 shadow-[0_0_20px_rgba(245,158,11,0.25)]">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 border-b border-amber-800/60 pb-2 mb-3">
                 <div>
-                    <span class="text-xs font-mono text-purple-400 uppercase"><i class="fa-solid fa-wifi mr-1"></i> TRẠM 01: HỆ SINH THÁI KHOA HỌC</span>
-                    <h2 class="font-orbitron text-lg sm:text-2xl font-bold text-white">TRUYỀN THÔNG & MÃ MẬT FUNLAB</h2>
+                    <span class="px-2 py-0.5 rounded bg-amber-500 text-slate-950 font-orbitron font-black text-[10px]">KHÔNG GIAN TRẢI NGHIỆM THÚ VỊ</span>
+                    <h3 class="font-orbitron text-base font-extrabold text-amber-300 mt-1"><i class="fa-solid fa-shapes mr-1.5 text-amber-400"></i> CHƯƠNG TRÌNH "VÒM KHOA HỌC"</h3>
                 </div>
-                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded bg-purple-950/50 border border-purple-500/50 flex items-center justify-center">
-                    <i class="fa-solid fa-satellite-dish text-xl sm:text-2xl text-purple-400 animate-pulse"></i>
-                </div>
-            </div>
-            <div class="mb-5 p-4 rounded-xl bg-gradient-to-r from-amber-950/90 via-slate-950 to-purple-950/90 border-2 border-amber-400/80 shadow-[0_0_20px_rgba(245,158,11,0.25)]">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 border-b border-amber-800/60 pb-2 mb-3">
-                    <div>
-                        <span class="px-2 py-0.5 rounded bg-amber-500 text-slate-950 font-orbitron font-black text-[10px] uppercase">KHÔNG GIAN TRẢI NGHIỆM THÚ VỊ</span>
-                        <h3 class="font-orbitron text-lg font-extrabold text-amber-300 tracking-wide mt-1"><i class="fa-solid fa-shapes mr-1.5 text-amber-400"></i> CHƯƠNG TRÌNH "VÒM KHOA HỌC"</h3>
-                    </div>
-                    <div class="px-3 py-1 rounded-full bg-amber-950 border border-amber-400 text-amber-300 font-mono text-xs font-bold flex items-center gap-1.5">
-                        <i class="fa-solid fa-clock text-amber-400"></i>
-                        <span>08:00 – 10:00 | SÁNG THỨ BẢY HÀNG TUẦN</span>
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs font-sans">
-                    <div class="p-2.5 bg-slate-950/80 rounded border border-amber-900/80"><div class="text-amber-400 font-bold mb-1 flex items-center gap-1"><i class="fa-solid fa-hand-sparkles"></i> 100% TỰ TAY THỰC HÀNH</div><p class="text-slate-300 text-[11px]">Làm thí nghiệm thật cùng thầy cô KHTN & CLB. Nói không với "học chay"!</p></div>
-                    <div class="p-2.5 bg-slate-950/80 rounded border border-purple-900/80"><div class="text-purple-300 font-bold mb-1 flex items-center gap-1"><i class="fa-solid fa-lightbulb"></i> HIỂU RÕ BẢN CHẤT</div><p class="text-slate-300 text-[11px]">Bóc tách nguyên lý từ hiện tượng đời thường, không nhồi nhét công thức khô khan.</p></div>
-                    <div class="p-2.5 bg-slate-950/80 rounded border border-cyan-900/80"><div class="text-cyan-300 font-bold mb-1 flex items-center gap-1"><i class="fa-solid fa-users"></i> TEAMWORK & CREATIVE</div><p class="text-slate-300 text-[11px]">Dành cho cả Team Yêu Khoa Học & Team "Chưa-Hề-Yêu" đến để "quay xe" đam mê!</p></div>
+                <div class="px-3 py-1 rounded-full bg-amber-950 border border-amber-400 text-amber-300 font-mono text-xs font-bold flex items-center gap-1.5 shrink-0">
+                    <i class="fa-solid fa-clock text-amber-400"></i> 08:00 – 10:00 | SÁNG THỨ BẢY
                 </div>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
-                <div class="p-3 bg-slate-950/80 border border-purple-900/80 rounded-lg flex items-start gap-3"><i class="fa-solid fa-play text-purple-400 text-xl mt-1"></i><div><div class="font-orbitron text-xs text-purple-300 font-bold">VIDEO CHALLENGE</div><div class="text-[11px] text-slate-300 mt-0.5">Phát sóng <strong>Thứ 6 hàng tuần</strong> trên kênh <strong>Vess project</strong></div></div></div>
-                <div class="p-3 bg-slate-950/80 border border-cyan-900/80 rounded-lg flex items-start gap-3"><i class="fa-solid fa-radio text-cyan-400 text-xl mt-1"></i><div><div class="font-orbitron text-xs text-cyan-300 font-bold">RADIO VIỆT ANH</div><div class="text-[11px] text-slate-300 mt-0.5">Vinh danh đặc vụ xuất sắc <strong>Thứ 5 hàng tuần</strong></div></div></div>
-                <div class="p-3 bg-slate-950/80 border border-emerald-900/80 rounded-lg flex items-start gap-3"><i class="fa-solid fa-award text-emerald-400 text-xl mt-1"></i><div><div class="font-orbitron text-xs text-emerald-300 font-bold">HUY HIỆU SỐ</div><div class="text-[11px] text-slate-300 mt-0.5">Thăng cấp: <strong>Explorer ➔ Creative Engineer ➔ Funlab Master</strong></div></div></div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs font-sans">
+                <div class="p-2.5 bg-slate-950/80 rounded border border-amber-900/80"><div class="text-amber-400 font-bold mb-1 flex items-center gap-1"><i class="fa-solid fa-hand-sparkles"></i> 100% TỰ TAY THỰC HÀNH</div><p class="text-slate-300 text-[11px]">Làm thí nghiệm thật cùng thầy cô KHTN &amp; CLB. Nói không với "học chay"!</p></div>
+                <div class="p-2.5 bg-slate-950/80 rounded border border-purple-900/80"><div class="text-purple-300 font-bold mb-1 flex items-center gap-1"><i class="fa-solid fa-lightbulb"></i> HIỂU RÕ BẢN CHẤT</div><p class="text-slate-300 text-[11px]">Bóc tách nguyên lý từ hiện tượng đời thường, không nhồi nhét công thức khô khan.</p></div>
+                <div class="p-2.5 bg-slate-950/80 rounded border border-cyan-900/80"><div class="text-cyan-300 font-bold mb-1 flex items-center gap-1"><i class="fa-solid fa-users"></i> TEAMWORK &amp; CREATIVE</div><p class="text-slate-300 text-[11px]">Dành cho cả Team Yêu Khoa Học &amp; Team "Chưa-Hề-Yêu" — đến để "quay xe" đam mê!</p></div>
             </div>
-            <div class="p-4 bg-purple-950/30 border-l-4 border-purple-400 rounded-r-lg mb-4">
-                <h3 class="font-semibold text-purple-200 text-xs sm:text-sm leading-relaxed"><i class="fa-solid fa-key mr-1.5 text-purple-400"></i>"Đặc vụ hãy giải mã mật thư: Video Funlab Challenge và Radio Việt Anh vinh danh đặc vụ được phát sóng vào các ngày nào trong tuần trên kênh Vess project?"</h3>
-            </div>
-            <div id="station1Options" class="space-y-3 mb-5">
-                <button type="button" onclick="selectStation1Option('A')" class="quiz-btn w-full p-3.5 sm:p-4 rounded-lg bg-slate-900/80 border border-purple-800/60 hover:border-purple-400 text-left text-slate-200 font-sans transition flex items-center justify-between group text-xs sm:text-sm"><span><strong class="font-mono text-purple-400 mr-2">A.</strong> Thứ 6 (Video Challenge) & Thứ 5 (Radio Việt Anh)</span><i class="fa-solid fa-chevron-right text-purple-400 opacity-0 group-hover:opacity-100 transition"></i></button>
-                <button type="button" onclick="selectStation1Option('B')" class="quiz-btn w-full p-3.5 sm:p-4 rounded-lg bg-slate-900/80 border border-purple-800/60 hover:border-purple-400 text-left text-slate-200 font-sans transition flex items-center justify-between group text-xs sm:text-sm"><span><strong class="font-mono text-purple-400 mr-2">B.</strong> Thứ 2 (Video Challenge) & Chủ Nhật (Radio Việt Anh)</span><i class="fa-solid fa-chevron-right text-purple-400 opacity-0 group-hover:opacity-100 transition"></i></button>
-                <button type="button" onclick="selectStation1Option('C')" class="quiz-btn w-full p-3.5 sm:p-4 rounded-lg bg-slate-900/80 border border-purple-800/60 hover:border-purple-400 text-left text-slate-200 font-sans transition flex items-center justify-between group text-xs sm:text-sm"><span><strong class="font-mono text-purple-400 mr-2">C.</strong> Thứ 3 (Video Challenge) & Thứ 7 (Radio Việt Anh)</span><i class="fa-solid fa-chevron-right text-purple-400 opacity-0 group-hover:opacity-100 transition"></i></button>
-            </div>
-            <div id="station1Feedback" class="hidden p-3.5 sm:p-4 rounded-lg mb-5 font-mono text-xs sm:text-sm border transition-all"></div>
-            <button id="btnNextStation1" onclick="goToScreen3()" disabled class="btn-cyber w-full py-3.5 sm:py-4 rounded-lg font-orbitron font-bold text-white tracking-wider flex items-center justify-center space-x-2 opacity-50 cursor-not-allowed text-xs sm:text-sm"><span>TIẾP TỤC ĐẾN TRẠM 02: DẤU ẤN KHOA HỌC ĐÃ QUA</span><i class="fa-solid fa-arrow-right ml-2"></i></button>
         </div>
-
-        <!-- SCREEN 3 -->
-        <div id="screen3" class="tech-card p-5 sm:p-8 md:p-10 rounded-xl screen-transition screen-hidden">
-            <div class="flex justify-between items-center mb-4 sm:mb-6 border-b border-cyan-900/50 pb-3 sm:pb-4">
-                <div><span class="text-xs font-mono text-amber-400 uppercase"><i class="fa-solid fa-flask-vial mr-1"></i> TRẠM 02: THỰC NGHIỆM ĐỘC ĐÁO</span><h2 class="font-orbitron text-lg sm:text-2xl font-bold text-white">DẤU ẤN HOẠT ĐỘNG ĐÃ QUA</h2></div>
-                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded bg-amber-950/50 border border-amber-500/50 flex items-center justify-center"><i class="fa-solid fa-fire text-xl sm:text-2xl text-amber-400 animate-pulse"></i></div>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
-                <div class="p-3 bg-slate-950/80 border border-amber-800 rounded-lg"><div class="flex items-center space-x-2 mb-1 text-amber-400 font-orbitron text-xs font-bold"><i class="fa-solid fa-fire-burner"></i><span>TAY KHÔNG BẮT LỬA</span></div><p class="text-[11px] text-slate-300">Thí nghiệm bọt khí Metan cháy rực rỡ trên bàn tay mà không hề gây bỏng.</p></div>
-                <div class="p-3 bg-slate-950/80 border border-cyan-800 rounded-lg"><div class="flex items-center space-x-2 mb-1 text-cyan-400 font-orbitron text-xs font-bold"><i class="fa-solid fa-compress"></i><span>BÀN TAY TÀNG HÌNH</span></div><p class="text-[11px] text-slate-300">Áp suất ngưng tụ bóp bẹp lon nhôm & trứng chui vào chai.</p></div>
-                <div class="p-3 bg-slate-950/80 border border-purple-800 rounded-lg"><div class="flex items-center space-x-2 mb-1 text-purple-400 font-orbitron text-xs font-bold"><i class="fa-solid fa-bolt"></i><span>TĨNH ĐIỆN & PHÁO HOA</span></div><p class="text-[11px] text-slate-300">Máy Wimshurst làm tóc dựng ngược và pháo hoa từ muối CuSO4, NaCl.</p></div>
-            </div>
-            <div class="p-4 bg-amber-950/30 border-l-4 border-amber-400 rounded-r-lg mb-4">
-                <h3 class="font-semibold text-amber-200 text-xs sm:text-sm leading-relaxed"><i class="fa-solid fa-circle-question mr-1.5 text-amber-400"></i>"Trong các năm học qua, Funlab & CLB Khoa Học đã gây ấn tượng mạnh với học sinh toàn trường qua những màn trình diễn thực nghiệm nào?"</h3>
-            </div>
-            <div id="station2Options" class="space-y-3 mb-5">
-                <button type="button" onclick="selectStation2Option('A')" class="quiz-btn w-full p-3.5 sm:p-4 rounded-lg bg-slate-900/80 border border-amber-800/60 hover:border-amber-400 text-left text-slate-200 font-sans transition flex items-center justify-between group text-xs sm:text-sm"><span><strong class="font-mono text-amber-400 mr-2">A.</strong> "Tay không bắt lửa" (Metan an toàn), Bóp bẹp lon bằng áp suất & Pháo hoa kim loại</span><i class="fa-solid fa-chevron-right text-amber-400 opacity-0 group-hover:opacity-100 transition"></i></button>
-                <button type="button" onclick="selectStation2Option('B')" class="quiz-btn w-full p-3.5 sm:p-4 rounded-lg bg-slate-900/80 border border-amber-800/60 hover:border-amber-400 text-left text-slate-200 font-sans transition flex items-center justify-between group text-xs sm:text-sm"><span><strong class="font-mono text-amber-400 mr-2">B.</strong> Thi đấu giải cờ vua trên sân trường</span><i class="fa-solid fa-chevron-right text-amber-400 opacity-0 group-hover:opacity-100 transition"></i></button>
-                <button type="button" onclick="selectStation2Option('C')" class="quiz-btn w-full p-3.5 sm:p-4 rounded-lg bg-slate-900/80 border border-amber-800/60 hover:border-amber-400 text-left text-slate-200 font-sans transition flex items-center justify-between group text-xs sm:text-sm"><span><strong class="font-mono text-amber-400 mr-2">C.</strong> Biểu diễn vũ đạo nhảy hiện đại</span><i class="fa-solid fa-chevron-right text-amber-400 opacity-0 group-hover:opacity-100 transition"></i></button>
-            </div>
-            <div id="station2Feedback" class="hidden p-3.5 sm:p-4 rounded-lg mb-5 font-mono text-xs sm:text-sm border transition-all"></div>
-            <button id="btnNextStation2" onclick="goToScreen4()" disabled class="btn-cyber w-full py-3.5 sm:py-4 rounded-lg font-orbitron font-bold text-white tracking-wider flex items-center justify-center space-x-2 opacity-50 cursor-not-allowed text-xs sm:text-sm"><span>TIẾP TỤC ĐẾN TRẠM 03: THỬ THÁCH CHUYÊN MÔN</span><i class="fa-solid fa-arrow-right ml-2"></i></button>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
+            <div class="p-3 bg-slate-950/80 border border-purple-900/80 rounded-lg flex items-start gap-3"><i class="fa-solid fa-play text-purple-400 text-xl mt-1"></i><div><div class="font-orbitron text-xs text-purple-300 font-bold">VIDEO CHALLENGE</div><div class="text-[11px] text-slate-300 mt-0.5">Phát sóng <strong>Thứ 6 hàng tuần</strong> trên kênh <strong>Vess project</strong></div></div></div>
+            <div class="p-3 bg-slate-950/80 border border-cyan-900/80 rounded-lg flex items-start gap-3"><i class="fa-solid fa-radio text-cyan-400 text-xl mt-1"></i><div><div class="font-orbitron text-xs text-cyan-300 font-bold">RADIO VIỆT ANH</div><div class="text-[11px] text-slate-300 mt-0.5">Vinh danh đặc vụ xuất sắc <strong>Thứ 5 hàng tuần</strong></div></div></div>
+            <div class="p-3 bg-slate-950/80 border border-emerald-900/80 rounded-lg flex items-start gap-3"><i class="fa-solid fa-award text-emerald-400 text-xl mt-1"></i><div><div class="font-orbitron text-xs text-emerald-300 font-bold">HUY HIỆU SỐ</div><div class="text-[11px] text-slate-300 mt-0.5">Thăng cấp: <strong>Explorer → Creative Engineer → Funlab Master</strong></div></div></div>
         </div>
-
-        <!-- SCREEN 4 -->
-        <div id="screen4" class="tech-card p-5 sm:p-8 md:p-10 rounded-xl screen-transition screen-hidden">
-            <div class="flex justify-between items-center mb-4 sm:mb-6 border-b border-cyan-900/50 pb-3 sm:pb-4">
-                <div><span id="deptBadge" class="text-xs font-mono text-cyan-400 uppercase"><i class="fa-solid fa-bolt mr-1"></i> THỬ THÁCH CHUYÊN MÔN</span><h2 class="font-orbitron text-lg sm:text-2xl font-bold text-white">KÍCH HOẠT LÕI NĂNG LƯỢNG</h2></div>
-                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded bg-cyan-950/50 border border-cyan-500/50 flex items-center justify-center"><i class="fa-solid fa-atom text-xl sm:text-2xl text-cyan-400 animate-spin" style="animation-duration:8s;"></i></div>
-            </div>
-            <div id="challengeBox" class="mb-5 sm:mb-6 space-y-4"></div>
-            <div id="minigameFeedback" class="hidden p-3.5 sm:p-4 rounded-lg mb-5 font-mono text-xs sm:text-sm border transition-all"></div>
-            <button id="btnNextScreen4" onclick="goToScreen5()" disabled class="btn-cyber w-full py-3.5 sm:py-4 rounded-lg font-orbitron font-bold text-white tracking-wider flex items-center justify-center space-x-2 opacity-50 cursor-not-allowed text-xs sm:text-sm"><span>TIẾP TỤC ĐẾN HỒ SƠ NĂNG LỰC THỰC CHIẾN</span><i class="fa-solid fa-arrow-right ml-2"></i></button>
+        <div class="p-4 bg-purple-950/30 border-l-4 border-purple-400 rounded-r-lg mb-4">
+            <h3 class="font-semibold text-purple-200 text-xs sm:text-sm leading-relaxed"><i class="fa-solid fa-key mr-1.5 text-purple-400"></i>"Đặc vụ hãy giải mã mật thư: Video Funlab Challenge và Radio Việt Anh vinh danh đặc vụ được phát sóng vào các ngày nào trong tuần trên kênh Vess project?"</h3>
         </div>
+        <div id="station1Options" class="space-y-3 mb-5"></div>
+        <div id="station1Feedback" class="hidden p-3.5 rounded-lg mb-5 font-mono text-xs sm:text-sm border"></div>
+        <button id="btnNextStation1" class="btn-cyber w-full py-3.5 sm:py-4 rounded-lg font-orbitron font-bold text-white tracking-wider flex items-center justify-center gap-2 text-xs sm:text-sm" disabled>
+            <span>TIẾP TỤC → TRẠM 02: DẤU ẤN KHOA HỌC ĐÃ QUA</span><i class="fa-solid fa-arrow-right"></i>
+        </button>
+    </div>
 
-        <!-- SCREEN 5 -->
-        <div id="screen5" class="tech-card p-5 sm:p-8 md:p-10 rounded-xl screen-transition screen-hidden">
-            <div class="mb-4 sm:mb-6 border-b border-cyan-900/50 pb-3 sm:pb-4">
-                <span class="text-xs font-mono text-emerald-400 uppercase"><i class="fa-solid fa-terminal mr-1"></i> HỒ SƠ NĂNG LỰC THỰC CHIẾN</span>
-                <h2 class="font-orbitron text-lg sm:text-2xl font-bold text-white">HÀNH TRANG & ĐAM MÊ</h2>
+    <!-- ═══ SCREEN 3: STATION 2 ═══ -->
+    <div id="screen3" class="tech-card p-5 sm:p-8 md:p-10 rounded-xl screen-hidden">
+        <div class="flex justify-between items-center mb-4 sm:mb-6 border-b border-cyan-900/50 pb-3 sm:pb-4">
+            <div>
+                <span class="text-xs font-mono text-amber-400 uppercase"><i class="fa-solid fa-flask-vial mr-1"></i> TRẠM 02: THỰC NGHIỆM ĐỘC ĐÁO</span>
+                <h2 class="font-orbitron text-lg sm:text-2xl font-bold text-white">DẤU ẤN HOẠT ĐỘNG ĐÃ QUA</h2>
             </div>
-            <form onsubmit="handleScreen5Submit(event)" class="space-y-5 sm:space-y-6">
-                <div class="p-4 bg-amber-950/30 border border-amber-500/60 rounded-xl">
-                    <label class="block font-mono text-xs text-amber-300 uppercase tracking-wider mb-2 font-bold"><i class="fa-solid fa-shapes mr-1 text-amber-400"></i> HIỂU BIẾT & CẢM NHẬN VỀ "VÒM KHOA HỌC" <span class="text-rose-500">*</span></label>
-                    <p class="text-[11px] text-slate-300 mb-2 font-sans">Chương trình thực hành 08:00-10:00 Sáng Thứ 7. Em hiểu gì về chương trình hoặc muốn thực hành chủ đề nào?</p>
-                    <textarea id="vomUnderstanding" rows="2" required class="w-full bg-slate-950/90 border border-amber-800 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 rounded-lg p-3 text-amber-300 font-mono text-xs sm:text-sm outline-none transition" placeholder="// Ví dụ: Em muốn tự tay pha chế dung dịch đổi màu, làm tên lửa nước..."></textarea>
-                </div>
-                <div>
-                    <label id="expLabel" class="block font-mono text-xs text-cyan-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-code mr-1"></i> 1. KINH NGHIỆM / SỞ THÍCH SÁNG TẠO <span class="text-rose-500">*</span></label>
-                    <textarea id="studentExperience" rows="3" required class="w-full bg-slate-950/90 border border-cyan-800 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 rounded-lg p-3 text-emerald-400 font-mono text-xs sm:text-sm outline-none transition" placeholder="// Ví dụ: Em từng làm mô hình xe bong bóng, thích chỉnh ảnh CapCut..."></textarea>
-                </div>
-                <div>
-                    <label class="block font-mono text-xs text-cyan-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-link mr-1"></i> 2. LINK SẢN PHẨM / PORTFOLIO (KHÔNG BẮT BUỘC)</label>
-                    <input type="text" id="studentPortfolio" class="w-full bg-slate-950/80 border border-cyan-800 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 rounded-lg px-4 py-2.5 text-white font-sans text-xs sm:text-sm placeholder-slate-600 outline-none transition" placeholder="Dán link Drive, TikTok, YouTube, Canva...">
-                </div>
-                <div>
-                    <label id="aspLabel" class="block font-mono text-xs text-cyan-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-rocket mr-1"></i> 3. NGUYỆN VỌNG & Ý TƯỞNG ĐÓNG GÓP <span class="text-rose-500">*</span></label>
-                    <textarea id="studentAspiration" rows="3" required class="w-full bg-slate-950/90 border border-cyan-800 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 rounded-lg p-3 text-emerald-400 font-mono text-xs sm:text-sm outline-none transition" placeholder="// Em muốn cùng CLB làm bệ phóng tên lửa nước, dựng clip triệu view..."></textarea>
-                </div>
-                <div id="screen5Error" class="hidden text-rose-400 text-xs font-mono bg-rose-950/40 border border-rose-800 p-3 rounded"></div>
-                <button type="submit" class="btn-cyber w-full py-3.5 sm:py-4 rounded-lg font-orbitron font-bold text-white tracking-wider flex items-center justify-center space-x-3 text-sm sm:text-base">
-                    <i class="fa-solid fa-paper-plane text-cyan-300 text-lg"></i>
-                    <span>MÃ HÓA & GỬI ĐƠN NỘP HOÀN TẤT</span>
-                </button>
-            </form>
+            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded bg-amber-950/50 border border-amber-500/50 flex items-center justify-center shrink-0">
+                <i class="fa-solid fa-fire text-xl sm:text-2xl text-amber-400 animate-pulse"></i>
+            </div>
         </div>
-
-        <!-- LOADING -->
-        <div id="loadingOverlay" class="tech-card p-8 sm:p-10 rounded-xl text-center screen-transition screen-hidden">
-            <div class="inline-block relative w-20 h-20 mb-5">
-                <div class="absolute inset-0 border-4 border-cyan-500/20 rounded-full"></div>
-                <div class="absolute inset-0 border-4 border-cyan-400 rounded-full border-t-transparent animate-spin"></div>
-                <i class="fa-solid fa-database text-cyan-400 text-xl absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></i>
-            </div>
-            <h3 class="font-orbitron font-bold text-lg sm:text-xl text-white mb-2">ĐANG MÃ HÓA & TRUYỀN DỮ LIỆU...</h3>
-            <p class="font-mono text-xs sm:text-sm text-cyan-400 glow-blue">Đang kết nối tới Ban Giám Sát CLB Khoa Học.</p>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
+            <div class="p-3 bg-slate-950/80 border border-amber-800 rounded-lg"><div class="flex items-center gap-1.5 mb-1 text-amber-400 font-orbitron text-xs font-bold"><i class="fa-solid fa-fire-burner"></i> TAY KHÔNG BẮT LỬA</div><p class="text-[11px] text-slate-300">Thí nghiệm bọt khí Metan cháy rực rỡ trên bàn tay mà không hề gây bỏng.</p></div>
+            <div class="p-3 bg-slate-950/80 border border-cyan-800 rounded-lg"><div class="flex items-center gap-1.5 mb-1 text-cyan-400 font-orbitron text-xs font-bold"><i class="fa-solid fa-compress"></i> BÀN TAY TÀNG HÌNH</div><p class="text-[11px] text-slate-300">Áp suất ngưng tụ bóp bẹp lon nhôm &amp; trứng chui vào chai.</p></div>
+            <div class="p-3 bg-slate-950/80 border border-purple-800 rounded-lg"><div class="flex items-center gap-1.5 mb-1 text-purple-400 font-orbitron text-xs font-bold"><i class="fa-solid fa-bolt"></i> TĨNH ĐIỆN &amp; PHÁO HOA</div><p class="text-[11px] text-slate-300">Máy Wimshurst làm tóc dựng ngược và pháo hoa từ muối CuSO4, NaCl.</p></div>
         </div>
+        <div class="p-4 bg-amber-950/30 border-l-4 border-amber-400 rounded-r-lg mb-4">
+            <h3 class="font-semibold text-amber-200 text-xs sm:text-sm leading-relaxed"><i class="fa-solid fa-circle-question mr-1.5 text-amber-400"></i>"Trong các năm học qua, Funlab &amp; CLB Khoa Học đã gây ấn tượng mạnh với học sinh toàn trường qua những màn trình diễn thực nghiệm nào?"</h3>
+        </div>
+        <div id="station2Options" class="space-y-3 mb-5"></div>
+        <div id="station2Feedback" class="hidden p-3.5 rounded-lg mb-5 font-mono text-xs sm:text-sm border"></div>
+        <button id="btnNextStation2" class="btn-cyber w-full py-3.5 sm:py-4 rounded-lg font-orbitron font-bold text-white tracking-wider flex items-center justify-center gap-2 text-xs sm:text-sm" disabled>
+            <span>TIẾP TỤC → TRẠM 03: THỬ THÁCH CHUYÊN MÔN</span><i class="fa-solid fa-arrow-right"></i>
+        </button>
+    </div>
 
-        <!-- SCREEN 6 SUCCESS -->
-        <div id="screen6" class="tech-card p-5 sm:p-8 md:p-10 rounded-xl screen-transition screen-hidden text-center relative overflow-hidden">
-            <div class="mb-4">
-                <div class="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-emerald-950/80 border-2 border-emerald-400 mb-3 shadow-[0_0_30px_#00ff66]"><i class="fa-solid fa-check text-2xl sm:text-3xl text-emerald-400"></i></div>
-                <h2 class="font-orbitron font-black text-xl sm:text-3xl text-emerald-400 glow-green uppercase tracking-wide">ĐĂNG KÝ THÀNH CÔNG!</h2>
-                <p id="successMessage" class="mt-2 text-slate-200 font-sans text-xs sm:text-base max-w-xl mx-auto"></p>
+    <!-- ═══ SCREEN 4: STATION 3 (CHALLENGE) ═══ -->
+    <div id="screen4" class="tech-card p-5 sm:p-8 md:p-10 rounded-xl screen-hidden">
+        <div class="flex justify-between items-center mb-4 sm:mb-6 border-b border-cyan-900/50 pb-3 sm:pb-4">
+            <div>
+                <span id="deptBadge" class="text-xs font-mono text-cyan-400 uppercase"><i class="fa-solid fa-bolt mr-1"></i> THỬ THÁCH CHUYÊN MÔN</span>
+                <h2 class="font-orbitron text-lg sm:text-2xl font-bold text-white">KÍCH HOẠT LÕI NĂNG LƯỢNG</h2>
             </div>
-            <div id="badgeContainer" class="max-w-md mx-auto my-6 p-0 rounded-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950 border-2 border-cyan-400 shadow-[0_0_40px_rgba(0,240,255,0.3)] text-left relative overflow-hidden transition-all pulse-border">
-                <div class="bg-gradient-to-r from-cyan-500 via-emerald-400 to-indigo-500 h-2 w-full"></div>
-                <div class="p-5 sm:p-6 relative z-10">
-                    <div class="flex justify-between items-center border-b border-cyan-800/80 pb-3 mb-4">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-10 h-10 rounded-lg bg-cyan-950 border border-cyan-400/80 flex items-center justify-center"><i class="fa-solid fa-atom text-2xl text-cyan-300 animate-spin" style="animation-duration:12s;"></i></div>
-                            <div>
-                                <div class="font-orbitron font-black text-xs sm:text-sm text-white tracking-wider">VA SCIENCE CLUB <span class="text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 font-mono">OFFICIAL</span></div>
-                                <p class="text-[9px] font-mono text-cyan-400/90">TRƯỜNG VIỆT ANH 2 • FUNLAB RESEARCH DIVISION</p>
-                            </div>
+            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded bg-cyan-950/50 border border-cyan-500/50 flex items-center justify-center shrink-0">
+                <i class="fa-solid fa-atom text-xl sm:text-2xl text-cyan-400 animate-spin" style="animation-duration:8s;"></i>
+            </div>
+        </div>
+        <div id="challengeBox" class="mb-5 sm:mb-6 space-y-4"></div>
+        <div id="minigameFeedback" class="hidden p-3.5 rounded-lg mb-5 font-mono text-xs sm:text-sm border"></div>
+        <button id="btnNextScreen4" class="btn-cyber w-full py-3.5 sm:py-4 rounded-lg font-orbitron font-bold text-white tracking-wider flex items-center justify-center gap-2 text-xs sm:text-sm" disabled>
+            <span>TIẾP TỤC → HỒ SƠ NĂNG LỰC THỰC CHIẾN</span><i class="fa-solid fa-arrow-right"></i>
+        </button>
+    </div>
+
+    <!-- ═══ SCREEN 5: PROFILE ═══ -->
+    <div id="screen5" class="tech-card p-5 sm:p-8 md:p-10 rounded-xl screen-hidden">
+        <div class="mb-4 sm:mb-6 border-b border-cyan-900/50 pb-3 sm:pb-4">
+            <span class="text-xs font-mono text-emerald-400 uppercase"><i class="fa-solid fa-terminal mr-1"></i> HỒ SƠ NĂNG LỰC THỰC CHIẾN</span>
+            <h2 class="font-orbitron text-lg sm:text-2xl font-bold text-white">HÀNH TRANG &amp; ĐAM MÊ</h2>
+        </div>
+        <form id="profileForm" class="space-y-5 sm:space-y-6">
+            <div class="p-4 bg-amber-950/30 border border-amber-500/60 rounded-xl">
+                <label class="block font-mono text-xs text-amber-300 uppercase tracking-wider mb-2 font-bold"><i class="fa-solid fa-shapes mr-1 text-amber-400"></i> HIỂU BIẾT &amp; CẢM NHẬN VỀ "VÒM KHOA HỌC" <span class="text-rose-500">*</span></label>
+                <p class="text-[11px] text-slate-300 mb-2 font-sans">Chương trình thực hành 08:00–10:00 Sáng T7. Em hiểu gì về chương trình hoặc muốn thực hành chủ đề nào?</p>
+                <textarea id="vomUnderstanding" rows="2" required class="w-full bg-slate-950/90 border border-amber-800 focus:border-amber-400 focus:ring-1 focus:ring-amber-400/40 rounded-lg p-3 text-amber-300 font-mono text-xs outline-none transition resize-y" placeholder="// Ví dụ: Em muốn tự tay pha chế dung dịch đổi màu, làm tên lửa nước..."></textarea>
+            </div>
+            <div>
+                <label id="expLabel" class="block font-mono text-xs text-cyan-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-code mr-1"></i> 1. KINH NGHIỆM / SỞ THÍCH SÁNG TẠO <span class="text-rose-500">*</span></label>
+                <textarea id="studentExperience" rows="3" required class="w-full bg-slate-950/90 border border-cyan-800 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 rounded-lg p-3 text-emerald-400 font-mono text-xs outline-none transition resize-y" placeholder="// Ví dụ: Em từng làm mô hình xe bong bóng, thích chỉnh ảnh CapCut..."></textarea>
+            </div>
+            <div>
+                <label class="block font-mono text-xs text-cyan-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-link mr-1"></i> 2. LINK SẢN PHẨM / PORTFOLIO <span class="text-slate-500 normal-case font-sans">(không bắt buộc)</span></label>
+                <input type="url" id="studentPortfolio" class="w-full bg-slate-950/80 border border-cyan-800 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 rounded-lg px-4 py-2.5 text-white font-sans text-xs placeholder-slate-600 outline-none transition" placeholder="https://drive.google.com/... hoặc TikTok, YouTube, Canva...">
+            </div>
+            <div>
+                <label id="aspLabel" class="block font-mono text-xs text-cyan-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-rocket mr-1"></i> 3. NGUYỆN VỌNG &amp; Ý TƯỞNG ĐÓNG GÓP <span class="text-rose-500">*</span></label>
+                <textarea id="studentAspiration" rows="3" required class="w-full bg-slate-950/90 border border-cyan-800 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 rounded-lg p-3 text-emerald-400 font-mono text-xs outline-none transition resize-y" placeholder="// Em muốn cùng CLB làm bệ phóng tên lửa nước, dựng clip triệu view..."></textarea>
+            </div>
+            <div id="screen5Error" class="hidden text-rose-400 text-xs font-mono bg-rose-950/40 border border-rose-800 p-3 rounded flex items-center gap-2">
+                <i class="fa-solid fa-triangle-exclamation"></i><span id="screen5ErrorMsg"></span>
+            </div>
+            <button type="submit" class="btn-cyber w-full py-3.5 sm:py-4 rounded-lg font-orbitron font-bold text-white tracking-wider flex items-center justify-center gap-3 text-sm sm:text-base">
+                <i class="fa-solid fa-paper-plane text-cyan-300 text-lg"></i>
+                <span>MÃ HÓA &amp; GỬI ĐƠN HOÀN TẤT</span>
+            </button>
+        </form>
+    </div>
+
+    <!-- ═══ LOADING ═══ -->
+    <div id="loadingOverlay" class="tech-card p-8 sm:p-12 rounded-xl text-center screen-hidden">
+        <div class="inline-block relative w-20 h-20 mb-5">
+            <div class="absolute inset-0 border-4 border-cyan-500/20 rounded-full"></div>
+            <div class="absolute inset-0 border-4 border-t-cyan-400 border-cyan-400/10 rounded-full animate-spin"></div>
+            <i class="fa-solid fa-database text-cyan-400 text-xl absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></i>
+        </div>
+        <h3 class="font-orbitron font-bold text-lg sm:text-xl text-white mb-2">ĐANG MÃ HÓA &amp; TRUYỀN DỮ LIỆU...</h3>
+        <p class="font-mono text-xs text-cyan-400 glow-blue">Đang kết nối tới Ban Giám Sát CLB Khoa Học.</p>
+    </div>
+
+    <!-- ═══ SCREEN 6: SUCCESS ═══ -->
+    <div id="screen6" class="tech-card p-5 sm:p-8 md:p-10 rounded-xl screen-hidden text-center">
+        <div class="mb-4">
+            <div class="inline-flex items-center justify-center w-14 h-14 sm:w-18 sm:h-18 rounded-full bg-emerald-950/80 border-2 border-emerald-400 mb-3 shadow-[0_0_35px_#00ff66]">
+                <i class="fa-solid fa-check text-2xl sm:text-3xl text-emerald-400"></i>
+            </div>
+            <h2 class="font-orbitron font-black text-xl sm:text-3xl text-emerald-400 glow-green uppercase tracking-wide">ĐĂNG KÝ THÀNH CÔNG!</h2>
+            <p id="successMessage" class="mt-2 text-slate-200 font-sans text-xs sm:text-sm max-w-xl mx-auto leading-relaxed"></p>
+        </div>
+        <!-- Badge -->
+        <div id="badgeContainer" class="max-w-md mx-auto my-6 rounded-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950 border-2 border-cyan-400 shadow-[0_0_40px_rgba(0,240,255,0.3)] text-left relative overflow-hidden pulse-border">
+            <div class="bg-gradient-to-r from-cyan-500 via-emerald-400 to-indigo-500 h-2 w-full"></div>
+            <div class="p-5 sm:p-6">
+                <div class="flex justify-between items-center border-b border-cyan-800/80 pb-3 mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-cyan-950 border border-cyan-400/80 flex items-center justify-center">
+                            <i class="fa-solid fa-atom text-2xl text-cyan-300 animate-spin" style="animation-duration:12s;"></i>
                         </div>
-                        <span id="badgeLevelTag" class="px-2.5 py-1 rounded-md bg-emerald-950/90 text-emerald-300 font-mono text-[10px] font-bold border border-emerald-500/60 inline-block">THCS AGENT</span>
-                    </div>
-                    <div class="grid grid-cols-12 gap-4 items-center my-2">
-                        <div class="col-span-4 flex flex-col items-center">
-                            <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-xl bg-slate-950 border-2 border-cyan-400/80 p-1 relative flex flex-col items-center justify-center overflow-hidden">
-                                <div class="absolute top-0 left-0 right-0 h-1 bg-cyan-400/70"></div>
-                                <i id="badgeAvatarIcon" class="fa-solid fa-user-astronaut text-4xl sm:text-5xl text-cyan-300 drop-shadow-[0_0_10px_rgba(0,240,255,0.6)]"></i>
-                                <span id="badgeRankTitle" class="mt-2 text-[8px] font-mono font-bold px-1.5 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800 uppercase">EXPLORER</span>
-                            </div>
-                        </div>
-                        <div class="col-span-8 space-y-2 font-mono">
-                            <div><span class="text-[9px] text-slate-400 uppercase block">MÃ ĐẶC VỤ:</span><span id="badgeAgentCode" class="text-cyan-300 font-orbitron font-extrabold text-sm sm:text-base tracking-widest glow-blue">FL-THPT-2026</span></div>
-                            <div><span class="text-[9px] text-slate-400 uppercase block">HỌ VÀ TÊN:</span><span id="badgeName" class="text-white font-sans font-bold text-sm sm:text-base block truncate">--</span></div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div><span class="text-[8px] text-slate-400 uppercase block">LỚP:</span><span id="badgeClass" class="text-emerald-400 font-bold text-xs">--</span></div>
-                                <div><span class="text-[8px] text-slate-400 uppercase block">BAN:</span><span id="badgeDepartment" class="text-amber-300 font-bold text-xs truncate block">--</span></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mt-4 pt-3 border-t border-slate-800/80 font-mono">
-                        <div class="text-[9px] text-cyan-400/90 mb-1.5 flex justify-between"><span><i class="fa-solid fa-shield-check mr-1 text-emerald-400"></i> 3/3 TRẠM HOÀN THÀNH</span><span id="badgeTimestamp" class="text-slate-300">--</span></div>
-                        <div class="grid grid-cols-3 gap-1.5 text-[9px] text-center">
-                            <div class="p-1 rounded bg-slate-950 border border-purple-500/40 text-purple-300"><i class="fa-solid fa-satellite-dish mr-1"></i>T01: MÃ MẬT</div>
-                            <div class="p-1 rounded bg-slate-950 border border-amber-500/40 text-amber-300"><i class="fa-solid fa-flask mr-1"></i>T02: THỰC NGHIỆM</div>
-                            <div class="p-1 rounded bg-slate-950 border border-cyan-500/40 text-cyan-300"><i class="fa-solid fa-microchip mr-1"></i>T03: CHUYÊN MÔN</div>
+                        <div>
+                            <div class="font-orbitron font-black text-xs text-white tracking-wider">VA SCIENCE CLUB <span class="text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 font-mono">OFFICIAL</span></div>
+                            <p class="text-[9px] font-mono text-cyan-400/90">TRƯỜNG VIỆT ANH 2 • FUNLAB RESEARCH DIVISION</p>
                         </div>
                     </div>
+                    <span id="badgeLevelTag" class="px-2.5 py-1 rounded-md bg-emerald-950/90 text-emerald-300 font-mono text-[10px] font-bold border border-emerald-500/60">OPERATIVE</span>
+                </div>
+                <div class="grid grid-cols-12 gap-4 items-center my-2">
+                    <div class="col-span-4 flex flex-col items-center">
+                        <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-xl bg-slate-950 border-2 border-cyan-400/80 p-1 flex flex-col items-center justify-center overflow-hidden relative">
+                            <div class="absolute top-0 left-0 right-0 h-1 bg-cyan-400/70"></div>
+                            <i id="badgeAvatarIcon" class="fa-solid fa-user-astronaut text-4xl sm:text-5xl text-cyan-300 drop-shadow-[0_0_10px_rgba(0,240,255,0.6)]"></i>
+                            <span id="badgeRankTitle" class="mt-2 text-[8px] font-mono font-bold px-1.5 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800 uppercase">EXPLORER</span>
+                        </div>
+                    </div>
+                    <div class="col-span-8 space-y-2 font-mono">
+                        <div><span class="text-[9px] text-slate-400 uppercase block">MÃ ĐẶC VỤ:</span><span id="badgeAgentCode" class="text-cyan-300 font-orbitron font-extrabold text-sm tracking-widest glow-blue">FL-2026</span></div>
+                        <div><span class="text-[9px] text-slate-400 uppercase block">HỌ VÀ TÊN:</span><span id="badgeName" class="text-white font-sans font-bold text-sm block truncate">--</span></div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div><span class="text-[8px] text-slate-400 uppercase block">LỚP:</span><span id="badgeClass" class="text-emerald-400 font-bold text-xs">--</span></div>
+                            <div><span class="text-[8px] text-slate-400 uppercase block">BAN:</span><span id="badgeDepartment" class="text-amber-300 font-bold text-xs truncate block">--</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 pt-3 border-t border-slate-800/80 font-mono">
+                    <div class="text-[9px] text-cyan-400/90 mb-1.5 flex justify-between">
+                        <span><i class="fa-solid fa-shield-check mr-1 text-emerald-400"></i> 3/3 TRẠM HOÀN THÀNH</span>
+                        <span id="badgeTimestamp" class="text-slate-300">--</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-1.5 text-[9px] text-center">
+                        <div class="p-1 rounded bg-slate-950 border border-purple-500/40 text-purple-300"><i class="fa-solid fa-satellite-dish mr-1"></i>T01: MÃ MẬT</div>
+                        <div class="p-1 rounded bg-slate-950 border border-amber-500/40 text-amber-300"><i class="fa-solid fa-flask mr-1"></i>T02: THỰC NGHIỆM</div>
+                        <div class="p-1 rounded bg-slate-950 border border-cyan-500/40 text-cyan-300"><i class="fa-solid fa-microchip mr-1"></i>T03: CHUYÊN MÔN</div>
+                    </div>
                 </div>
             </div>
-            <div class="mt-5 flex flex-col sm:flex-row gap-3 justify-center">
-                <button onclick="downloadBadge()" class="btn-cyber px-5 py-2.5 rounded-lg font-mono text-xs sm:text-sm text-cyan-300 flex items-center justify-center gap-2"><i class="fa-solid fa-download"></i> TẢI THẺ ĐẶC VỤ (PNG)</button>
-                <button onclick="resetGame()" class="px-5 py-2.5 rounded-lg bg-slate-900 border border-slate-700 hover:border-cyan-400 text-slate-300 hover:text-cyan-400 font-mono text-xs sm:text-sm transition flex items-center justify-center gap-2"><i class="fa-solid fa-rotate-left"></i> ĐĂNG KÝ BẠN KHÁC</button>
-            </div>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-3 justify-center mt-2">
+            <button id="btnDownloadBadge" class="btn-cyber px-5 py-2.5 rounded-lg font-mono text-xs sm:text-sm text-cyan-300 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-download"></i> TẢI THẺ ĐẶC VỤ (PNG)
+            </button>
+            <button id="btnReset" class="px-5 py-2.5 rounded-lg bg-slate-900 border border-slate-700 hover:border-cyan-400 text-slate-300 hover:text-cyan-400 font-mono text-xs sm:text-sm transition-all flex items-center justify-center gap-2">
+                <i class="fa-solid fa-rotate-left"></i> ĐĂNG KÝ BẠN KHÁC
+            </button>
         </div>
     </div>
+  </div>
 </main>
 
-<!-- ADMIN AUTH MODAL -->
-<div id="adminAuthModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
-    <div class="tech-card p-6 rounded-xl max-w-sm w-full border-amber-500/60">
-        <div class="text-center mb-4">
-            <div class="w-12 h-12 rounded-full bg-amber-950 border border-amber-500 flex items-center justify-center mx-auto mb-2"><i class="fa-solid fa-lock text-amber-400 text-xl"></i></div>
-            <h3 class="font-orbitron font-bold text-lg text-white">XÁC THỰC QUYỀN GIÁO VIÊN</h3>
-            <p class="text-xs text-slate-400 font-mono mt-1">Nhập PIN quản trị để xem danh sách bài nộp</p>
+<!-- ═══ ADMIN AUTH MODAL ═══ -->
+<div id="adminAuthModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="tech-card p-6 rounded-xl max-w-sm w-full" style="border-color:rgba(245,158,11,0.6);">
+        <div class="text-center mb-5">
+            <div class="w-12 h-12 rounded-full bg-amber-950 border border-amber-500 flex items-center justify-center mx-auto mb-2">
+                <i class="fa-solid fa-lock text-amber-400 text-xl"></i>
+            </div>
+            <h3 class="font-orbitron font-bold text-lg text-white">XÁC THỰC GIÁO VIÊN</h3>
+            <p class="text-xs text-slate-400 font-mono mt-1">Nhập mã PIN quản trị để xem danh sách bài nộp</p>
         </div>
-        <form onsubmit="verifyAdminPin(event)" class="space-y-4">
-            <input type="password" id="adminPinInput" required placeholder="Mã PIN (Mặc định: 2026)" class="w-full bg-slate-950 border border-amber-800 focus:border-amber-400 rounded-lg px-4 py-3 text-center text-amber-300 font-mono tracking-widest text-lg outline-none">
-            <div id="adminPinError" class="hidden text-rose-400 text-xs font-mono text-center"></div>
+        <form id="adminPinForm" class="space-y-4">
+            <input type="password" id="adminPinInput" required placeholder="Nhập mã PIN..." autocomplete="current-password"
+                class="w-full bg-slate-950 border border-amber-800 focus:border-amber-400 rounded-lg px-4 py-3 text-center text-amber-300 font-mono tracking-widest text-lg outline-none transition">
+            <div id="adminPinError" class="hidden text-rose-400 text-xs font-mono text-center bg-rose-950/40 border border-rose-800 rounded p-2"></div>
             <div class="flex gap-2">
-                <button type="button" onclick="closeAdminModal()" class="w-1/2 py-2.5 rounded bg-slate-900 border border-slate-700 text-slate-300 font-mono text-xs hover:bg-slate-800">HỦY BỎ</button>
-                <button type="submit" class="w-1/2 py-2.5 rounded bg-amber-600 hover:bg-amber-500 text-slate-950 font-orbitron font-bold text-xs tracking-wider transition">XÁC NHẬN</button>
+                <button type="button" id="btnCloseAdminModal" class="w-1/2 py-2.5 rounded bg-slate-900 border border-slate-700 hover:bg-slate-800 text-slate-300 font-mono text-xs transition-all">HỦY BỎ</button>
+                <button type="submit" class="w-1/2 py-2.5 rounded bg-amber-600 hover:bg-amber-500 text-slate-950 font-orbitron font-bold text-xs tracking-wider transition-all">XÁC NHẬN</button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- ADMIN DASHBOARD MODAL -->
-<div id="adminDashboardModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md p-3 sm:p-6 overflow-y-auto hidden">
-    <div class="max-w-6xl mx-auto tech-card p-4 sm:p-6 rounded-xl border-cyan-500/80 my-4">
+<!-- ═══ ADMIN DASHBOARD MODAL ═══ -->
+<div id="adminDashboardModal" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-md p-3 sm:p-6 overflow-y-auto hidden">
+    <div class="max-w-6xl mx-auto tech-card p-4 sm:p-6 rounded-xl my-4" style="border-color:rgba(0,240,255,0.6);">
         <div class="flex flex-col md:flex-row md:items-center justify-between border-b border-cyan-900/80 pb-4 mb-4 gap-3">
             <div>
-                <div class="flex items-center gap-2"><span class="px-2 py-0.5 rounded bg-amber-950 text-amber-400 text-[10px] font-mono border border-amber-800">ADMIN CONTROL</span><span id="submissionCountBadge" class="px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 text-[10px] font-mono border border-cyan-800">0 BÀI NỘP</span></div>
-                <h2 class="font-orbitron text-xl sm:text-2xl font-bold text-white mt-1">BẢNG QUẢN LÝ ĐẶC VỤ FUNLAB</h2>
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="px-2 py-0.5 rounded bg-amber-950 text-amber-400 text-[10px] font-mono border border-amber-800">ADMIN CONTROL</span>
+                    <span id="submissionCountBadge" class="px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 text-[10px] font-mono border border-cyan-800">0 BÀI NỘP</span>
+                </div>
+                <h2 class="font-orbitron text-xl font-bold text-white">BẢNG QUẢN LÝ ĐẶC VỤ FUNLAB</h2>
             </div>
-            <div class="flex flex-wrap items-center gap-2">
-                <button onclick="exportToCSV()" class="px-3 py-2 rounded bg-emerald-950 border border-emerald-500 hover:bg-emerald-900 text-emerald-300 font-mono text-xs flex items-center gap-1.5 transition"><i class="fa-solid fa-file-excel"></i> XUẤT CSV</button>
-                <button onclick="closeAdminDashboard()" class="px-3 py-2 rounded bg-slate-900 border border-slate-700 hover:border-rose-500 text-slate-300 hover:text-rose-400 font-mono text-xs flex items-center gap-1.5 transition"><i class="fa-solid fa-xmark"></i> ĐÓNG</button>
+            <div class="flex flex-wrap gap-2">
+                <button id="btnExportCSV" class="px-3 py-2 rounded bg-emerald-950 border border-emerald-500 hover:bg-emerald-900 text-emerald-300 font-mono text-xs flex items-center gap-1.5 transition-all">
+                    <i class="fa-solid fa-file-excel"></i> XUẤT CSV
+                </button>
+                <button id="btnCloseAdminDashboard" class="px-3 py-2 rounded bg-slate-900 border border-slate-700 hover:border-rose-500 text-slate-300 hover:text-rose-400 font-mono text-xs flex items-center gap-1.5 transition-all">
+                    <i class="fa-solid fa-xmark"></i> ĐÓNG
+                </button>
             </div>
         </div>
+        <!-- Filters -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-            <input type="text" id="adminSearchInput" oninput="renderAdminTable()" placeholder="Tìm theo Họ tên, Lớp..." class="w-full bg-slate-950 border border-cyan-800 rounded px-3 py-2 text-xs text-cyan-300 font-mono outline-none focus:border-cyan-400">
-            <select id="adminFilterLevel" onchange="renderAdminTable()" class="w-full bg-slate-950 border border-cyan-800 rounded px-3 py-2 text-xs text-cyan-300 font-mono outline-none">
-                <option value="ALL">Tất cả Khối Lớp</option><option value="THCS">Khối THCS</option><option value="THPT">Khối THPT</option>
+            <input type="text" id="adminSearchInput" placeholder="Tìm tên, lớp..." class="bg-slate-950 border border-cyan-800 rounded px-3 py-2 text-xs text-cyan-300 font-mono outline-none focus:border-cyan-400 transition-all">
+            <select id="adminFilterLevel" class="bg-slate-950 border border-cyan-800 rounded px-3 py-2 text-xs text-cyan-300 font-mono outline-none">
+                <option value="ALL">Tất cả Khối</option>
+                <option value="THCS">Khối THCS</option>
+                <option value="THPT">Khối THPT</option>
             </select>
-            <select id="adminFilterDept" onchange="renderAdminTable()" class="w-full bg-slate-950 border border-cyan-800 rounded px-3 py-2 text-xs text-cyan-300 font-mono outline-none"><option value="ALL">Tất cả Vị Trí / Ban</option></select>
+            <select id="adminFilterDept" class="bg-slate-950 border border-cyan-800 rounded px-3 py-2 text-xs text-cyan-300 font-mono outline-none"></select>
         </div>
-        <div class="overflow-x-auto rounded-lg border border-cyan-900/60 bg-slate-950/90">
-            <table class="w-full text-left border-collapse text-xs font-sans">
-                <thead><tr class="bg-cyan-950/80 font-mono text-cyan-400 border-b border-cyan-800 text-[11px]">
-                    <th class="p-3">STT</th><th class="p-3">MÃ ĐẶC VỤ</th><th class="p-3">HỌ VÀ TÊN</th><th class="p-3">LỚP</th><th class="p-3">KHỐI</th><th class="p-3">BAN/VỊ TRÍ</th><th class="p-3 text-center">T1</th><th class="p-3 text-center">T2</th><th class="p-3 text-center">T3</th><th class="p-3">THỜI GIAN</th><th class="p-3 text-center">THAO TÁC</th>
-                </tr></thead>
+        <!-- Table -->
+        <div class="overflow-x-auto rounded-lg border border-cyan-900/60">
+            <table class="w-full text-left border-collapse text-xs font-sans min-w-[700px]">
+                <thead>
+                    <tr class="bg-cyan-950/80 font-mono text-cyan-400 border-b border-cyan-800 text-[11px]">
+                        <th class="p-3">#</th>
+                        <th class="p-3">MÃ ĐẶC VỤ</th>
+                        <th class="p-3">HỌ VÀ TÊN</th>
+                        <th class="p-3">LỚP</th>
+                        <th class="p-3">KHỐI</th>
+                        <th class="p-3">BAN/VỊ TRÍ</th>
+                        <th class="p-3 text-center">T1</th>
+                        <th class="p-3 text-center">T2</th>
+                        <th class="p-3 text-center">T3</th>
+                        <th class="p-3">THỜI GIAN</th>
+                        <th class="p-3 text-center">THAO TÁC</th>
+                    </tr>
+                </thead>
                 <tbody id="adminTableBody" class="divide-y divide-slate-800/80 text-slate-300"></tbody>
             </table>
         </div>
     </div>
 </div>
 
-<!-- STUDENT DETAIL MODAL -->
-<div id="studentDetailModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
-    <div class="tech-card p-6 rounded-xl max-w-xl w-full border-cyan-500 max-h-[90vh] overflow-y-auto">
+<!-- ═══ STUDENT DETAIL MODAL ═══ -->
+<div id="studentDetailModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="tech-card p-6 rounded-xl max-w-xl w-full max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-start border-b border-cyan-900 pb-3 mb-4">
-            <div><span id="detailAgentCode" class="text-xs font-mono text-cyan-400 font-bold">FL-2026</span><h3 id="detailName" class="font-orbitron font-bold text-lg text-white">--</h3></div>
-            <button onclick="closeStudentDetail()" class="text-slate-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+            <div><span id="detailAgentCode" class="text-xs font-mono text-cyan-400 font-bold block">FL-2026</span><h3 id="detailName" class="font-orbitron font-bold text-lg text-white">--</h3></div>
+            <button id="btnCloseDetail" class="text-slate-400 hover:text-white text-xl p-1"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <div class="space-y-3 font-mono text-xs">
             <div class="grid grid-cols-2 gap-2 p-2.5 bg-slate-950 rounded border border-slate-800">
@@ -376,43 +440,590 @@
                 <div><span class="text-slate-500">BAN:</span> <span id="detailDept" class="text-amber-300 font-bold">--</span></div>
                 <div class="col-span-2"><span class="text-slate-500">NGÀY NỘP:</span> <span id="detailTime" class="text-slate-300">--</span></div>
             </div>
-            <div class="p-2.5 bg-amber-950/40 rounded border border-amber-800"><div class="text-amber-400 font-bold mb-1">HIỂU BIẾT VỀ VÒM KHOA HỌC:</div><p id="detailVom" class="text-amber-200 whitespace-pre-wrap text-xs font-sans">--</p></div>
-            <div class="p-2.5 bg-slate-950 rounded border border-slate-800"><div class="text-cyan-400 font-bold mb-1">KẾT QUẢ CÁC TRẠM:</div><div>• Trạm 01: <span id="detailAns1" class="text-slate-200">--</span></div><div>• Trạm 02: <span id="detailAns2" class="text-slate-200">--</span></div><div>• Trạm 03: <span id="detailAns3" class="text-slate-200">--</span></div></div>
-            <div class="p-2.5 bg-slate-950 rounded border border-slate-800"><div class="text-cyan-400 font-bold mb-1">KINH NGHIỆM:</div><p id="detailExp" class="text-slate-300 whitespace-pre-wrap text-xs font-sans">--</p></div>
+            <div class="p-2.5 bg-amber-950/40 rounded border border-amber-800"><div class="text-amber-400 font-bold mb-1">VÒM KHOA HỌC:</div><p id="detailVom" class="text-amber-200 whitespace-pre-wrap font-sans text-xs">--</p></div>
+            <div class="p-2.5 bg-slate-950 rounded border border-slate-800"><div class="text-cyan-400 font-bold mb-1">KẾT QUẢ TRẠM:</div><div>• T01: <span id="detailAns1" class="text-slate-200">--</span></div><div>• T02: <span id="detailAns2" class="text-slate-200">--</span></div><div>• T03: <span id="detailAns3" class="text-slate-200 break-all">--</span></div></div>
+            <div class="p-2.5 bg-slate-950 rounded border border-slate-800"><div class="text-cyan-400 font-bold mb-1">KINH NGHIỆM:</div><p id="detailExp" class="text-slate-300 whitespace-pre-wrap font-sans text-xs">--</p></div>
             <div class="p-2.5 bg-slate-950 rounded border border-slate-800"><div class="text-cyan-400 font-bold mb-1">PORTFOLIO:</div><p id="detailPortfolio" class="text-emerald-400 text-xs break-all">--</p></div>
-            <div class="p-2.5 bg-slate-950 rounded border border-slate-800"><div class="text-cyan-400 font-bold mb-1">NGUYỆN VỌNG:</div><p id="detailAspiration" class="text-slate-300 whitespace-pre-wrap text-xs font-sans">--</p></div>
+            <div class="p-2.5 bg-slate-950 rounded border border-slate-800"><div class="text-cyan-400 font-bold mb-1">NGUYỆN VỌNG:</div><p id="detailAspiration" class="text-slate-300 whitespace-pre-wrap font-sans text-xs">--</p></div>
         </div>
-        <div class="mt-4 pt-3 border-t border-slate-800 text-right"><button onclick="closeStudentDetail()" class="px-4 py-2 bg-slate-900 border border-slate-700 text-slate-300 rounded hover:border-cyan-400 text-xs font-mono">ĐÓNG</button></div>
+        <div class="mt-4 pt-3 border-t border-slate-800 text-right">
+            <button id="btnCloseDetail2" class="px-4 py-2 bg-slate-900 border border-slate-700 text-slate-300 rounded hover:border-cyan-400 text-xs font-mono">ĐÓNG</button>
+        </div>
     </div>
 </div>
 
-<footer class="relative z-10 w-full p-3 border-t border-cyan-900/40 bg-slate-950/90 text-center font-mono text-[11px] text-slate-500 flex flex-col sm:flex-row justify-between items-center px-4 sm:px-6 gap-1.5">
+<footer class="relative z-10 w-full p-3 border-t border-cyan-900/40 bg-slate-950/90 font-mono text-[11px] text-slate-500 flex flex-col sm:flex-row justify-between items-center px-4 sm:px-6 gap-1.5">
     <div>© CLB KHOA HỌC TRƯỜNG VIỆT ANH 2 | FUNLAB PORTAL</div>
     <div class="text-cyan-400/80"><i class="fa-solid fa-shield-halved mr-1"></i> STATUS: ONLINE RECRUITMENT</div>
 </footer>
 
 <script>
-// ── CONFIG ──────────────────────────────────────────────
-const ADMIN_PIN = '2026';
-const SUPABASE_SUBMIT_URL = '/api/recruitment/submit';
+/* ══════════════════════════════════════════════════════
+   CONSTANTS & STATE
+══════════════════════════════════════════════════════ */
+var ADMIN_PIN = '2026';
+var SUPABASE_SUBMIT_URL = '/api/recruitment/submit';
 
-let studentData = {
+var studentData = {
     name:'', studentClass:'', level:'THCS', registrationType:'VÒM KHOA HỌC',
     department:'', vomUnderstanding:'', station1Answer:'', station2Answer:'',
     challengeAnswer:'', experience:'', portfolio:'', aspiration:'',
     agentCode:'', timestamp:''
 };
 
-let localSubmissions = JSON.parse(localStorage.getItem('FUNLAB_LOCAL_SUBMISSIONS') || '[]');
+var localSubmissions = [];
+try { localSubmissions = JSON.parse(localStorage.getItem('FUNLAB_LOCAL_SUBMISSIONS') || '[]'); } catch(e) { localSubmissions = []; }
 
-function selectRegType(v) { studentData.registrationType = v; }
+/* ══════════════════════════════════════════════════════
+   AUDIO
+══════════════════════════════════════════════════════ */
+var isAudioEnabled = true;
+var audioCtx = null;
+function initAudio() { if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){} } }
+function playSound(type) {
+    if (!isAudioEnabled || !type) return;
+    try {
+        initAudio(); if (!audioCtx) return;
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        var osc = audioCtx.createOscillator();
+        var gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        var now = audioCtx.currentTime;
+        if (type === 'click')   { osc.type='sine';     osc.frequency.setValueAtTime(800,now); osc.frequency.exponentialRampToValueAtTime(400,now+0.08); gain.gain.setValueAtTime(0.1,now); gain.gain.exponentialRampToValueAtTime(0.001,now+0.08); osc.start(now); osc.stop(now+0.08); }
+        else if (type==='success'){osc.type='triangle'; osc.frequency.setValueAtTime(440,now); osc.frequency.setValueAtTime(554,now+0.1); osc.frequency.setValueAtTime(659,now+0.2); gain.gain.setValueAtTime(0.15,now); gain.gain.exponentialRampToValueAtTime(0.001,now+0.35); osc.start(now); osc.stop(now+0.35);}
+        else if (type==='error'){osc.type='sawtooth';  osc.frequency.setValueAtTime(220,now); osc.frequency.exponentialRampToValueAtTime(110,now+0.2); gain.gain.setValueAtTime(0.12,now); gain.gain.exponentialRampToValueAtTime(0.001,now+0.2); osc.start(now); osc.stop(now+0.2);}
+    } catch(e) {}
+}
+document.getElementById('btnToggleAudio').addEventListener('click', function() {
+    isAudioEnabled = !isAudioEnabled;
+    document.getElementById('audioIcon').className = isAudioEnabled ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark text-rose-400';
+    if (isAudioEnabled) playSound('click');
+});
 
-// ── ADMIN ────────────────────────────────────────────────
-function openAdminModal() { playSound('click'); document.getElementById('adminPinInput').value=''; document.getElementById('adminPinError').classList.add('hidden'); document.getElementById('adminAuthModal').classList.remove('hidden'); }
-function closeAdminModal() { playSound('click'); document.getElementById('adminAuthModal').classList.add('hidden'); }
-function verifyAdminPin(e) {
+/* ══════════════════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════════════════ */
+function esc(str) {
+    return (str || '').toString()
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+/* ══════════════════════════════════════════════════════
+   PROGRESS & SCREEN NAVIGATION
+══════════════════════════════════════════════════════ */
+var SCREEN_CONFIG = {
+    1: { label:'PHASE 01: XÁC THỰC ID & KHỐI LỚP', pct:20 },
+    2: { label:'PHASE 02: TRẠM 01 — MÃ MẬT FUNLAB', pct:40 },
+    3: { label:'PHASE 03: TRẠM 02 — THỰC NGHIỆM', pct:60 },
+    4: { label:'PHASE 04: TRẠM 03 — CHUYÊN MÔN', pct:80 },
+    5: { label:'PHASE 05: HỒ SƠ NĂNG LỰC', pct:90 },
+    'loading': { label:'TRUYỀN DỮ LIỆU...', pct:95 },
+    6: { label:'COMPLETED: XÁC NHẬN ĐẶC VỤ', pct:100 }
+};
+var ALL_SCREENS = ['screen1','screen2','screen3','screen4','screen5','loadingOverlay','screen6'];
+
+function showScreen(n) {
+    ALL_SCREENS.forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) { el.classList.add('screen-hidden'); el.classList.remove('screen-active'); }
+    });
+    var cfg = SCREEN_CONFIG[n];
+    if (!cfg) return;
+    var id = n === 'loading' ? 'loadingOverlay' : 'screen' + n;
+    var el = document.getElementById(id);
+    if (el) { el.classList.remove('screen-hidden'); el.classList.add('screen-active'); }
+    document.getElementById('stageLabel').textContent = cfg.label;
+    document.getElementById('stagePercent').textContent = cfg.pct + '% COMPLETE';
+    document.getElementById('progressBar').style.width = cfg.pct + '%';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (n === 2) buildStation1Options();
+    if (n === 3) buildStation2Options();
+    if (n === 4) loadChallengeQuestions();
+    if (n === 5) customizeScreen5UI();
+}
+
+/* ══════════════════════════════════════════════════════
+   ROLES
+══════════════════════════════════════════════════════ */
+var rolesTHCS = [
+    { id:'Đặc Vụ Vòm Khoa Học',    title:'Vòm Khoa Học', desc:'Thực hành Sáng T7 với GV KHTN',  icon:'fa-atom',         color:'text-amber-400'  },
+    { id:'Đặc Vụ Thí Nghiệm',      title:'Thí Nghiệm',   desc:'Pha chế & Mô hình STEM',          icon:'fa-flask-vial',   color:'text-cyan-400'   },
+    { id:'Đặc Vụ Truyền Thông Nhí', title:'Media Nhí',   desc:'CapCut, Ảnh & Poster',            icon:'fa-camera-retro', color:'text-purple-400' },
+    { id:'Đặc Vụ Sự Kiện',         title:'Sự Kiện',      desc:'Đạo cụ & Hỗ trợ trò chơi',       icon:'fa-box-archive',  color:'text-amber-400'  }
+];
+var rolesTHPT = [
+    { id:'Ban Chuyên Môn',  title:'Chuyên Môn', desc:'Nghiên cứu & Kịch bản',  icon:'fa-brain',              color:'text-cyan-400'    },
+    { id:'Ban Kỹ Thuật',    title:'Kỹ Thuật',   desc:'Thí nghiệm & Sân khấu',  icon:'fa-screwdriver-wrench', color:'text-emerald-400' },
+    { id:'Ban Truyền Thông',title:'Truyền Thông',desc:'Quay, Dựng & Poster',   icon:'fa-video',              color:'text-purple-400'  },
+    { id:'Ban Tổ Chức',     title:'Hậu Cần',    desc:'Vật tư & Điều phối',     icon:'fa-sitemap',            color:'text-amber-400'   }
+];
+
+function detectGradeLevel() {
+    var rawVal = (document.getElementById('studentClass').value || '').trim().toUpperCase();
+    var digits = rawVal.replace(/[^0-9]/g, '').substring(0, 2);
+    var gradeNum = parseInt(digits, 10) || 0;
+    var badge = document.getElementById('levelBadge');
+
+    if (gradeNum >= 10 && gradeNum <= 12) {
+        studentData.level = 'THPT';
+        badge.textContent = 'KHỐI THPT (NÒNG CỐT)';
+        badge.className = 'px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-950 border border-emerald-500 text-emerald-300';
+    } else if (gradeNum >= 6 && gradeNum <= 9) {
+        studentData.level = 'THCS';
+        badge.textContent = 'KHỐI THCS (KHÁM PHÁ)';
+        badge.className = 'px-2 py-0.5 rounded text-[10px] font-mono bg-cyan-950 border border-cyan-500 text-cyan-300';
+    } else {
+        studentData.level = 'THCS';
+        badge.textContent = 'ĐANG PHÂN LỚP...';
+        badge.className = 'px-2 py-0.5 rounded text-[10px] font-mono bg-slate-900 border border-slate-700 text-slate-400';
+    }
+    renderRoles();
+}
+
+function renderRoles() {
+    var container = document.getElementById('roleCardsContainer');
+    var list = studentData.level === 'THPT' ? rolesTHPT : rolesTHCS;
+    container.innerHTML = '';
+    container.className = 'grid grid-cols-2 md:grid-cols-4 gap-3';
+    list.forEach(function(r) {
+        var card = document.createElement('div');
+        card.className = 'role-card p-3 rounded-lg bg-slate-950/60 text-center' + (studentData.department === r.id ? ' selected' : '');
+        card.setAttribute('data-roleid', r.id);
+        card.innerHTML =
+            '<i class="fa-solid ' + r.icon + ' text-2xl ' + r.color + ' mb-1.5 block"></i>' +
+            '<div class="font-orbitron text-xs text-white font-bold leading-tight">' + r.title + '</div>' +
+            '<div class="text-[10px] text-slate-400 mt-0.5">' + r.desc + '</div>';
+        card.addEventListener('click', (function(roleId, el) {
+            return function() {
+                playSound('click');
+                studentData.department = roleId;
+                container.querySelectorAll('.role-card').forEach(function(c) { c.classList.remove('selected'); });
+                el.classList.add('selected');
+            };
+        })(r.id, card));
+        container.appendChild(card);
+    });
+}
+
+/* ══════════════════════════════════════════════════════
+   SCREEN 1 — IDENTITY
+══════════════════════════════════════════════════════ */
+document.getElementById('studentClass').addEventListener('input', detectGradeLevel);
+
+document.getElementById('identityForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    const pin = document.getElementById('adminPinInput').value.trim();
+    var name = document.getElementById('studentName').value.trim();
+    var cls  = document.getElementById('studentClass').value.trim();
+    var errEl = document.getElementById('screen1Error');
+    var errMsg = document.getElementById('screen1ErrorMsg');
+
+    function showErr(msg) {
+        playSound('error');
+        errMsg.textContent = msg;
+        errEl.classList.remove('hidden');
+        errEl.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    }
+    if (!name) { showErr('Nhập đầy đủ HỌ VÀ TÊN học sinh!'); return; }
+    if (!cls)  { showErr('Nhập LỚP HIỆN TẠI (ví dụ: 10A1)!'); return; }
+    if (!studentData.department) { showErr('Chọn 1 VỊ TRÍ / BAN để ứng tuyển!'); return; }
+    errEl.classList.add('hidden');
+    playSound('click');
+    studentData.name = name;
+    studentData.studentClass = cls;
+    studentData.registrationType = document.querySelector('input[name="regType"]:checked')?.value || 'VÒM KHOA HỌC';
+    // Hiển thị agent tag ở header
+    var tag = document.getElementById('agentTagHeader');
+    document.getElementById('agentTagName').textContent = name.split(' ').slice(-1)[0].toUpperCase() + ' — ' + cls.toUpperCase();
+    tag.classList.add('visible');
+    showScreen(2);
+});
+
+/* ══════════════════════════════════════════════════════
+   STATION 1 — MÃ MẬT
+══════════════════════════════════════════════════════ */
+var station1Data = {
+    options: [
+        { key:'A', text:'Thứ 6 (Video Challenge) & Thứ 5 (Radio Việt Anh)' },
+        { key:'B', text:'Thứ 2 (Video Challenge) & Chủ Nhật (Radio Việt Anh)' },
+        { key:'C', text:'Thứ 3 (Video Challenge) & Thứ 7 (Radio Việt Anh)' }
+    ],
+    correct: 'A',
+    feedbackOk: '<i class="fa-solid fa-circle-check mr-2"></i><strong>MÃ MẬT CHÍNH XÁC!</strong> Thứ 6 (Video Challenge) & Thứ 5 (Radio Việt Anh)!',
+    feedbackWrong: '<i class="fa-solid fa-lightbulb mr-2"></i><strong>ĐÁP ÁN LÀ A!</strong> Video Thứ 6 — Radio Thứ 5. Đã cập nhật!'
+};
+
+function buildStation1Options() {
+    var container = document.getElementById('station1Options');
+    container.innerHTML = '';
+    station1Data.options.forEach(function(o) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'quiz-btn w-full p-3.5 sm:p-4 rounded-lg bg-slate-900/80 border border-purple-800/60 hover:border-purple-400 text-left text-slate-200 font-sans transition flex items-center justify-between group text-xs sm:text-sm';
+        btn.innerHTML = '<span><strong class="font-mono text-purple-400 mr-2">' + o.key + '.</strong> ' + esc(o.text) + '</span><i class="fa-solid fa-chevron-right text-purple-400 opacity-0 group-hover:opacity-100 transition"></i>';
+        btn.addEventListener('click', (function(key) {
+            return function() { handleStation1Answer(key); };
+        })(o.key));
+        container.appendChild(btn);
+    });
+}
+
+function handleStation1Answer(key) {
+    studentData.station1Answer = key;
+    var fb = document.getElementById('station1Feedback');
+    var btnNext = document.getElementById('btnNextStation1');
+    fb.className = 'p-3.5 rounded-lg mb-5 font-mono text-xs sm:text-sm border';
+    if (key === station1Data.correct) {
+        fb.classList.add('bg-emerald-950/50','border-emerald-500','text-emerald-300');
+        fb.innerHTML = station1Data.feedbackOk;
+        playSound('success');
+    } else {
+        fb.classList.add('bg-amber-950/50','border-amber-500','text-amber-300');
+        fb.innerHTML = station1Data.feedbackWrong;
+        playSound('click');
+    }
+    fb.classList.remove('hidden');
+    // Highlight selected
+    document.getElementById('station1Options').querySelectorAll('.quiz-btn').forEach(function(b) {
+        b.classList.remove('selected-ans','wrong-ans');
+        var strongEl = b.querySelector('strong');
+        if (strongEl && strongEl.textContent.trim().startsWith(key)) {
+            b.classList.add(key === station1Data.correct ? 'selected-ans' : 'wrong-ans');
+        }
+    });
+    btnNext.disabled = false;
+}
+document.getElementById('btnNextStation1').addEventListener('click', function() {
+    if (this.disabled) return;
+    playSound('click');
+    showScreen(3);
+});
+
+/* ══════════════════════════════════════════════════════
+   STATION 2 — THỰC NGHIỆM
+══════════════════════════════════════════════════════ */
+var station2Data = {
+    options: [
+        { key:'A', text:'"Tay không bắt lửa" (Metan an toàn), Bóp bẹp lon bằng áp suất & Pháo hoa kim loại' },
+        { key:'B', text:'Thi đấu giải cờ vua trên sân trường' },
+        { key:'C', text:'Biểu diễn vũ đạo nhảy hiện đại' }
+    ],
+    correct: 'A',
+    feedbackOk: '<i class="fa-solid fa-circle-check mr-2"></i><strong>CHUẨN!</strong> Lửa Metan, bóp lon áp suất & pháo hoa kim loại là thực nghiệm huyền thoại!',
+    feedbackWrong: '<i class="fa-solid fa-lightbulb mr-2"></i><strong>ĐÁP ÁN LÀ A!</strong> Funlab bùng nổ với Lửa Metan, Ngưng tụ áp suất và Pháo hoa màu sắc!'
+};
+
+function buildStation2Options() {
+    var container = document.getElementById('station2Options');
+    container.innerHTML = '';
+    station2Data.options.forEach(function(o) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'quiz-btn w-full p-3.5 sm:p-4 rounded-lg bg-slate-900/80 border border-amber-800/60 hover:border-amber-400 text-left text-slate-200 font-sans transition flex items-center justify-between group text-xs sm:text-sm';
+        btn.innerHTML = '<span><strong class="font-mono text-amber-400 mr-2">' + o.key + '.</strong> ' + esc(o.text) + '</span><i class="fa-solid fa-chevron-right text-amber-400 opacity-0 group-hover:opacity-100 transition"></i>';
+        btn.addEventListener('click', (function(key) {
+            return function() { handleStation2Answer(key); };
+        })(o.key));
+        container.appendChild(btn);
+    });
+}
+
+function handleStation2Answer(key) {
+    studentData.station2Answer = key;
+    var fb = document.getElementById('station2Feedback');
+    var btnNext = document.getElementById('btnNextStation2');
+    fb.className = 'p-3.5 rounded-lg mb-5 font-mono text-xs sm:text-sm border';
+    if (key === station2Data.correct) {
+        fb.classList.add('bg-emerald-950/50','border-emerald-500','text-emerald-300');
+        fb.innerHTML = station2Data.feedbackOk;
+        playSound('success');
+    } else {
+        fb.classList.add('bg-amber-950/50','border-amber-500','text-amber-300');
+        fb.innerHTML = station2Data.feedbackWrong;
+        playSound('click');
+    }
+    fb.classList.remove('hidden');
+    document.getElementById('station2Options').querySelectorAll('.quiz-btn').forEach(function(b) {
+        b.classList.remove('selected-ans','wrong-ans');
+        var strongEl = b.querySelector('strong');
+        if (strongEl && strongEl.textContent.trim().startsWith(key)) {
+            b.classList.add(key === station2Data.correct ? 'selected-ans' : 'wrong-ans');
+        }
+    });
+    btnNext.disabled = false;
+}
+document.getElementById('btnNextStation2').addEventListener('click', function() {
+    if (this.disabled) return;
+    playSound('click');
+    showScreen(4);
+});
+
+/* ══════════════════════════════════════════════════════
+   STATION 3 — CHALLENGE
+══════════════════════════════════════════════════════ */
+var challengeBankTHCS = {
+    question: 'Trong Tập 5 Funlab "Thử thách nín thở", Phổi không hề có cơ để tự co bóp. Vậy "ông chủ" điều khiển áp suất giúp phổi hít thở mỗi ngày là gì?',
+    options: [
+        { key:'A', text:'Cơ hoành (Chiếc màng cao su co giãn dưới lồng ngực).' },
+        { key:'B', text:'Trái tim tự bơm không khí vào.' },
+        { key:'C', text:'Do chúng ta tự dùng tay ép bụng vào.' }
+    ],
+    correct:'A',
+    feedbackOk:'<i class="fa-solid fa-circle-check mr-2"></i><strong>CHÍNH XÁC!</strong> Cơ hoành hạ xuống làm giảm áp suất trong lồng ngực, giúp không khí tràn vào phổi tự nhiên!',
+    feedbackWrong:'<i class="fa-solid fa-circle-info mr-2"></i><strong>ĐÁP ÁN LÀ A!</strong> Cơ hoành chính là chiếc bơm kỳ diệu điều khiển hơi thở!'
+};
+
+var challengeBankTHPT = {
+    'Ban Chuyên Môn': {
+        question:'Trong Tập 4 "Pháo hoa Funlab", muối Đồng (CuSO4) tạo màu xanh lá, muối Ăn (NaCl) tạo màu vàng chói. Nguyên lý cốt lõi là gì?',
+        options:[{key:'A',text:'Các ion kim loại hấp thụ nhiệt năng rồi giải phóng các hạt ánh sáng (Photon).'},{key:'B',text:'Do xà phòng trong chén nổ sinh khí bọt màu.'},{key:'C',text:'Do phản ứng cháy tỏa ra khói độc có màu.'}],
+        correct:'A',feedbackOk:'<i class="fa-solid fa-circle-check mr-2"></i><strong>TƯ DUY CHUYÊN MÔN XUẤT SẮC!</strong> Ion kim loại giải phóng photon ánh sáng tạo nên sắc màu!',feedbackWrong:'<i class="fa-solid fa-circle-info mr-2"></i><strong>ĐÁP ÁN ĐÚNG LÀ A!</strong> Ion kim loại giải phóng photon khi nhận nhiệt năng!'
+    },
+    'Ban Kỹ Thuật': {
+        question:'Trong "Tay không bắt lửa" Metan sủi bọt xà phòng, để không bị bỏng, nguyên tắc kỹ thuật nào là bắt buộc?',
+        options:[{key:'A',text:'Bản thân khí Metan là khí lạnh nên không gây bỏng.'},{key:'B',text:'Phải nhúng ướt đẫm bàn tay bằng nước lạnh trước để tạo lớp màng tản nhiệt.'},{key:'C',text:'Đeo găng khẩu trang cách nhiệt dày.'}],
+        correct:'B',feedbackOk:'<i class="fa-solid fa-circle-check mr-2"></i><strong>CHUẨN KỸ THUẬT AN TOÀN!</strong> Lớp nước lạnh trên tay hấp thụ nhiệt năng, bảo vệ da tuyệt đối!',feedbackWrong:'<i class="fa-solid fa-circle-info mr-2"></i><strong>ĐÁP ÁN ĐÚNG LÀ B!</strong> Phải làm ướt đẫm tay bằng nước lạnh để tạo màng bảo vệ nhiệt.'
+    },
+    'Ban Truyền Thông': {
+        question:'Để ghi lại khoảnh khắc quả bóng vỡ tung trong 0.1 giây do máy Wimshurst phóng điện, kỹ thuật quay phim nào bùng nổ nhất?',
+        options:[{key:'A',text:'Quay tua nhanh thời gian (Time-lapse).'},{key:'B',text:'Quay tốc độ khung hình cao (60fps/120fps Slow-Motion) kết hợp góc quay Macro cực cận.'},{key:'C',text:'Chụp một bức ảnh tĩnh bình thường.'}],
+        correct:'B',feedbackOk:'<i class="fa-solid fa-circle-check mr-2"></i><strong>TƯ DUY MEDIA XUẤT SẮC!</strong> Slow-mo 60/120fps bắt trọn khoảnh khắc bùng nổ!',feedbackWrong:'<i class="fa-solid fa-circle-info mr-2"></i><strong>ĐÁP ÁN ĐÚNG LÀ B!</strong> Slow-mo 60/120fps là bí quyết tạo nên thước phim bùng nổ!'
+    },
+    'Ban Tổ Chức': {
+        question:'Trong Tập 6 "Chiếc lon bẹp dí", kỹ thuật viên đã thao tác như thế nào?',
+        options:[{key:'A',text:'Đun sôi một ít nước trong lon rồi úp ngược ngay vào chậu nước lạnh.'},{key:'B',text:'Dùng búa đập mạnh vào lon.'},{key:'C',text:'Bơm khí nitơ lỏng vào lon.'}],
+        correct:'A',feedbackOk:'<i class="fa-solid fa-circle-check mr-2"></i><strong>TƯ DUY HẬU CẦN TUYỆT VỜI!</strong> Hơi nước ngưng tụ đột ngột làm áp suất giảm mạnh, khí quyển bóp bẹp lon!',feedbackWrong:'<i class="fa-solid fa-circle-info mr-2"></i><strong>ĐÁP ÁN ĐÚNG LÀ A!</strong> Đun nước úp vào chậu nước lạnh tạo hiệu ứng áp suất thần kỳ!'
+    }
+};
+
+var currentChallengeData = null;
+
+function loadChallengeQuestions() {
+    currentChallengeData = studentData.level === 'THCS'
+        ? challengeBankTHCS
+        : (challengeBankTHPT[studentData.department] || challengeBankTHPT['Ban Chuyên Môn']);
+
+    document.getElementById('deptBadge').innerHTML =
+        '<i class="fa-solid fa-bolt mr-1"></i> KHỐI ' + studentData.level + ': ' + esc(studentData.department.toUpperCase());
+
+    var box = document.getElementById('challengeBox');
+    box.innerHTML = '';
+
+    // Question card
+    var qDiv = document.createElement('div');
+    qDiv.className = 'p-4 bg-cyan-950/30 border-l-4 border-cyan-400 rounded-r-lg';
+    qDiv.innerHTML = '<h3 class="font-semibold text-cyan-200 text-xs sm:text-sm leading-relaxed">"' + esc(currentChallengeData.question) + '"</h3>';
+    box.appendChild(qDiv);
+
+    // Options — DOM elements, NO inline onclick
+    var optDiv = document.createElement('div');
+    optDiv.className = 'space-y-3 mt-4';
+    currentChallengeData.options.forEach(function(o) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'quiz-btn w-full p-3.5 sm:p-4 rounded-lg bg-slate-900/80 border border-cyan-800/60 hover:border-cyan-400 text-left text-slate-200 font-sans transition flex items-center justify-between group text-xs sm:text-sm';
+        btn.setAttribute('data-key', o.key);
+        btn.innerHTML =
+            '<span><strong class="font-mono text-cyan-400 mr-2">' + o.key + '.</strong> ' + esc(o.text) + '</span>' +
+            '<i class="fa-solid fa-chevron-right text-cyan-500 opacity-0 group-hover:opacity-100 transition"></i>';
+        btn.addEventListener('click', (function(key) {
+            return function() { handleChallengeAnswer(key); };
+        })(o.key));
+        optDiv.appendChild(btn);
+    });
+    box.appendChild(optDiv);
+
+    // Reset feedback & next btn
+    var fb = document.getElementById('minigameFeedback');
+    fb.className = 'hidden';
+    document.getElementById('btnNextScreen4').disabled = true;
+}
+
+function handleChallengeAnswer(key) {
+    var opt = currentChallengeData.options.find(function(o) { return o.key === key; });
+    studentData.challengeAnswer = key + ': ' + (opt ? opt.text : '');
+    var fb = document.getElementById('minigameFeedback');
+    var btnNext = document.getElementById('btnNextScreen4');
+    fb.className = 'p-3.5 rounded-lg mb-5 font-mono text-xs sm:text-sm border';
+    if (key === currentChallengeData.correct) {
+        fb.classList.add('bg-emerald-950/50','border-emerald-500','text-emerald-300');
+        fb.innerHTML = currentChallengeData.feedbackOk;
+        playSound('success');
+    } else {
+        fb.classList.add('bg-amber-950/50','border-amber-500','text-amber-300');
+        fb.innerHTML = currentChallengeData.feedbackWrong;
+        playSound('click');
+    }
+    fb.classList.remove('hidden');
+    // Highlight
+    document.getElementById('challengeBox').querySelectorAll('.quiz-btn').forEach(function(b) {
+        b.classList.remove('selected-ans','wrong-ans');
+        if (b.getAttribute('data-key') === key) {
+            b.classList.add(key === currentChallengeData.correct ? 'selected-ans' : 'wrong-ans');
+        }
+        if (b.getAttribute('data-key') === currentChallengeData.correct) {
+            b.classList.add('selected-ans');
+        }
+    });
+    btnNext.disabled = false;
+}
+document.getElementById('btnNextScreen4').addEventListener('click', function() {
+    if (this.disabled) return;
+    playSound('click');
+    showScreen(5);
+});
+
+/* ══════════════════════════════════════════════════════
+   SCREEN 5 — PROFILE FORM
+══════════════════════════════════════════════════════ */
+function customizeScreen5UI() {
+    if (studentData.level === 'THCS') {
+        document.getElementById('expLabel').innerHTML = '<i class="fa-solid fa-star mr-1"></i> 1. SỞ THÍCH HOẶC MÔ HÌNH/SẢN PHẨM EM TỪNG TỰ LÀM <span class="text-rose-500">*</span>';
+        document.getElementById('aspLabel').innerHTML = '<i class="fa-solid fa-rocket mr-1"></i> 2. THỬ THÁCH NÀO CỦA FUNLAB LÀM EM HÀO HỨNG NHẤT? <span class="text-rose-500">*</span>';
+    } else {
+        document.getElementById('expLabel').innerHTML = '<i class="fa-solid fa-code mr-1"></i> 1. KINH NGHIỆM / SỞ THÍCH SÁNG TẠO CỦA EM <span class="text-rose-500">*</span>';
+        document.getElementById('aspLabel').innerHTML = '<i class="fa-solid fa-rocket mr-1"></i> 2. NGUYỆN VỌNG &amp; Ý TƯỞNG ĐÓNG GÓP CHO CLB <span class="text-rose-500">*</span>';
+    }
+}
+
+document.getElementById('profileForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    var vom = document.getElementById('vomUnderstanding').value.trim();
+    var exp = document.getElementById('studentExperience').value.trim();
+    var port = document.getElementById('studentPortfolio').value.trim();
+    var asp = document.getElementById('studentAspiration').value.trim();
+    var errEl = document.getElementById('screen5Error');
+    var errMsg = document.getElementById('screen5ErrorMsg');
+
+    function showErr(msg) {
+        playSound('error');
+        errMsg.textContent = msg;
+        errEl.classList.remove('hidden');
+        errEl.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    }
+    if (!vom) { showErr('Điền thông tin VÒM KHOA HỌC!'); return; }
+    if (!exp) { showErr('Điền thông tin KINH NGHIỆM / SỞ THÍCH!'); return; }
+    if (!asp) { showErr('Điền NGUYỆN VỌNG của em!'); return; }
+    errEl.classList.add('hidden');
+
+    studentData.vomUnderstanding = vom;
+    studentData.experience = exp;
+    studentData.portfolio = port || 'Không cung cấp';
+    studentData.aspiration = asp;
+    studentData.timestamp = new Date().toLocaleString('vi-VN');
+    studentData.agentCode = 'FL-' + studentData.level + '-' + Math.floor(1000 + Math.random() * 9000);
+
+    showScreen('loading');
+
+    // Lưu localStorage
+    try {
+        var entry = Object.assign({}, studentData);
+        localSubmissions.unshift(entry);
+        localStorage.setItem('FUNLAB_LOCAL_SUBMISSIONS', JSON.stringify(localSubmissions));
+    } catch(e2) { console.warn('LocalStorage error:', e2); }
+
+    // Gửi Supabase (không block UI nếu lỗi)
+    try {
+        await fetch(SUPABASE_SUBMIT_URL, {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({
+                name: studentData.name,
+                student_class: studentData.studentClass,
+                level: studentData.level,
+                registration_type: studentData.registrationType,
+                department: studentData.department,
+                vom_understanding: studentData.vomUnderstanding,
+                station1_answer: studentData.station1Answer,
+                station2_answer: studentData.station2Answer,
+                challenge_answer: studentData.challengeAnswer,
+                experience: studentData.experience,
+                portfolio: studentData.portfolio,
+                aspiration: studentData.aspiration,
+                agent_code: studentData.agentCode
+            })
+        });
+    } catch(fetchErr) { console.warn('[Supabase] Submit error:', fetchErr); }
+
+    setupScreen6();
+    showScreen(6);
+    playSound('success');
+});
+
+function setupScreen6() {
+    document.getElementById('successMessage').innerHTML =
+        'CHÚC MỪNG ĐẶC VỤ <strong class="text-cyan-300">' + esc(studentData.name) + '</strong>!<br>' +
+        'Đơn ứng tuyển <strong class="text-amber-300">' + esc(studentData.registrationType) + '</strong> — ' +
+        '<strong class="text-emerald-400">' + esc(studentData.department) + '</strong> đã được ghi nhận thành công.';
+
+    document.getElementById('badgeName').textContent = studentData.name;
+    document.getElementById('badgeClass').textContent = studentData.studentClass;
+    document.getElementById('badgeDepartment').textContent = studentData.department;
+    document.getElementById('badgeAgentCode').textContent = studentData.agentCode;
+    document.getElementById('badgeTimestamp').textContent = studentData.timestamp;
+    document.getElementById('badgeLevelTag').textContent = studentData.level + ' OPERATIVE';
+
+    var iconMap = {
+        'Ban Chuyên Môn':'fa-brain text-cyan-300',
+        'Ban Kỹ Thuật':'fa-microchip text-emerald-300',
+        'Ban Truyền Thông':'fa-video text-purple-300',
+        'Ban Tổ Chức':'fa-sitemap text-amber-300',
+        'Đặc Vụ Thí Nghiệm':'fa-flask-vial text-cyan-300',
+        'Đặc Vụ Truyền Thông Nhí':'fa-camera-retro text-purple-300',
+        'Đặc Vụ Sự Kiện':'fa-box-archive text-amber-300',
+        'Đặc Vụ Vòm Khoa Học':'fa-atom text-amber-300'
+    };
+    document.getElementById('badgeAvatarIcon').className =
+        'fa-solid ' + (iconMap[studentData.department] || 'fa-atom text-cyan-300') +
+        ' text-4xl sm:text-5xl drop-shadow-[0_0_10px_rgba(0,240,255,0.6)]';
+    document.getElementById('badgeRankTitle').textContent =
+        studentData.level === 'THPT' ? 'LAB MASTER' :
+        (studentData.department.includes('Vòm') ? 'VÒM KH MEMBER' : 'EXPLORER');
+}
+
+document.getElementById('btnDownloadBadge').addEventListener('click', function() {
+    playSound('click');
+    var btn = this;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang xuất...';
+    btn.disabled = true;
+    html2canvas(document.getElementById('badgeContainer'), { backgroundColor:'#030712', scale:2, useCORS:true })
+        .then(function(canvas) {
+            var a = document.createElement('a');
+            a.download = 'FUNLAB-AGENT-' + studentData.agentCode + '.png';
+            a.href = canvas.toDataURL('image/png');
+            a.click();
+        })
+        .catch(function(err) { console.error('Badge error:', err); alert('Không thể tải badge. Vui lòng thử lại!'); })
+        .finally(function() { btn.innerHTML = '<i class="fa-solid fa-download"></i> TẢI THẺ ĐẶC VỤ (PNG)'; btn.disabled = false; });
+});
+
+document.getElementById('btnReset').addEventListener('click', function() {
+    playSound('click');
+    studentData = { name:'', studentClass:'', level:'THCS', registrationType:'VÒM KHOA HỌC', department:'', vomUnderstanding:'', station1Answer:'', station2Answer:'', challengeAnswer:'', experience:'', portfolio:'', aspiration:'', agentCode:'', timestamp:'' };
+    document.getElementById('identityForm').reset();
+    document.getElementById('profileForm').reset();
+    document.getElementById('agentTagHeader').classList.remove('visible');
+    detectGradeLevel();
+    showScreen(1);
+});
+
+/* ══════════════════════════════════════════════════════
+   ADMIN
+══════════════════════════════════════════════════════ */
+document.getElementById('btnOpenAdmin').addEventListener('click', function() {
+    playSound('click');
+    document.getElementById('adminPinInput').value = '';
+    document.getElementById('adminPinError').classList.add('hidden');
+    document.getElementById('adminAuthModal').classList.remove('hidden');
+    document.getElementById('adminPinInput').focus();
+});
+document.getElementById('btnCloseAdminModal').addEventListener('click', function() {
+    playSound('click');
+    document.getElementById('adminAuthModal').classList.add('hidden');
+});
+document.getElementById('adminPinForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var pin = document.getElementById('adminPinInput').value.trim();
     if (pin === ADMIN_PIN || pin === '123456') {
         playSound('success');
         document.getElementById('adminAuthModal').classList.add('hidden');
@@ -420,437 +1031,212 @@ function verifyAdminPin(e) {
         initAdminDashboard();
     } else {
         playSound('error');
-        const err = document.getElementById('adminPinError');
-        err.innerText = 'Mật khẩu PIN không đúng!';
-        err.classList.remove('hidden');
+        var errEl = document.getElementById('adminPinError');
+        errEl.textContent = 'Mã PIN không đúng! Vui lòng thử lại.';
+        errEl.classList.remove('hidden');
+        document.getElementById('adminPinInput').value = '';
+        document.getElementById('adminPinInput').focus();
     }
-}
-function closeAdminDashboard() { playSound('click'); document.getElementById('adminDashboardModal').classList.add('hidden'); }
-function initAdminDashboard() { populateDeptFilterOptions(); renderAdminTable(); }
+});
 
-function getAllSubmissions() { return localSubmissions; }
+document.getElementById('btnCloseAdminDashboard').addEventListener('click', function() {
+    playSound('click');
+    document.getElementById('adminDashboardModal').classList.add('hidden');
+});
+document.getElementById('btnCloseDetail').addEventListener('click', function() { document.getElementById('studentDetailModal').classList.add('hidden'); });
+document.getElementById('btnCloseDetail2').addEventListener('click', function() { document.getElementById('studentDetailModal').classList.add('hidden'); });
+document.getElementById('btnExportCSV').addEventListener('click', exportToCSV);
+document.getElementById('adminSearchInput').addEventListener('input', renderAdminTable);
+document.getElementById('adminFilterLevel').addEventListener('change', renderAdminTable);
+document.getElementById('adminFilterDept').addEventListener('change', renderAdminTable);
 
-function populateDeptFilterOptions() {
-    const filterDept = document.getElementById('adminFilterDept');
-    const depts = new Set(localSubmissions.map(function(s) { return s.department; }).filter(Boolean));
-    let html = '<option value="ALL">Tất cả Vị Trí / Ban</option>';
-    depts.forEach(function(d) { html += '<option value="' + d + '">' + d + '</option>'; });
-    filterDept.innerHTML = html;
-}
-
-function renderAdminTable() {
-    const tbody = document.getElementById('adminTableBody');
-    const search = (document.getElementById('adminSearchInput').value || '').trim().toLowerCase();
-    const filterLevel = document.getElementById('adminFilterLevel').value;
-    const filterDept = document.getElementById('adminFilterDept').value;
-    let subs = localSubmissions.slice();
-    if (filterLevel !== 'ALL') subs = subs.filter(function(s) { return s.level === filterLevel; });
-    if (filterDept !== 'ALL') subs = subs.filter(function(s) { return s.department === filterDept; });
-    if (search) subs = subs.filter(function(s) { return (s.name||'').toLowerCase().includes(search) || (s.studentClass||'').toLowerCase().includes(search); });
-    document.getElementById('submissionCountBadge').innerText = subs.length + ' BÀI NỘP';
-    if (subs.length === 0) { tbody.innerHTML = '<tr><td colspan="11" class="p-6 text-center text-slate-500 font-mono">Chưa có dữ liệu.</td></tr>'; return; }
-    let html = '';
-    subs.forEach(function(s, i) {
-        const chk1 = s.station1Answer === 'A' ? '<i class="fa-solid fa-check text-emerald-400"></i>' : '<span class="text-amber-400">' + (s.station1Answer||'-') + '</span>';
-        const chk2 = s.station2Answer === 'A' ? '<i class="fa-solid fa-check text-emerald-400"></i>' : '<span class="text-amber-400">' + (s.station2Answer||'-') + '</span>';
-        const lvlCls = s.level === 'THPT' ? 'bg-emerald-950 text-emerald-300 border-emerald-800' : 'bg-cyan-950 text-cyan-300 border-cyan-800';
-        html += '<tr class="hover:bg-slate-900/60 transition text-xs font-mono">';
-        html += '<td class="p-3 text-slate-500">' + (i+1) + '</td>';
-        html += '<td class="p-3 font-bold text-cyan-400">' + esc(s.agentCode) + '</td>';
-        html += '<td class="p-3 font-semibold text-white font-sans">' + esc(s.name) + '</td>';
-        html += '<td class="p-3 text-emerald-400 font-bold">' + esc(s.studentClass) + '</td>';
-        html += '<td class="p-3"><span class="px-1.5 py-0.5 rounded border text-[10px] ' + lvlCls + '">' + esc(s.level) + '</span></td>';
-        html += '<td class="p-3 text-amber-300">' + esc(s.department) + '<br><span class="text-[9px] text-amber-400/80">(' + esc(s.registrationType) + ')</span></td>';
-        html += '<td class="p-3 text-center">' + chk1 + '</td>';
-        html += '<td class="p-3 text-center">' + chk2 + '</td>';
-        html += '<td class="p-3 text-center text-cyan-300 text-[10px]">' + esc(s.challengeAnswer ? s.challengeAnswer.split(':')[0] : '-') + '</td>';
-        html += '<td class="p-3 text-slate-400 text-[10px]">' + esc(s.timestamp) + '</td>';
-        html += '<td class="p-3 text-center space-x-1">';
-        html += '<button onclick="viewStudentDetail(' + i + ')" class="px-2 py-1 rounded bg-cyan-950 border border-cyan-800 hover:border-cyan-400 text-cyan-300 text-[11px]"><i class="fa-solid fa-eye"></i></button> ';
-        html += '<button onclick="deleteLocal(' + JSON.stringify(s.agentCode) + ')" class="px-2 py-1 rounded bg-rose-950 border border-rose-900 hover:border-rose-500 text-rose-400 text-[11px]"><i class="fa-solid fa-trash"></i></button>';
-        html += '</td></tr>';
-    });
-    tbody.innerHTML = html;
-    window._adminSubs = subs;
-}
-
-function deleteLocal(agentCode) {
-    if (!confirm('Xóa bài nộp mã [' + agentCode + ']?')) return;
-    localSubmissions = localSubmissions.filter(function(s) { return s.agentCode !== agentCode; });
-    localStorage.setItem('FUNLAB_LOCAL_SUBMISSIONS', JSON.stringify(localSubmissions));
+function initAdminDashboard() {
+    populateDeptFilter();
     renderAdminTable();
 }
 
+function populateDeptFilter() {
+    var sel = document.getElementById('adminFilterDept');
+    var depts = Array.from(new Set(localSubmissions.map(function(s) { return s.department; }).filter(Boolean)));
+    var html = '<option value="ALL">Tất cả Vị Trí / Ban</option>';
+    depts.forEach(function(d) {
+        html += '<option value="' + esc(d) + '">' + esc(d) + '</option>';
+    });
+    sel.innerHTML = html;
+}
+
+function renderAdminTable() {
+    var tbody = document.getElementById('adminTableBody');
+    var search = (document.getElementById('adminSearchInput').value || '').trim().toLowerCase();
+    var filterLevel = document.getElementById('adminFilterLevel').value;
+    var filterDept  = document.getElementById('adminFilterDept').value;
+
+    var subs = localSubmissions.filter(function(s) {
+        if (filterLevel !== 'ALL' && s.level !== filterLevel) return false;
+        if (filterDept  !== 'ALL' && s.department !== filterDept) return false;
+        if (search && !(s.name||'').toLowerCase().includes(search) && !(s.studentClass||'').toLowerCase().includes(search)) return false;
+        return true;
+    });
+
+    document.getElementById('submissionCountBadge').textContent = subs.length + ' BÀI NỘP';
+
+    if (subs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="11" class="p-8 text-center text-slate-500 font-mono text-sm">Chưa có dữ liệu bài nộp.</td></tr>';
+        return;
+    }
+
+    // Xóa nội dung cũ, dùng DOM elements (KHÔNG dùng innerHTML với data động)
+    tbody.innerHTML = '';
+    // Lưu subs vào window để viewStudentDetail dùng
+    window._adminSubs = subs;
+
+    subs.forEach(function(s, i) {
+        var tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-900/60 transition text-xs font-mono border-b border-slate-800/50';
+
+        var chk1Html = s.station1Answer === 'A'
+            ? '<i class="fa-solid fa-check text-emerald-400"></i>'
+            : '<span class="text-amber-400">' + esc(s.station1Answer || '-') + '</span>';
+        var chk2Html = s.station2Answer === 'A'
+            ? '<i class="fa-solid fa-check text-emerald-400"></i>'
+            : '<span class="text-amber-400">' + esc(s.station2Answer || '-') + '</span>';
+        var chk3Key = (s.challengeAnswer || '-').split(':')[0].trim();
+        var lvlCls  = s.level === 'THPT'
+            ? 'bg-emerald-950 text-emerald-300 border-emerald-800'
+            : 'bg-cyan-950 text-cyan-300 border-cyan-800';
+
+        tr.innerHTML =
+            '<td class="p-3 text-slate-500">' + (i+1) + '</td>' +
+            '<td class="p-3 font-bold text-cyan-400">' + esc(s.agentCode) + '</td>' +
+            '<td class="p-3 font-semibold text-white font-sans">' + esc(s.name) + '</td>' +
+            '<td class="p-3 text-emerald-400 font-bold">' + esc(s.studentClass) + '</td>' +
+            '<td class="p-3"><span class="px-1.5 py-0.5 rounded border text-[10px] ' + lvlCls + '">' + esc(s.level) + '</span></td>' +
+            '<td class="p-3 text-amber-300">' + esc(s.department) + '<br><span class="text-[9px] text-amber-400/80">(' + esc(s.registrationType) + ')</span></td>' +
+            '<td class="p-3 text-center">' + chk1Html + '</td>' +
+            '<td class="p-3 text-center">' + chk2Html + '</td>' +
+            '<td class="p-3 text-center text-cyan-300">' + esc(chk3Key) + '</td>' +
+            '<td class="p-3 text-slate-400 text-[10px]">' + esc(s.timestamp) + '</td>' +
+            '<td class="p-3 text-center"></td>';
+
+        // Thao tác — dùng DOM buttons với event listeners, KHÔNG dùng onclick string
+        var actionTd = tr.querySelector('td:last-child');
+        var btnView = document.createElement('button');
+        btnView.className = 'px-2 py-1 mr-1 rounded bg-cyan-950 border border-cyan-800 hover:border-cyan-400 text-cyan-300 text-[11px] transition-all';
+        btnView.innerHTML = '<i class="fa-solid fa-eye"></i>';
+        btnView.title = 'Xem chi tiết';
+        btnView.addEventListener('click', (function(idx) {
+            return function() { viewStudentDetail(idx); };
+        })(i));
+        actionTd.appendChild(btnView);
+
+        var btnDel = document.createElement('button');
+        btnDel.className = 'px-2 py-1 rounded bg-rose-950 border border-rose-900 hover:border-rose-500 text-rose-400 text-[11px] transition-all';
+        btnDel.innerHTML = '<i class="fa-solid fa-trash"></i>';
+        btnDel.title = 'Xóa bài nộp';
+        btnDel.addEventListener('click', (function(agentCode) {
+            return function() { deleteSubmission(agentCode); };
+        })(s.agentCode));
+        actionTd.appendChild(btnDel);
+
+        tbody.appendChild(tr);
+    });
+}
+
 function viewStudentDetail(idx) {
-    const s = (window._adminSubs || localSubmissions)[idx];
+    var s = (window._adminSubs || localSubmissions)[idx];
     if (!s) return;
     playSound('click');
-    document.getElementById('detailAgentCode').innerText = s.agentCode || '--';
-    document.getElementById('detailName').innerText = s.name || '--';
-    document.getElementById('detailClass').innerText = s.studentClass || '--';
-    document.getElementById('detailLevel').innerText = s.level || '--';
-    document.getElementById('detailRegType').innerText = s.registrationType || '--';
-    document.getElementById('detailDept').innerText = s.department || '--';
-    document.getElementById('detailTime').innerText = s.timestamp || '--';
-    document.getElementById('detailVom').innerText = s.vomUnderstanding || '--';
-    document.getElementById('detailAns1').innerText = s.station1Answer || '--';
-    document.getElementById('detailAns2').innerText = s.station2Answer || '--';
-    document.getElementById('detailAns3').innerText = s.challengeAnswer || '--';
-    document.getElementById('detailExp').innerText = s.experience || '--';
-    document.getElementById('detailPortfolio').innerText = s.portfolio || '--';
-    document.getElementById('detailAspiration').innerText = s.aspiration || '--';
+    document.getElementById('detailAgentCode').textContent = s.agentCode || '--';
+    document.getElementById('detailName').textContent      = s.name || '--';
+    document.getElementById('detailClass').textContent     = s.studentClass || '--';
+    document.getElementById('detailLevel').textContent     = s.level || '--';
+    document.getElementById('detailRegType').textContent   = s.registrationType || '--';
+    document.getElementById('detailDept').textContent      = s.department || '--';
+    document.getElementById('detailTime').textContent      = s.timestamp || '--';
+    document.getElementById('detailVom').textContent       = s.vomUnderstanding || '--';
+    document.getElementById('detailAns1').textContent      = s.station1Answer || '--';
+    document.getElementById('detailAns2').textContent      = s.station2Answer || '--';
+    document.getElementById('detailAns3').textContent      = s.challengeAnswer || '--';
+    document.getElementById('detailExp').textContent       = s.experience || '--';
+    document.getElementById('detailPortfolio').textContent = s.portfolio || '--';
+    document.getElementById('detailAspiration').textContent= s.aspiration || '--';
     document.getElementById('studentDetailModal').classList.remove('hidden');
 }
-function closeStudentDetail() { document.getElementById('studentDetailModal').classList.add('hidden'); }
+
+function deleteSubmission(agentCode) {
+    if (!confirm('Xóa bài nộp [' + agentCode + ']? Thao tác này không thể hoàn tác!')) return;
+    localSubmissions = localSubmissions.filter(function(s) { return s.agentCode !== agentCode; });
+    try { localStorage.setItem('FUNLAB_LOCAL_SUBMISSIONS', JSON.stringify(localSubmissions)); } catch(e) {}
+    populateDeptFilter();
+    renderAdminTable();
+    playSound('click');
+}
 
 function exportToCSV() {
-    const subs = getAllSubmissions();
-    if (subs.length === 0) { alert('Chưa có dữ liệu!'); return; }
-    const NL = '\r\n';
-    let csv = '\uFEFFSTT,Mã Đặc Vụ,Họ Và Tên,Lớp,Khối,Hình Thức,Ban Ứng Tuyển,Vòm KH,T1,T2,T3,Kinh Nghiệm,Portfolio,Nguyện Vọng,Thời Gian' + NL;
+    var subs = localSubmissions;
+    if (subs.length === 0) { alert('Chưa có dữ liệu để xuất!'); return; }
+    var CRLF = '\r\n';
+    var headers = ['STT','Mã Đặc Vụ','Họ Tên','Lớp','Khối','Hình Thức','Ban/Vị Trí','Vòm KH','T1','T2','T3','Kinh Nghiệm','Portfolio','Nguyện Vọng','Thời Gian'];
+    var rows = [headers.map(function(h) { return '"' + h + '"'; }).join(',')];
     subs.forEach(function(s, i) {
-        const row = [i+1, s.agentCode, s.name, s.studentClass, s.level, s.registrationType, s.department,
-                     s.vomUnderstanding, s.station1Answer, s.station2Answer, s.challengeAnswer,
-                     s.experience, s.portfolio, s.aspiration, s.timestamp];
-        csv += row.map(function(v) { return '"' + (v||'').toString().replace(/"/g, '""') + '"'; }).join(',') + NL;
+        var cells = [
+            i+1, s.agentCode, s.name, s.studentClass, s.level,
+            s.registrationType, s.department, s.vomUnderstanding,
+            s.station1Answer, s.station2Answer, s.challengeAnswer,
+            s.experience, s.portfolio, s.aspiration, s.timestamp
+        ];
+        rows.push(cells.map(function(v) {
+            return '"' + (v || '').toString().replace(/"/g, '""').replace(/\r?\n/g, ' ') + '"';
+        }).join(','));
     });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv;charset=utf-8;'}));
+    var csvContent = '\uFEFF' + rows.join(CRLF);
+    var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
     a.download = 'FUNLAB_RECRUIT_' + new Date().toISOString().slice(0,10) + '.csv';
     a.click();
+    setTimeout(function() { URL.revokeObjectURL(a.href); }, 1000);
 }
 
-// ── AUDIO ────────────────────────────────────────────────
-let isAudioEnabled = true;
-let audioCtx = null;
-function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
-function playSound(type) {
-    if (!isAudioEnabled) return;
-    try {
-        initAudio();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        const now = audioCtx.currentTime;
-        if (type === 'click') { osc.type='sine'; osc.frequency.setValueAtTime(800,now); osc.frequency.exponentialRampToValueAtTime(400,now+0.08); gain.gain.setValueAtTime(0.12,now); gain.gain.exponentialRampToValueAtTime(0.01,now+0.08); osc.start(now); osc.stop(now+0.08); }
-        else if (type === 'success') { osc.type='triangle'; osc.frequency.setValueAtTime(440,now); osc.frequency.setValueAtTime(554.37,now+0.1); osc.frequency.setValueAtTime(659.25,now+0.2); gain.gain.setValueAtTime(0.18,now); gain.gain.exponentialRampToValueAtTime(0.01,now+0.35); osc.start(now); osc.stop(now+0.35); }
-        else if (type === 'error') { osc.type='sawtooth'; osc.frequency.setValueAtTime(220,now); osc.frequency.exponentialRampToValueAtTime(110,now+0.2); gain.gain.setValueAtTime(0.15,now); gain.gain.exponentialRampToValueAtTime(0.01,now+0.2); osc.start(now); osc.stop(now+0.2); }
-    } catch(e) {}
-}
-function toggleAudio() { isAudioEnabled=!isAudioEnabled; document.getElementById('audioIcon').className=isAudioEnabled?'fa-solid fa-volume-high':'fa-solid fa-volume-xmark text-rose-400'; if(isAudioEnabled) playSound('click'); }
-
-// ── ROLES ────────────────────────────────────────────────
-const rolesTHCS = [
-    {id:'Đặc Vụ Vòm Khoa Học',   title:'Vòm Khoa Học', desc:'Thực hành Sáng T7 với GV KHTN', icon:'fa-atom',        color:'text-amber-400'},
-    {id:'Đặc Vụ Thí Nghiệm',     title:'Thí Nghiệm',   desc:'Pha chế & Mô hình STEM',       icon:'fa-flask-vial',  color:'text-cyan-400'},
-    {id:'Đặc Vụ Truyền Thông Nhí',title:'Media Nhí',   desc:'CapCut, Ảnh & Poster',         icon:'fa-camera-retro',color:'text-purple-400'},
-    {id:'Đặc Vụ Sự Kiện',        title:'Sự Kiện',      desc:'Đạo cụ & Hỗ trợ trò chơi',    icon:'fa-box-archive', color:'text-amber-400'}
-];
-const rolesTHPT = [
-    {id:'Ban Chuyên Môn', title:'Chuyên Môn', desc:'Nghiên cứu & Kịch bản',  icon:'fa-brain',         color:'text-cyan-400'},
-    {id:'Ban Kỹ Thuật',   title:'Kỹ Thuật',   desc:'Thí nghiệm & Sân khấu',  icon:'fa-screwdriver-wrench', color:'text-emerald-400'},
-    {id:'Ban Truyền Thông',title:'Truyền Thông',desc:'Quay, Dựng & Poster',  icon:'fa-video',         color:'text-purple-400'},
-    {id:'Ban Tổ Chức',    title:'Hậu Cần',    desc:'Vật tư & Điều phối',     icon:'fa-sitemap',       color:'text-amber-400'}
-];
-
-function detectGradeLevel() {
-    const v = (document.getElementById('studentClass').value || '').trim().toUpperCase();
-    const badge = document.getElementById('levelBadge');
-    // Detect: lớp 10,11,12 = THPT; lớp 6,7,8,9 = THCS
-    const gradeNum = parseInt(v.replace(/[^0-9]/g, '').substring(0, 2)) || 0;
-    if (gradeNum >= 10 && gradeNum <= 12) {
-        studentData.level = 'THPT';
-        badge.innerText = 'KHỐI THPT (NÒNG CỐT)';
-        badge.className = 'px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-950 border border-emerald-500 text-emerald-300';
-    } else if (gradeNum >= 6 && gradeNum <= 9) {
-        studentData.level = 'THCS';
-        badge.innerText = 'KHỐI THCS (KHÁM PHÁ)';
-        badge.className = 'px-2 py-0.5 rounded text-[10px] font-mono bg-cyan-950 border border-cyan-500 text-cyan-300';
-    } else {
-        studentData.level = 'THCS';
-        badge.innerText = 'ĐANG PHÂN LỚP...';
-        badge.className = 'px-2 py-0.5 rounded text-[10px] font-mono bg-slate-900 border border-slate-700 text-slate-400';
-    }
-    renderRoles();
-}
-
-function renderRoles() {
-    const container = document.getElementById('roleCardsContainer');
-    const list = studentData.level === 'THPT' ? rolesTHPT : rolesTHCS;
-    container.innerHTML = '';
-    list.forEach(function(r, idx) {
-        const card = document.createElement('div');
-        card.className = 'role-card p-3 rounded-lg bg-slate-950/60 text-center' + (studentData.department === r.id ? ' selected' : '');
-        card.setAttribute('data-roleid', r.id);
-        card.innerHTML = '<i class="fa-solid ' + r.icon + ' text-2xl ' + r.color + ' mb-1.5"></i>' +
-                         '<div class="font-orbitron text-xs text-white font-bold">' + r.title + '</div>' +
-                         '<div class="text-[10px] text-slate-400 mt-0.5">' + r.desc + '</div>';
-        card.addEventListener('click', function() { selectRole(r.id, card); });
-        container.appendChild(card);
-    });
-}
-
-function selectRole(roleId, cardEl) {
-    playSound('click');
-    studentData.department = roleId;
-    document.querySelectorAll('.role-card').forEach(function(c) { c.classList.remove('selected'); });
-    if (cardEl) cardEl.classList.add('selected');
-}
-
-// ── PROGRESS ─────────────────────────────────────────────
-function updateProgress(label, pct) {
-    document.getElementById('stageLabel').innerText = label;
-    document.getElementById('stagePercent').innerText = pct + '% COMPLETE';
-    document.getElementById('progressBar').style.width = pct + '%';
-}
-
-function showScreen(n) {
-    ['screen1','screen2','screen3','screen4','screen5','loadingOverlay','screen6'].forEach(function(id) {
-        const el = document.getElementById(id);
-        if (el) { el.classList.remove('screen-active'); el.classList.add('screen-hidden'); }
-    });
-    const map = {
-        1: ['screen1', 'PHASE 01: XÁC THỰC ID & KHỐI LỚP', 20],
-        2: ['screen2', 'PHASE 02: TRẠM 01 - MÃ MẬT', 40],
-        3: ['screen3', 'PHASE 03: TRẠM 02 - THỰC NGHIỆM', 60],
-        4: ['screen4', 'PHASE 04: TRẠM 03 - CHUYÊN MÔN', 80],
-        5: ['screen5', 'PHASE 05: HỒ SƠ NĂNG LỰC', 90],
-        'loading': ['loadingOverlay', 'TRUYỀN DỮ LIỆU...', 95],
-        6: ['screen6', 'COMPLETED: XÁC NHẬN ĐẶC VỤ', 100]
+/* ══════════════════════════════════════════════════════
+   PARTICLE BACKGROUND
+══════════════════════════════════════════════════════ */
+(function() {
+    var canvas = document.getElementById('bgCanvas');
+    var ctx = canvas.getContext('2d');
+    var particles = [];
+    function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    window.addEventListener('resize', resize, { passive:true });
+    resize();
+    function Particle() { this.reset(); }
+    Particle.prototype.reset = function() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 1.8 + 0.3;
+        this.vx = (Math.random() - 0.5) * 0.35;
+        this.vy = (Math.random() - 0.5) * 0.35;
+        this.opacity = Math.random() * 0.45 + 0.15;
     };
-    const cfg = map[n];
-    if (cfg) {
-        const el = document.getElementById(cfg[0]);
-        if (el) { el.classList.remove('screen-hidden'); el.classList.add('screen-active'); }
-        updateProgress(cfg[1], cfg[2]);
-    }
-    if (n === 4) loadChallengeQuestions();
-    if (n === 5) customizeScreen5UI();
-}
-
-// ── SCREEN 1 ─────────────────────────────────────────────
-function handleScreen1Submit(e) {
-    e.preventDefault();
-    const name = document.getElementById('studentName').value.trim();
-    const cls  = document.getElementById('studentClass').value.trim();
-    const err  = document.getElementById('screen1Error');
-    if (!name || !cls) { playSound('error'); err.innerText='LỖI: Nhập đầy đủ Họ tên và Lớp!'; err.classList.remove('hidden'); return; }
-    if (!studentData.department) { playSound('error'); err.innerText='LỖI: Chọn 1 Vị trí/Ban ứng tuyển!'; err.classList.remove('hidden'); return; }
-    playSound('click'); err.classList.add('hidden');
-    studentData.name = name; studentData.studentClass = cls;
-    showScreen(2);
-}
-
-// ── STATION 1 ────────────────────────────────────────────
-function selectStation1Option(key) {
-    studentData.station1Answer = key;
-    const fb = document.getElementById('station1Feedback');
-    const btn = document.getElementById('btnNextStation1');
-    fb.classList.remove('hidden','bg-emerald-950/50','border-emerald-500','text-emerald-300','bg-amber-950/50','border-amber-500','text-amber-300');
-    if (key === 'A') { fb.classList.add('bg-emerald-950/50','border-emerald-500','text-emerald-300'); fb.innerHTML='<i class="fa-solid fa-circle-check mr-2"></i><strong>MÃ MẬT CHÍNH XÁC!</strong> Thứ 6 (Video Challenge) & Thứ 5 (Radio Việt Anh)!'; playSound('success'); }
-    else { fb.classList.add('bg-amber-950/50','border-amber-500','text-amber-300'); fb.innerHTML='<i class="fa-solid fa-lightbulb mr-2"></i><strong>ĐÁP ÁN LÀ A!</strong> Video Thứ 6 – Radio Thứ 5. Đã cập nhật!'; playSound('click'); }
-    btn.disabled = false; btn.classList.remove('opacity-50','cursor-not-allowed'); btn.classList.add('shadow-[0_0_20px_rgba(0,240,255,0.4)]');
-}
-function goToScreen3() { playSound('click'); showScreen(3); }
-
-// ── STATION 2 ────────────────────────────────────────────
-function selectStation2Option(key) {
-    studentData.station2Answer = key;
-    const fb = document.getElementById('station2Feedback');
-    const btn = document.getElementById('btnNextStation2');
-    fb.classList.remove('hidden','bg-emerald-950/50','border-emerald-500','text-emerald-300','bg-amber-950/50','border-amber-500','text-amber-300');
-    if (key === 'A') { fb.classList.add('bg-emerald-950/50','border-emerald-500','text-emerald-300'); fb.innerHTML='<i class="fa-solid fa-circle-check mr-2"></i><strong>CHUẨN!</strong> Lửa Metan, bóp lon áp suất & pháo hoa kim loại là thực nghiệm huyền thoại!'; playSound('success'); }
-    else { fb.classList.add('bg-amber-950/50','border-amber-500','text-amber-300'); fb.innerHTML='<i class="fa-solid fa-lightbulb mr-2"></i><strong>ĐÁP ÁN LÀ A!</strong> Funlab bùng nổ với Lửa Metan, Ngưng tụ áp suất và Pháo hoa màu sắc!'; playSound('click'); }
-    btn.disabled = false; btn.classList.remove('opacity-50','cursor-not-allowed'); btn.classList.add('shadow-[0_0_20px_rgba(0,240,255,0.4)]');
-}
-function goToScreen4() { playSound('click'); showScreen(4); }
-
-// ── STATION 3 ────────────────────────────────────────────
-const challengeBankTHCS = {
-    question: 'Trong Tập 5 Funlab "Thử thách nín thở", Phổi không hề có cơ để tự co bóp. Vậy "ông chủ" điều khiển áp suất giúp phổi hít thở mỗi ngày là gì?',
-    options: [
-        {key:'A', text:'Cơ hoành (Chiếc màng cao su co giãn dưới lồng ngực).'},
-        {key:'B', text:'Trái tim tự bơm không khí vào.'},
-        {key:'C', text:'Do chúng ta tự dùng tay ép bụng vào.'}
-    ],
-    correct:'A',
-    explainCorrect:'CHÍNH XÁC! Cơ hoành hạ xuống làm giảm áp suất trong lồng ngực, giúp không khí tràn vào phổi tự nhiên!',
-    explainOther:'ĐÁP ÁN LÀ A! Cơ hoành chính là chiếc bơm kỳ diệu điều khiển hơi thở!'
-};
-const challengeBankTHPT = {
-    'Ban Chuyên Môn': {
-        question: 'Trong Tập 4 "Pháo hoa Funlab", muối Đồng (CuSO4) tạo màu xanh lá, muối Ăn (NaCl) tạo màu vàng chói. Nguyên lý cốt lõi là gì?',
-        options: [{key:'A',text:'Các ion kim loại hấp thụ nhiệt năng rồi giải phóng các hạt ánh sáng (Photon).'},{key:'B',text:'Do xà phòng trong chén nổ sinh khí bọt màu.'},{key:'C',text:'Do phản ứng cháy tỏa ra khói độc có màu.'}],
-        correct:'A', explainCorrect:'TƯ DUY CHUYÊN MÔN RẤT TỐT! Ion kim loại giải phóng photon ánh sáng tạo nên sắc màu!', explainOther:'ĐÁP ÁN ĐÚNG LÀ A! Ion kim loại giải phóng photon khi nhận nhiệt năng!'
-    },
-    'Ban Kỹ Thuật': {
-        question: 'Trong "Tay không bắt lửa" Metan sủi bọt xà phòng, để không bị bỏng, nguyên tắc kỹ thuật nào là bắt buộc?',
-        options: [{key:'A',text:'Bản thân khí Metan là khí lạnh nên không gây bỏng.'},{key:'B',text:'Phải nhúng ướt đẫm bàn tay bằng nước lạnh trước để tạo lớp màng tản nhiệt.'},{key:'C',text:'Đeo găng khẩu trang cách nhiệt dày.'}],
-        correct:'B', explainCorrect:'CHUẨN KỸ THUẬT AN TOÀN! Lớp nước lạnh trên tay hấp thụ nhiệt năng, bảo vệ da tuyệt đối!', explainOther:'ĐÁP ÁN ĐÚNG LÀ B! Phải làm ướt đẫm tay bằng nước lạnh để tạo màng bảo vệ nhiệt.'
-    },
-    'Ban Truyền Thông': {
-        question: 'Để ghi lại khoảnh khắc quả bóng vỡ tung trong 0.1 giây do máy Wimshurst phóng điện, kỹ thuật quay phim nào bùng nổ nhất?',
-        options: [{key:'A',text:'Quay tua nhanh thời gian (Time-lapse).'},{key:'B',text:'Quay tốc độ khung hình cao (60fps/120fps Slow-Motion) kết hợp góc quay Macro cực cận.'},{key:'C',text:'Chụp một bức ảnh tĩnh bình thường.'}],
-        correct:'B', explainCorrect:'TƯ DUY MEDIA XUẤT SẮC! Slow-mo 60/120fps bắt trọn khoảnh khắc bùng nổ!', explainOther:'ĐÁP ÁN ĐÚNG LÀ B! Slow-mo 60/120fps là bí quyết tạo nên thước phim bùng nổ!'
-    },
-    'Ban Tổ Chức': {
-        question: 'Trong Tập 6 "Chiếc lon bẹp dí", kỹ thuật viên đã thao tác như thế nào?',
-        options: [{key:'A',text:'Đun sôi một ít nước trong lon rồi úp ngược ngay vào chậu nước lạnh.'},{key:'B',text:'Dùng búa đập mạnh vào lon.'},{key:'C',text:'Bơm khí nitơ lỏng vào lon.'}],
-        correct:'A', explainCorrect:'TƯ DUY HẬU CẦN TUYỆT VỜI! Hơi nước ngưng tụ đột ngột làm áp suất giảm mạnh, khí quyển bóp bẹp lon!', explainOther:'ĐÁP ÁN ĐÚNG LÀ A! Đun nước úp vào chậu nước lạnh tạo hiệu ứng áp suất thần kỳ!'
-    }
-};
-let currentActiveData = null;
-
-function loadChallengeQuestions() {
-    if (studentData.level === 'THCS') {
-        currentActiveData = challengeBankTHCS;
-    } else {
-        currentActiveData = challengeBankTHPT[studentData.department] || challengeBankTHPT['Ban Chuyên Môn'];
-    }
-    document.getElementById('deptBadge').innerHTML = '<i class="fa-solid fa-bolt mr-1"></i> KHỐI ' + studentData.level + ': ' + studentData.department.toUpperCase();
-    const box = document.getElementById('challengeBox');
-    box.innerHTML = '';
-
-    // Câu hỏi
-    const qDiv = document.createElement('div');
-    qDiv.className = 'p-4 bg-cyan-950/30 border-l-4 border-cyan-400 rounded-r-lg mb-4';
-    qDiv.innerHTML = '<h3 class="font-semibold text-cyan-200 text-xs sm:text-base leading-relaxed">"' + currentActiveData.question + '"</h3>';
-    box.appendChild(qDiv);
-
-    // Các lựa chọn — dùng DOM element, tránh inline onclick với dấu nháy kép
-    const optDiv = document.createElement('div');
-    optDiv.className = 'space-y-3';
-    currentActiveData.options.forEach(function(o) {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'quiz-btn w-full p-3.5 sm:p-4 rounded-lg bg-slate-900/80 border border-cyan-800/60 hover:border-cyan-400 text-left text-slate-200 font-sans transition flex items-center justify-between group text-xs sm:text-sm';
-        btn.innerHTML = '<span><strong class="font-mono text-cyan-400 mr-2">' + o.key + '.</strong> ' + o.text + '</span><i class="fa-solid fa-chevron-right text-cyan-500 opacity-0 group-hover:opacity-100 transition"></i>';
-        btn.addEventListener('click', (function(key) {
-            return function() { selectChallengeOption(key); };
-        })(o.key));
-        optDiv.appendChild(btn);
-    });
-    box.appendChild(optDiv);
-}
-
-function selectChallengeOption(key) {
-    const opt = currentActiveData.options.find(function(o) { return o.key === key; });
-    studentData.challengeAnswer = key + ': ' + (opt ? opt.text : '');
-    const fb = document.getElementById('minigameFeedback');
-    const btn = document.getElementById('btnNextScreen4');
-    fb.classList.remove('hidden','bg-emerald-950/50','border-emerald-500','text-emerald-300','bg-amber-950/50','border-amber-500','text-amber-300');
-    if (key === currentActiveData.correct) { fb.classList.add('bg-emerald-950/50','border-emerald-500','text-emerald-300'); fb.innerHTML='<i class="fa-solid fa-circle-check mr-2"></i>'+currentActiveData.explainCorrect; playSound('success'); }
-    else { fb.classList.add('bg-amber-950/50','border-amber-500','text-amber-300'); fb.innerHTML='<i class="fa-solid fa-circle-info mr-2"></i>'+currentActiveData.explainOther; playSound('click'); }
-    btn.disabled = false; btn.classList.remove('opacity-50','cursor-not-allowed'); btn.classList.add('shadow-[0_0_20px_rgba(0,240,255,0.4)]');
-}
-function goToScreen5() { playSound('click'); showScreen(5); }
-
-function customizeScreen5UI() {
-    if (studentData.level === 'THCS') {
-        document.getElementById('expLabel').innerHTML = '<i class="fa-solid fa-star mr-1"></i> 1. SỞ THÍCH HOẶC MÔ HÌNH/SẢN PHẨM EM TỪNG TỰ LÀM <span class="text-rose-500">*</span>';
-        document.getElementById('aspLabel').innerHTML = '<i class="fa-solid fa-rocket mr-1"></i> 2. THỬ THÁCH NÀO CỦA FUNLAB LÀM EM HÀO HỨNG NHẤT? <span class="text-rose-500">*</span>';
-    }
-}
-
-// ── SCREEN 5 SUBMIT ──────────────────────────────────────
-async function handleScreen5Submit(e) {
-    e.preventDefault();
-    const vom = document.getElementById('vomUnderstanding').value.trim();
-    const exp = document.getElementById('studentExperience').value.trim();
-    const port = document.getElementById('studentPortfolio').value.trim();
-    const asp = document.getElementById('studentAspiration').value.trim();
-    const err = document.getElementById('screen5Error');
-    if (!vom || !exp || !asp) { playSound('error'); err.innerText='LỖI: Điền đầy đủ các thông tin bắt buộc!'; err.classList.remove('hidden'); return; }
-    playSound('click'); err.classList.add('hidden');
-    studentData.vomUnderstanding = vom;
-    studentData.experience = exp;
-    studentData.portfolio = port || 'Không cung cấp';
-    studentData.aspiration = asp;
-    studentData.timestamp = new Date().toLocaleString('vi-VN');
-    studentData.agentCode = 'FL-' + studentData.level + '-' + Math.floor(1000 + Math.random() * 9000);
-    showScreen('loading');
-    // Lưu local
-    localSubmissions.unshift(Object.assign({}, studentData));
-    localStorage.setItem('FUNLAB_LOCAL_SUBMISSIONS', JSON.stringify(localSubmissions));
-    // Gửi Supabase
-    try {
-        await fetch(SUPABASE_SUBMIT_URL, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                name: studentData.name, student_class: studentData.studentClass,
-                level: studentData.level, registration_type: studentData.registrationType,
-                department: studentData.department, vom_understanding: studentData.vomUnderstanding,
-                station1_answer: studentData.station1Answer, station2_answer: studentData.station2Answer,
-                challenge_answer: studentData.challengeAnswer, experience: studentData.experience,
-                portfolio: studentData.portfolio, aspiration: studentData.aspiration,
-                agent_code: studentData.agentCode
-            })
-        });
-    } catch(err2) { console.warn('Supabase submit error:', err2); }
-    setupScreen6UI();
-    showScreen(6);
-    playSound('success');
-}
-
-function setupScreen6UI() {
-    document.getElementById('successMessage').innerHTML = 'CHÚC MỪNG ĐẶC VỤ <strong class="text-cyan-300">' + esc(studentData.name) + '</strong>!<br>Đơn ứng tuyển <strong class="text-amber-300">' + esc(studentData.registrationType) + '</strong> - <strong class="text-emerald-400">' + esc(studentData.department) + '</strong> đã được gửi.';
-    document.getElementById('badgeName').innerText = studentData.name;
-    document.getElementById('badgeClass').innerText = studentData.studentClass;
-    document.getElementById('badgeDepartment').innerText = studentData.department;
-    document.getElementById('badgeAgentCode').innerText = studentData.agentCode;
-    document.getElementById('badgeTimestamp').innerText = studentData.timestamp;
-    document.getElementById('badgeLevelTag').innerText = studentData.registrationType.includes('VÒM') ? 'VÒM KH OPERATIVE' : studentData.level + ' OPERATIVE';
-    const iconMap = {
-        'Ban Chuyên Môn':'fa-brain text-cyan-300','Ban Kỹ Thuật':'fa-microchip text-emerald-300',
-        'Ban Truyền Thông':'fa-video text-purple-300','Ban Tổ Chức':'fa-sitemap text-amber-300',
-        'Đặc Vụ Thí Nghiệm':'fa-flask-vial text-cyan-300','Đặc Vụ Truyền Thông Nhí':'fa-camera-retro text-purple-300',
-        'Đặc Vụ Sự Kiện':'fa-box-archive text-amber-300','Đặc Vụ Vòm Khoa Học':'fa-atom text-amber-300'
+    Particle.prototype.update = function() {
+        this.x += this.vx; this.y += this.vy;
+        if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.reset();
     };
-    const ic = iconMap[studentData.department] || 'fa-atom text-cyan-300';
-    document.getElementById('badgeAvatarIcon').className = 'fa-solid ' + ic + ' text-4xl sm:text-5xl drop-shadow-[0_0_10px_rgba(0,240,255,0.6)]';
-    document.getElementById('badgeRankTitle').innerText = studentData.level === 'THPT' ? 'LAB MASTER' : (studentData.department.includes('Vòm') ? 'VÒM KH MEMBER' : 'EXPLORER');
-}
+    Particle.prototype.draw = function() {
+        ctx.fillStyle = 'rgba(0,240,255,' + this.opacity + ')';
+        ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
+    };
+    for (var i = 0; i < 50; i++) particles.push(new Particle());
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (var j = 0; j < particles.length; j++) { particles[j].update(); particles[j].draw(); }
+        requestAnimationFrame(animate);
+    }
+    animate();
+})();
 
-function downloadBadge() {
-    playSound('click');
-    html2canvas(document.getElementById('badgeContainer'), {backgroundColor:'#030712', scale:2}).then(function(canvas) {
-        const a = document.createElement('a');
-        a.download = 'FUNLAB-AGENT-' + studentData.agentCode + '.png';
-        a.href = canvas.toDataURL('image/png');
-        a.click();
-    }).catch(function(e) { console.error('Badge error:', e); });
-}
-
-function resetGame() {
-    playSound('click');
-    studentData = {name:'',studentClass:'',level:'THCS',registrationType:'VÒM KHOA HỌC',department:'',vomUnderstanding:'',station1Answer:'',station2Answer:'',challengeAnswer:'',experience:'',portfolio:'',aspiration:'',agentCode:'',timestamp:''};
-    document.getElementById('identityForm').reset();
-    ['studentExperience','studentPortfolio','studentAspiration','vomUnderstanding'].forEach(function(id) { const el=document.getElementById(id); if(el) el.value=''; });
-    ['btnNextStation1','btnNextStation2','btnNextScreen4'].forEach(function(id) { const btn=document.getElementById(id); if(btn){btn.disabled=true;btn.classList.add('opacity-50','cursor-not-allowed');} });
-    ['station1Feedback','station2Feedback','minigameFeedback'].forEach(function(id) { document.getElementById(id).classList.add('hidden'); });
-    detectGradeLevel();
-    showScreen(1);
-}
-
-function esc(str) { return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-// ── PARTICLE BG ──────────────────────────────────────────
-const canvas = document.getElementById('bgCanvas');
-const ctx2d = canvas.getContext('2d');
-let particles = [];
-function resizeCanvas() { canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
-window.addEventListener('resize', resizeCanvas); resizeCanvas();
-function Particle() { this.reset(); }
-Particle.prototype.reset = function() { this.x=Math.random()*canvas.width; this.y=Math.random()*canvas.height; this.size=Math.random()*2+0.5; this.speedX=(Math.random()-0.5)*0.4; this.speedY=(Math.random()-0.5)*0.4; this.opacity=Math.random()*0.5+0.2; };
-Particle.prototype.update = function() { this.x+=this.speedX; this.y+=this.speedY; if(this.x<0||this.x>canvas.width||this.y<0||this.y>canvas.height) this.reset(); };
-Particle.prototype.draw = function() { ctx2d.fillStyle='rgba(0,240,255,'+this.opacity+')'; ctx2d.beginPath(); ctx2d.arc(this.x,this.y,this.size,0,Math.PI*2); ctx2d.fill(); };
-for (let i=0; i<45; i++) particles.push(new Particle());
-function animateCanvas() { ctx2d.clearRect(0,0,canvas.width,canvas.height); particles.forEach(function(p){p.update();p.draw();}); requestAnimationFrame(animateCanvas); }
-animateCanvas();
-
-// Init
+/* ══════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════ */
 detectGradeLevel();
 </script>
 </body>
