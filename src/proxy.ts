@@ -39,12 +39,10 @@ export async function proxy(request: NextRequest) {
   }
 
   // ── [C-02] Bảo vệ /admin/* — cần admin_token cookie ────────────────────
-  // Lưu ý: dùng ADMIN_SECRET_CODE (server-only) thay vì NEXT_PUBLIC_ADMIN_CODE
+  // Cookie được set với value 'authenticated' (không lưu password rõ )
   if (pathname.startsWith('/admin') && !pathname.startsWith('/admin/login')) {
-    const adminToken   = request.cookies.get('admin_token')?.value;
-    const expectedCode = process.env.ADMIN_SECRET_CODE || process.env.NEXT_PUBLIC_ADMIN_CODE;
-
-    if (!adminToken || adminToken !== expectedCode) {
+    const adminToken = request.cookies.get('admin_token')?.value;
+    if (adminToken !== 'authenticated') {
       const url = request.nextUrl.clone();
       url.pathname = '/admin/login';
       return NextResponse.redirect(url);
@@ -53,9 +51,8 @@ export async function proxy(request: NextRequest) {
 
   // Auto-redirect nếu đã có admin token mà vào /admin/login
   if (pathname.startsWith('/admin/login')) {
-    const adminToken   = request.cookies.get('admin_token')?.value;
-    const expectedCode = process.env.ADMIN_SECRET_CODE || process.env.NEXT_PUBLIC_ADMIN_CODE;
-    if (adminToken && adminToken === expectedCode) {
+    const adminToken = request.cookies.get('admin_token')?.value;
+    if (adminToken === 'authenticated') {
       const url = request.nextUrl.clone();
       url.pathname = '/admin/dashboard';
       return NextResponse.redirect(url);

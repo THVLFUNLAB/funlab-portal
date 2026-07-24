@@ -17,16 +17,22 @@ export default function AdminLogin() {
     setLoading(true);
     setError('');
 
-    const formData = new FormData();
-    formData.append('code', code);
-    
-    const result = await verifyAdminCode(formData);
-    
-    if (result.success) {
-      router.push('/admin/dashboard');
-      router.refresh();
-    } else {
-      setError(result.error || 'Lỗi hệ thống');
+    try {
+      const formData = new FormData();
+      formData.append('code', code);
+      
+      const result = await verifyAdminCode(formData);
+      
+      if (result.success) {
+        router.push('/admin/dashboard');
+        // Không setLoading(false) — giữ loading trong lúc redirect
+      } else {
+        setError(result.error || 'Mã truy cập không hợp lệ!');
+        setLoading(false);
+      }
+    } catch (err) {
+      console.error('[AdminLogin] Error:', err);
+      setError('Lỗi kết nối máy chủ. Vui lòng thử lại!');
       setLoading(false);
     }
   };
