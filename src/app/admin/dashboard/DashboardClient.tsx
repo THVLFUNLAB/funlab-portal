@@ -15,7 +15,8 @@ import {
   Users, PlaySquare, BarChart, LogOut, Search, Settings, ShieldAlert,
   Edit2, PlusCircle, CheckCircle, XCircle, Activity, Trophy, Bot, Plus, Save, X, 
   Image as ImageIcon, Video, FileText, Trash2, Code2, Calculator, Eye, EyeOff,
-  Wand2, ArrowUpDown, Star, Sparkles, ChevronDown, ChevronUp, Copy, Check, Play
+  Wand2, ArrowUpDown, Star, Sparkles, ChevronDown, ChevronUp, Copy, Check, Play,
+  ClipboardList, ExternalLink, QrCode
 } from 'lucide-react';
 
 export default function AdminDashboardClient() {
@@ -299,6 +300,10 @@ export default function AdminDashboardClient() {
          <button onClick={() => setActiveTab('analytics')} className={`flex items-center gap-2 px-6 py-3 rounded-lg font-bold text-sm tracking-wide transition-all ${activeTab === 'analytics' ? 'bg-slate-800 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}>
             <BarChart className="w-4 h-4" /> THỐNG KÊ
          </button>
+         {/* Recruitment Tab */}
+         <button onClick={() => setActiveTab('recruitment' as any)} className={`flex items-center gap-2 px-6 py-3 rounded-lg font-bold text-sm tracking-wide transition-all ${(activeTab as string) === 'recruitment' ? 'bg-orange-900/60 text-orange-300 shadow-lg border border-orange-500/30' : 'text-slate-500 hover:text-orange-400'}`}>
+            <ClipboardList className="w-4 h-4" /> TUYỂN DỤNG
+         </button>
       </div>
 
       <AnimatePresence mode="wait">
@@ -410,6 +415,76 @@ export default function AdminDashboardClient() {
                    </div>
                 ))}
              </div>
+          </motion.div>
+        )}
+
+        {/* TAB 3: THỐNG KÊ */}
+        {/* TAB 4: TUYỂN DỤNG */}
+        {(activeTab as string) === 'recruitment' && (
+          <motion.div key="recruitment" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Card 1 — Xem đơn */}
+              <div className="bg-slate-900/60 border border-orange-500/20 rounded-2xl p-8 flex flex-col gap-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-12 h-12 rounded-xl bg-orange-950/60 border border-orange-500/30 flex items-center justify-center">
+                    <ClipboardList className="w-6 h-6 text-orange-400" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-black text-white">Danh Sách Đăng Ký</h2>
+                    <p className="text-xs text-slate-500">Xem tất cả đơn tuyển thành viên CLB</p>
+                  </div>
+                </div>
+                <p className="text-sm text-slate-400 leading-relaxed">
+                  Quản lý toàn bộ đơn đăng ký: xem thông tin, lọc theo lớp, tải xuống dữ liệu.
+                </p>
+                <a
+                  href="/admin/tuyen-thanh-vien"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-auto flex items-center justify-center gap-2 w-full px-5 py-3 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold transition-all shadow-[0_4px_20px_rgba(234,88,12,0.3)] hover:-translate-y-0.5"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  Mở Trang Quản Lý Đơn
+                </a>
+              </div>
+
+              {/* Card 2 — Form học sinh */}
+              <div className="bg-slate-900/60 border border-cyan-500/20 rounded-2xl p-8 flex flex-col gap-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-12 h-12 rounded-xl bg-cyan-950/60 border border-cyan-500/30 flex items-center justify-center">
+                    <QrCode className="w-6 h-6 text-cyan-400" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-black text-white">Form Tuyển Thành Viên</h2>
+                    <p className="text-xs text-slate-500">Link dành cho học sinh đăng ký</p>
+                  </div>
+                </div>
+                <p className="text-sm text-slate-400 leading-relaxed">
+                  Chia sẻ link này hoặc tạo mã QR để học sinh quét và điền đơn tuyển CLB.
+                </p>
+                <div className="flex items-center gap-2 bg-slate-800/80 border border-slate-700 rounded-xl px-4 py-3 font-mono text-xs text-cyan-300 break-all">
+                  funlab-portal.vercel.app/tuyen-thanh-vien
+                </div>
+                <div className="flex gap-2 mt-auto">
+                  <a
+                    href="/tuyen-thanh-vien"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-cyan-700 hover:bg-cyan-600 text-white font-bold text-sm transition-all hover:-translate-y-0.5"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    Mở Form
+                  </a>
+                  <button
+                    onClick={() => { navigator.clipboard.writeText('https://funlab-portal.vercel.app/tuyen-thanh-vien'); alert('Đã copy link!'); }}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold text-sm transition-colors"
+                  >
+                    <Copy className="w-4 h-4" />
+                    Copy Link
+                  </button>
+                </div>
+              </div>
+            </div>
           </motion.div>
         )}
 
