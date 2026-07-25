@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Đăng Ký Thành Viên — CLB Khoa Học Funlab</title>
+    <title>Đăng Ký Thành Viên — CLB Khoa Học Funlab | TH-THCS-THPT Việt Anh 2</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script>
+    
     <style>
         *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
         :root {
@@ -22,7 +23,6 @@
             --r:14px; --rsm:8px;
         }
         body { font-family:'Inter',sans-serif; background:var(--g50); color:var(--g800); min-height:100vh; -webkit-tap-highlight-color:transparent; }
-        /* HEADER */
         .hdr { background:var(--white); border-bottom:1px solid var(--g200); padding:0 24px; height:60px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
         .hdr-brand { display:flex; align-items:center; gap:10px; }
         .hdr-logo { width:34px; height:34px; background:var(--blue); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:16px; }
@@ -33,18 +33,14 @@
         .btn-ghost:hover { background:var(--g50); border-color:var(--g300); color:var(--g800); }
         .agent-tag { display:none; align-items:center; gap:5px; background:var(--green-pale); border:1px solid #a7f3d0; color:var(--green); border-radius:20px; padding:3px 10px; font-size:12px; font-weight:700; }
         .agent-tag.on { display:flex; }
-        /* PROGRESS */
         .prog-wrap { background:var(--white); border-bottom:1px solid var(--g200); padding:10px 24px; display:none; }
         .prog-meta { display:flex; justify-content:space-between; font-size:11px; color:var(--g400); font-weight:600; margin-bottom:6px; }
         .prog-track { height:4px; background:var(--g200); border-radius:99px; overflow:hidden; }
         .prog-fill { height:100%; background:var(--blue); border-radius:99px; transition:width .6s cubic-bezier(.4,0,.2,1); }
-        /* MAIN */
         main { max-width:660px; margin:0 auto; padding:20px 14px 48px; }
-        /* SCREENS */
         .scr { display:none; animation:up .3s ease; }
         .scr.on { display:block; }
         @keyframes up { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:none} }
-        /* CARD */
         .card { background:var(--white); border-radius:var(--r); box-shadow:var(--sh); overflow:hidden; }
         .ch { padding:22px 24px 0; }
         .cb { padding:18px 24px 24px; }
@@ -52,25 +48,18 @@
         .csub { font-size:13px; color:var(--g400); margin-bottom:16px; }
         .slabel { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--g500); display:flex; align-items:center; gap:5px; margin-bottom:10px; }
         .slabel i { color:var(--blue); }
-        /* FIELDS */
         .fg { margin-bottom:18px; }
         .fl { font-size:13px; font-weight:600; color:var(--g700); margin-bottom:5px; display:block; }
         .fl .req { color:#ef4444; }
-        input[type=text], input[type=url], textarea, select {
-            width:100%; border:1.5px solid var(--g200); border-radius:var(--rsm);
-            padding:10px 13px; font-size:14px; color:var(--g800); font-family:inherit;
-            background:var(--white); outline:none; transition:border-color .15s,box-shadow .15s;
-        }
+        input[type=text], input[type=url], textarea, select { width:100%; border:1.5px solid var(--g200); border-radius:var(--rsm); padding:10px 13px; font-size:14px; color:var(--g800); font-family:inherit; background:var(--white); outline:none; transition:border-color .15s,box-shadow .15s; }
         input:focus, textarea:focus, select:focus { border-color:var(--blue-lt); box-shadow:0 0 0 3px rgba(59,130,246,.1); }
         input::placeholder, textarea::placeholder { color:var(--g300); }
         textarea { resize:vertical; min-height:76px; }
         .frow { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
         @media(max-width:500px){ .frow{grid-template-columns:1fr;} }
-        /* LEVEL BADGE */
         .lbadge { display:inline-flex; align-items:center; gap:4px; padding:3px 9px; border-radius:20px; font-size:10px; font-weight:700; background:var(--g100); color:var(--g400); border:1.5px solid var(--g200); transition:.2s; margin-left:8px; }
         .lbadge.thpt { background:#ecfdf5; color:#047857; border-color:#a7f3d0; }
         .lbadge.thcs { background:var(--blue-pale); color:var(--blue); border-color:#bfdbfe; }
-        /* REG TYPE */
         .rtgrid { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; }
         @media(max-width:500px){ .rtgrid{grid-template-columns:1fr;} }
         .rtlabel input[type=radio] { display:none; }
@@ -80,7 +69,6 @@
         .rtcard .rts { font-size:10px; color:var(--g400); margin-top:2px; }
         .rtlabel input:checked + .rtcard { border-color:var(--blue-lt); background:var(--blue-pale); }
         .rtlabel input:checked + .rtcard .rtn { color:var(--blue); }
-        /* ROLE CARDS */
         .rgrid { display:grid; grid-template-columns:repeat(2,1fr); gap:9px; }
         @media(min-width:500px){ .rgrid{grid-template-columns:repeat(4,1fr);} }
         .rcard { border:2px solid var(--g200); border-radius:var(--rsm); padding:14px 8px; text-align:center; cursor:pointer; transition:.15s; background:var(--white); }
@@ -90,7 +78,6 @@
         .rcard .rcn { font-size:12px; font-weight:700; color:var(--g700); }
         .rcard .rcd { font-size:10px; color:var(--g400); margin-top:2px; line-height:1.4; }
         .rcard.sel .rcn { color:var(--blue); }
-        /* BUTTONS */
         .btn-p { width:100%; padding:13px; border-radius:var(--rsm); background:var(--blue); color:#fff; font-size:14px; font-weight:700; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:7px; transition:.15s; font-family:inherit; }
         .btn-p:hover:not(:disabled) { background:#1e40af; transform:translateY(-1px); box-shadow:0 4px 12px rgba(29,78,216,.28); }
         .btn-p:active:not(:disabled) { transform:none; }
@@ -100,7 +87,6 @@
         .brow { display:flex; gap:9px; margin-top:18px; }
         .btn-bk { padding:12px 14px; border-radius:var(--rsm); background:var(--white); color:var(--g500); border:1.5px solid var(--g200); cursor:pointer; font-size:13px; font-weight:600; display:flex; align-items:center; gap:5px; white-space:nowrap; transition:.15s; flex-shrink:0; font-family:inherit; }
         .btn-bk:hover { background:var(--g50); border-color:var(--g300); color:var(--g700); }
-        /* QUIZ */
         .qopt { width:100%; padding:13px 15px; border-radius:var(--rsm); border:1.5px solid var(--g200); background:var(--white); text-align:left; cursor:pointer; font-family:inherit; font-size:13px; color:var(--g700); display:flex; align-items:center; gap:11px; transition:.15s; margin-bottom:8px; }
         .qopt:last-child { margin-bottom:0; }
         .qopt .ok { width:27px; height:27px; border-radius:50%; border:1.5px solid var(--g300); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:var(--g500); flex-shrink:0; transition:.15s; }
@@ -110,11 +96,9 @@
         .qopt.correct .ok { background:var(--green); border-color:var(--green); color:#fff; }
         .qopt.wrong { border-color:#f97316; background:#fff7ed; }
         .qopt.wrong .ok { background:#f97316; border-color:#f97316; color:#fff; }
-        /* FEEDBACK */
         .fb { display:none; padding:11px 15px; border-radius:var(--rsm); margin-top:11px; font-size:13px; }
         .fb.ok  { background:var(--green-pale); border:1px solid #a7f3d0; color:#065f46; }
         .fb.bad { background:#fff7ed; border:1px solid #fed7aa; color:#9a3412; }
-        /* INFO BOX */
         .ibox { padding:13px 15px; border-radius:var(--rsm); background:var(--blue-pale); border:1px solid #bfdbfe; color:var(--g700); font-size:13px; line-height:1.6; margin-bottom:18px; }
         .ibox strong { color:var(--blue); }
         .igrid { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin-bottom:18px; }
@@ -123,9 +107,7 @@
         .iitem .ii { font-size:18px; margin-bottom:5px; }
         .iitem .it { font-size:11px; font-weight:700; color:var(--g700); text-transform:uppercase; letter-spacing:.04em; }
         .iitem .id { font-size:11px; color:var(--g500); margin-top:2px; line-height:1.45; }
-        /* ERROR */
         .errbox { display:none; padding:9px 13px; border-radius:var(--rsm); font-size:13px; font-weight:500; background:#fef2f2; border:1px solid #fecaca; color:#b91c1c; margin-top:10px; align-items:center; gap:6px; }
-        /* LANDING */
         .lhero { text-align:center; padding:30px 24px 20px; }
         .llogo { width:60px; height:60px; background:var(--blue); border-radius:14px; display:flex; align-items:center; justify-content:center; margin:0 auto 14px; color:#fff; font-size:26px; }
         .ltitle { font-size:24px; font-weight:800; color:var(--g900); letter-spacing:-.025em; margin-bottom:8px; line-height:1.2; }
@@ -137,19 +119,17 @@
         .vitem .vt { font-size:12px; font-weight:700; color:var(--g700); margin-bottom:3px; }
         .vitem .vd { font-size:11px; color:var(--g400); line-height:1.4; }
         .sstrip { display:flex; justify-content:center; gap:24px; padding:14px 24px; background:var(--g50); border-top:1px solid var(--g100); border-bottom:1px solid var(--g100); }
-        .snum { font-size:20px; font-weight:800; color:var(--blue); letter-spacing:-.02em; }
-        .slbl { font-size:10px; font-weight:600; color:var(--g400); text-transform:uppercase; letter-spacing:.04em; margin-top:1px; }
+        .stat .snum { font-size:20px; font-weight:800; color:var(--blue); letter-spacing:-.02em; }
+        .stat .slbl { font-size:10px; font-weight:600; color:var(--g400); text-transform:uppercase; letter-spacing:.04em; margin-top:1px; }
         .lcta { padding:18px 24px 24px; }
         .btn-cta { width:100%; padding:14px; border-radius:var(--rsm); background:var(--blue); color:#fff; font-size:15px; font-weight:700; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:7px; transition:.15s; font-family:inherit; }
         .btn-cta:hover { background:#1e40af; transform:translateY(-1px); box-shadow:0 6px 18px rgba(29,78,216,.22); }
         .lnote { text-align:center; margin-top:9px; font-size:12px; color:var(--g400); }
-        /* VOM BOX */
         .vbox { padding:13px 15px; border-radius:var(--rsm); background:var(--amber-pale); border:1px solid #fde68a; margin-bottom:15px; }
         .vbh { display:flex; align-items:center; gap:7px; margin-bottom:7px; }
         .vbht { font-size:13px; font-weight:700; color:#92400e; }
         .vbtm { font-size:11px; font-weight:600; color:#b45309; background:#fef3c7; border:1px solid #fde68a; border-radius:20px; padding:2px 9px; margin-left:auto; white-space:nowrap; }
         .vbd { font-size:12px; color:#78350f; line-height:1.6; }
-        /* SUCCESS */
         .stop { text-align:center; padding:26px 24px 14px; }
         .sicon { width:56px; height:56px; background:var(--green-pale); border-radius:50%; border:2px solid #a7f3d0; display:flex; align-items:center; justify-content:center; margin:0 auto 12px; color:var(--green); font-size:22px; }
         .stitle { font-size:21px; font-weight:800; color:var(--g900); letter-spacing:-.02em; margin-bottom:7px; }
@@ -172,13 +152,11 @@
         .bst .bsl { font-size:9px; font-weight:600; color:var(--g500); text-transform:uppercase; letter-spacing:.04em; }
         .bst .bss { font-size:10px; font-weight:700; color:var(--green); margin-top:1px; }
         .sbtns { padding:0 24px 24px; display:flex; gap:9px; }
-        /* LOADING */
         .lwrap { text-align:center; padding:44px 24px; }
         .spin { width:40px; height:40px; border:3px solid var(--g200); border-top-color:var(--blue); border-radius:50%; animation:sp .75s linear infinite; margin:0 auto 14px; }
         @keyframes sp { to{transform:rotate(360deg)} }
         .ltt { font-size:16px; font-weight:700; color:var(--g800); margin-bottom:5px; }
         .lts { font-size:13px; color:var(--g400); }
-        /* MODAL */
         .mover { display:none; position:fixed; inset:0; z-index:200; background:rgba(0,0,0,.45); backdrop-filter:blur(4px); align-items:center; justify-content:center; padding:14px; }
         .mover.on { display:flex; }
         .mbox { background:#fff; border-radius:var(--r); box-shadow:0 20px 60px rgba(0,0,0,.15); width:100%; max-width:400px; overflow:hidden; }
@@ -193,7 +171,6 @@
         .btn-cancel:hover { background:var(--g50); }
         .btn-confirm { flex:1; padding:10px; border-radius:var(--rsm); border:none; background:var(--blue); font-size:13px; font-weight:700; color:#fff; cursor:pointer; transition:.15s; font-family:inherit; }
         .btn-confirm:hover { background:#1e40af; }
-        /* ADMIN */
         .aover { display:none; position:fixed; inset:0; z-index:200; background:var(--g50); overflow-y:auto; }
         .aover.on { display:block; }
         .ain { max-width:960px; margin:0 auto; padding:14px; }
@@ -218,7 +195,6 @@
         .abtn.v:hover { border-color:var(--blue-lt); color:var(--blue); }
         .abtn.d { border-color:#fecaca; color:#ef4444; background:#fff; margin-left:4px; }
         .abtn.d:hover { background:#fef2f2; }
-        /* DETAIL */
         .dgrid { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-bottom:12px; }
         @media(max-width:460px){ .dgrid{grid-template-columns:1fr;} }
         .dfield { padding:9px 11px; background:var(--g50); border-radius:var(--rsm); }
@@ -252,7 +228,6 @@
 
 <main>
 
-<!-- SCREEN 0: LANDING -->
 <div class="scr card on" id="screen0">
     <div class="lhero">
         <div class="llogo"><i class="fa-solid fa-flask-vial"></i></div>
@@ -272,12 +247,11 @@
         <div class="stat"><div class="snum">2</div><div class="slbl">Chương trình lớn</div></div>
     </div>
     <div class="lcta">
-        <button class="btn-cta" id="btnStart" onclick="showScr('screen1a')">Bắt Đầu Đăng Ký <i class="fa-solid fa-arrow-right"></i></button>
-        <div class="lnote">Chỉ mất khoảng <strong>5 phút</strong> để hoàn thành</div>
+        <button class="btn-cta" id="btnStart">Bắt Đầu Đăng Ký <i class="fa-solid fa-arrow-right"></i></button>
+        <div class="lnote">Chỉ mất khoảng <strong>5 phút</strong> để hoàn thành · TH-THCS-THPT Việt Anh 2</div>
     </div>
 </div>
 
-<!-- SCREEN 1A -->
 <div class="scr card" id="screen1a">
     <div class="ch">
         <div class="slabel"><i class="fa-solid fa-user"></i> Bước 1 / 5 — Thông tin cá nhân</div>
@@ -302,7 +276,6 @@
     </div>
 </div>
 
-<!-- SCREEN 1B -->
 <div class="scr card" id="screen1b">
     <div class="ch">
         <div class="slabel"><i class="fa-solid fa-sitemap"></i> Bước 2 / 5 — Hình thức tham gia</div>
@@ -330,7 +303,6 @@
     </div>
 </div>
 
-<!-- SCREEN 2: TRAM 01 -->
 <div class="scr card" id="screen2">
     <div class="ch">
         <div class="slabel"><i class="fa-solid fa-satellite-dish"></i> Bước 3 / 5 — Trạm 01</div>
@@ -353,7 +325,6 @@
     </div>
 </div>
 
-<!-- SCREEN 3: TRAM 02 -->
 <div class="scr card" id="screen3">
     <div class="ch">
         <div class="slabel"><i class="fa-solid fa-flask-vial"></i> Bước 3 / 5 — Trạm 02</div>
@@ -376,7 +347,6 @@
     </div>
 </div>
 
-<!-- SCREEN 4: TRAM 03 -->
 <div class="scr card" id="screen4">
     <div class="ch">
         <div class="slabel" id="deptLabel"><i class="fa-solid fa-atom"></i> Bước 3 / 5 — Trạm 03</div>
@@ -393,7 +363,6 @@
     </div>
 </div>
 
-<!-- SCREEN 5: HO SO -->
 <div class="scr card" id="screen5">
     <div class="ch">
         <div class="slabel"><i class="fa-solid fa-file-pen"></i> Bước 4 / 5 — Hồ sơ năng lực</div>
@@ -428,12 +397,10 @@
     </div>
 </div>
 
-<!-- LOADING -->
 <div class="scr card" id="screenLoad">
     <div class="lwrap"><div class="spin"></div><div class="ltt">Đang gửi đơn đăng ký...</div><div class="lts">Vui lòng chờ trong giây lát</div></div>
 </div>
 
-<!-- SCREEN 6: SUCCESS -->
 <div class="scr card" id="screen6">
     <div class="stop">
         <div class="sicon"><i class="fa-solid fa-check"></i></div>
@@ -468,7 +435,6 @@
 
 </main>
 
-<!-- ADMIN AUTH -->
 <div class="mover" id="modalAuth">
     <div class="mbox">
         <div class="mh">
@@ -486,7 +452,6 @@
     </div>
 </div>
 
-<!-- ADMIN DASHBOARD -->
 <div class="aover" id="adminDash">
     <div class="ain">
         <div class="atop">
@@ -508,7 +473,6 @@
     </div>
 </div>
 
-<!-- DETAIL MODAL -->
 <div class="mover" id="modalDetail" style="align-items:center;">
     <div class="mbox" style="max-width:540px;max-height:90vh;overflow-y:auto;">
         <div class="mh" style="padding-bottom:0;">
@@ -536,22 +500,6 @@
 </div>
 
 <script>
-// === showScr: defined early so onclick attribute can call it ===
-function showScr(id){
-  var ALL=['screen0','screen1a','screen1b','screen2','screen3','screen4','screen5','screenLoad','screen6'];
-  ALL.forEach(function(s){var el=document.getElementById(s);if(el)el.classList.remove('on');});
-  var t=document.getElementById(id);if(t)t.classList.add('on');
-  var M={screen0:{step:null,pct:0},screen1a:{step:'Buoc 1',pct:15},screen1b:{step:'Buoc 2',pct:30},screen2:{step:'Tram 01',pct:50},screen3:{step:'Tram 02',pct:65},screen4:{step:'Tram 03',pct:80},screen5:{step:'Ho so',pct:90},screenLoad:{step:'Dang gui...',pct:95},screen6:{step:'Hoan thanh!',pct:100}};
-  var m=M[id];var pw=document.getElementById('progWrap');
-  if(m&&m.step){pw.style.display='block';document.getElementById('stageLabel').textContent=m.step;document.getElementById('stagePct').textContent=m.pct+'%';document.getElementById('progFill').style.width=m.pct+'%';}
-  else pw.style.display='none';
-  window.scrollTo({top:0,behavior:'smooth'});
-  if(id==='screen2')buildS1();
-  if(id==='screen3')buildS2();
-  if(id==='screen4')buildS3();
-  if(id==='screen5')customS5();
-}
-
 var ADMIN_PIN = '2026';
 var API_URL = '/api/recruitment/submit';
 var sd = {name:'',cls:'',level:'THCS',regType:'VOM KHOA HOC',dept:'',vom:'',s1:'',s2:'',s3:'',exp:'',port:'',asp:'',code:'',ts:''};
@@ -574,6 +522,7 @@ var SMETA = {
     screen6:{step:'Hoàn thành!',pct:100}
 };
 var ALL_SCRNS=['screen0','screen1a','screen1b','screen2','screen3','screen4','screen5','screenLoad','screen6'];
+
 function showScr(id){
     ALL_SCRNS.forEach(function(s){ var el=document.getElementById(s); if(el){el.classList.remove('on');} });
     var t=document.getElementById(id); if(t) t.classList.add('on');
@@ -589,8 +538,18 @@ function showScr(id){
 
 document.getElementById('btnStart').addEventListener('click', function(){ showScr('screen1a'); });
 
-var ROLES_THCS=[{id:'Vòm Khoa Học',icon:'🔭',name:'Vòm Khoa Học',desc:'Thực hành T7 với GV KHTN'},{id:'Thí Nghiệm',icon:'🧪',name:'Thí Nghiệm',desc:'Pha chế & Mô hình STEM'},{id:'Media Nhí',icon:'📸',name:'Media Nhí',desc:'CapCut, Ảnh & Poster'},{id:'Sự Kiện',icon:'🎪',name:'Sự Kiện',desc:'Đạo cụ & Hỗ trợ trò chơi'}];
-var ROLES_THPT=[{id:'Ban Chuyên Môn',icon:'🧠',name:'Chuyên Môn',desc:'Nghiên cứu & Kịch bản'},{id:'Ban Kỹ Thuật',icon:'🔧',name:'Kỹ Thuật',desc:'Thí nghiệm & Sân khấu'},{id:'Ban Truyền Thông',icon:'🎬',name:'Truyền Thông',desc:'Quay, Dựng & Poster'},{id:'Ban Tổ Chức',icon:'📋',name:'Tổ Chức',desc:'Vật tư & Điều phối'}];
+var ROLES_THCS=[
+    {id:'Vòm Khoa Học',icon:'🔭',name:'Vòm Khoa Học',desc:'Thực hành T7 với GV KHTN'},
+    {id:'Thí Nghiệm',icon:'🧪',name:'Thí Nghiệm',desc:'Pha chế & Mô hình STEM'},
+    {id:'Media Nhí',icon:'📸',name:'Media Nhí',desc:'CapCut, Ảnh & Poster'},
+    {id:'Sự Kiện',icon:'🎪',name:'Sự Kiện',desc:'Đạo cụ & Hỗ trợ trò chơi'}
+];
+var ROLES_THPT=[
+    {id:'Ban Chuyên Môn',icon:'🧠',name:'Chuyên Môn',desc:'Nghiên cứu & Kịch bản'},
+    {id:'Ban Kỹ Thuật',icon:'🔧',name:'Kỹ Thuật',desc:'Thí nghiệm & Sân khấu'},
+    {id:'Ban Truyền Thông',icon:'🎬',name:'Truyền Thông',desc:'Quay, Dựng & Poster'},
+    {id:'Ban Tổ Chức',icon:'📋',name:'Tổ Chức',desc:'Vật tư & Điều phối'}
+];
 
 function detectGrade(){
     var v=(document.getElementById('studentClass').value||'').trim();
@@ -610,7 +569,13 @@ function renderRoles(){
         el.className='rcard'+(sd.dept===r.id?' sel':'');
         el.setAttribute('data-id',r.id);
         el.innerHTML='<div class="rci">'+r.icon+'</div><div class="rcn">'+r.name+'</div><div class="rcd">'+r.desc+'</div>';
-        el.addEventListener('click',(function(id,me){return function(){ sd.dept=id; c.querySelectorAll('.rcard').forEach(function(x){x.classList.remove('sel');}); me.classList.add('sel'); };})(r.id,el));
+        el.addEventListener('click',(function(id,me){
+            return function(){
+                sd.dept=id;
+                c.querySelectorAll('.rcard').forEach(function(x){x.classList.remove('sel');});
+                me.classList.add('sel');
+            };
+        })(r.id,el));
         c.appendChild(el);
     });
 }
@@ -644,24 +609,54 @@ function buildOpts(containerId,fbId,nextId,data,onPick){
             var fb=document.getElementById(fbId);
             fb.className='fb '+(key===data.ans?'ok':'bad');
             fb.innerHTML=key===data.ans?data.fok:data.fbad; fb.style.display='block';
-            c.querySelectorAll('.qopt').forEach(function(x){ var k=x.getAttribute('data-k'); x.classList.remove('correct','wrong'); if(k===data.ans) x.classList.add('correct'); else if(k===key&&key!==data.ans) x.classList.add('wrong'); });
+            c.querySelectorAll('.qopt').forEach(function(x){
+                var k=x.getAttribute('data-k');
+                x.classList.remove('correct','wrong');
+                if(k===data.ans) x.classList.add('correct');
+                else if(k===key&&key!==data.ans) x.classList.add('wrong');
+            });
             document.getElementById(nextId).disabled=false;
         };})(o.k));
         c.appendChild(b);
     });
 }
 
-var D1={opts:[{k:'A',t:'Thứ 6 (Video Challenge) & Thứ 5 (Radio Việt Anh)'},{k:'B',t:'Thứ 2 (Video Challenge) & Chủ Nhật (Radio Việt Anh)'},{k:'C',t:'Thứ 3 (Video Challenge) & Thứ 7 (Radio Việt Anh)'}],ans:'A',fok:'<i class="fa-solid fa-circle-check" style="margin-right:5px;"></i><strong>Chính xác!</strong> Video Thứ 6 và Radio Thứ 5 trên kênh Vess Project.',fbad:'<i class="fa-solid fa-lightbulb" style="margin-right:5px;"></i><strong>Đáp án A:</strong> Video Thứ 6 (Challenge) — Radio Thứ 5 (Vinh danh).'};
+var D1={
+    opts:[
+        {k:'A',t:'Thứ 6 (Video Challenge) & Thứ 5 (Radio Việt Anh)'},
+        {k:'B',t:'Thứ 2 (Video Challenge) & Chủ Nhật (Radio Việt Anh)'},
+        {k:'C',t:'Thứ 3 (Video Challenge) & Thứ 7 (Radio Việt Anh)'}
+    ],
+    ans:'A',
+    fok:'<i class="fa-solid fa-circle-check" style="margin-right:5px;"></i><strong>Chính xác!</strong> Video Thứ 6 và Radio Thứ 5 trên kênh Vess Project.',
+    fbad:'<i class="fa-solid fa-lightbulb" style="margin-right:5px;"></i><strong>Đáp án A:</strong> Video Thứ 6 (Challenge) — Radio Thứ 5 (Vinh danh).'
+};
 function buildS1(){ buildOpts('s1opts','s1fb','btn2Next',D1,function(k){sd.s1=k;}); }
 document.getElementById('btn2Bk').addEventListener('click',function(){showScr('screen1b');});
 document.getElementById('btn2Next').addEventListener('click',function(){if(!this.disabled) showScr('screen3');});
 
-var D2={opts:[{k:'A',t:'"Tay không bắt lửa" (Metan), Lon bẹp bằng áp suất & Pháo hoa kim loại'},{k:'B',t:'Thi đấu giải cờ vua trên sân trường'},{k:'C',t:'Biểu diễn vũ đạo nhảy hiện đại'}],ans:'A',fok:'<i class="fa-solid fa-circle-check" style="margin-right:5px;"></i><strong>Đúng rồi!</strong> Lửa Metan, Lon bẹp áp suất và Pháo hoa kim loại!',fbad:'<i class="fa-solid fa-lightbulb" style="margin-right:5px;"></i><strong>Đáp án A:</strong> Funlab nổi tiếng với Lửa Metan, Áp suất và Pháo hoa màu sắc!'};
+var D2={
+    opts:[
+        {k:'A',t:'"Tay không bắt lửa" (Metan), Lon bẹp bằng áp suất & Pháo hoa kim loại'},
+        {k:'B',t:'Thi đấu giải cờ vua trên sân trường'},
+        {k:'C',t:'Biểu diễn vũ đạo nhảy hiện đại'}
+    ],
+    ans:'A',
+    fok:'<i class="fa-solid fa-circle-check" style="margin-right:5px;"></i><strong>Đúng rồi!</strong> Lửa Metan, Lon bẹp áp suất và Pháo hoa kim loại!',
+    fbad:'<i class="fa-solid fa-lightbulb" style="margin-right:5px;"></i><strong>Đáp án A:</strong> Funlab nổi tiếng với Lửa Metan, Áp suất và Pháo hoa màu sắc!'
+};
 function buildS2(){ buildOpts('s2opts','s2fb','btn3Next',D2,function(k){sd.s2=k;}); }
 document.getElementById('btn3Bk').addEventListener('click',function(){showScr('screen2');});
 document.getElementById('btn3Next').addEventListener('click',function(){if(!this.disabled) showScr('screen4');});
 
-var CHL={THCS:{q:'Phổi không có cơ để tự co bóp. "Ông chủ" điều khiển áp suất giúp phổi hít thở mỗi ngày là gì?',opts:[{k:'A',t:'Cơ hoành (màng cao su dưới lồng ngực) co giãn điều khiển áp suất.'},{k:'B',t:'Trái tim tự bơm không khí vào phổi.'},{k:'C',t:'Chúng ta dùng tay ép bụng để thở.'}],ans:'A',fok:'<i class="fa-solid fa-circle-check" style="margin-right:5px;"></i><strong>Chính xác!</strong> Cơ hoành hạ xuống — giảm áp suất — không khí tràn vào phổi!',fbad:'<i class="fa-solid fa-lightbulb" style="margin-right:5px;"></i><strong>Đáp án A:</strong> Cơ hoành là "chiếc bơm" điều khiển hơi thở!'},'Ban Chuyên Môn':{q:'Muối Đồng (CuSO4) tạo màu xanh lá, muối Ăn (NaCl) tạo màu vàng. Nguyên lý cốt lõi là gì?',opts:[{k:'A',t:'Ion kim loại hấp thụ nhiệt → giải phóng photon ánh sáng màu.'},{k:'B',t:'Xà phòng trong chén nổ sinh khí bọt màu.'},{k:'C',t:'Phản ứng cháy tỏa ra khói màu.'}],ans:'A',fok:'<i class="fa-solid fa-circle-check" style="margin-right:5px;"></i><strong>Xuất sắc!</strong> Ion kim loại giải phóng photon tạo nên sắc màu!',fbad:'<i class="fa-solid fa-lightbulb" style="margin-right:5px;"></i><strong>Đáp án A:</strong> Ion kim loại giải phóng photon khi nhận nhiệt năng!'},'Ban Kỹ Thuật':{q:'Trong "Tay không bắt lửa", để không bị bỏng, nguyên tắc bắt buộc là gì?',opts:[{k:'A',t:'Metan là khí lạnh nên không gây bỏng.'},{k:'B',t:'Phải làm ướt đẫm tay bằng nước lạnh trước để tạo màng tản nhiệt.'},{k:'C',t:'Đeo găng cách nhiệt dày.'}],ans:'B',fok:'<i class="fa-solid fa-circle-check" style="margin-right:5px;"></i><strong>Chuẩn!</strong> Nước lạnh hấp thụ nhiệt, bảo vệ da tuyệt đối!',fbad:'<i class="fa-solid fa-lightbulb" style="margin-right:5px;"></i><strong>Đáp án B:</strong> Làm ướt tay bằng nước lạnh tạo màng bảo vệ nhiệt!'},'Ban Truyền Thông':{q:'Để ghi lại khoảnh khắc quả bóng vỡ trong 0.1 giây, kỹ thuật quay nào tốt nhất?',opts:[{k:'A',t:'Quay tua nhanh (Time-lapse).'},{k:'B',t:'Slow-motion 60/120fps kết hợp góc quay Macro cực cận.'},{k:'C',t:'Chụp một bức ảnh tĩnh bình thường.'}],ans:'B',fok:'<i class="fa-solid fa-circle-check" style="margin-right:5px;"></i><strong>Tư duy media chuẩn!</strong> Slow-mo 60/120fps bắt trọn khoảnh khắc!',fbad:'<i class="fa-solid fa-lightbulb" style="margin-right:5px;"></i><strong>Đáp án B:</strong> Slow-mo 60/120fps là bí quyết tạo thước phim đỉnh!'},'Ban Tổ Chức':{q:'Trong "Chiếc lon bẹp dí", kỹ thuật viên đã làm gì?',opts:[{k:'A',t:'Đun nước sôi trong lon rồi úp ngược vào chậu nước lạnh.'},{k:'B',t:'Dùng búa đập mạnh vào lon.'},{k:'C',t:'Bơm khí nitơ lỏng vào lon.'}],ans:'A',fok:'<i class="fa-solid fa-circle-check" style="margin-right:5px;"></i><strong>Tư duy hậu cần chuẩn!</strong> Hơi nước ngưng tụ — áp suất giảm — lon bẹp!',fbad:'<i class="fa-solid fa-lightbulb" style="margin-right:5px;"></i><strong>Đáp án A:</strong> Đun nước + úp vào chậu lạnh tạo hiệu ứng áp suất thần kỳ!'}};
+var CHL={
+    THCS:{q:'Phổi không có cơ để tự co bóp. "Ông chủ" điều khiển áp suất giúp phổi hít thở mỗi ngày là gì?',opts:[{k:'A',t:'Cơ hoành (màng cao su dưới lồng ngực) co giãn điều khiển áp suất.'},{k:'B',t:'Trái tim tự bơm không khí vào phổi.'},{k:'C',t:'Chúng ta dùng tay ép bụng để thở.'}],ans:'A',fok:'<i class="fa-solid fa-circle-check" style="margin-right:5px;"></i><strong>Chính xác!</strong> Cơ hoành hạ xuống — giảm áp suất — không khí tràn vào phổi!',fbad:'<i class="fa-solid fa-lightbulb" style="margin-right:5px;"></i><strong>Đáp án A:</strong> Cơ hoành là "chiếc bơm" điều khiển hơi thở!'},
+    'Ban Chuyên Môn':{q:'Muối Đồng (CuSO4) tạo màu xanh lá, muối Ăn (NaCl) tạo màu vàng. Nguyên lý cốt lõi là gì?',opts:[{k:'A',t:'Ion kim loại hấp thụ nhiệt → giải phóng photon ánh sáng màu.'},{k:'B',t:'Xà phòng trong chén nổ sinh khí bọt màu.'},{k:'C',t:'Phản ứng cháy tỏa ra khói màu.'}],ans:'A',fok:'<i class="fa-solid fa-circle-check" style="margin-right:5px;"></i><strong>Xuất sắc!</strong> Ion kim loại giải phóng photon tạo nên sắc màu!',fbad:'<i class="fa-solid fa-lightbulb" style="margin-right:5px;"></i><strong>Đáp án A:</strong> Ion kim loại giải phóng photon khi nhận nhiệt năng!'},
+    'Ban Kỹ Thuật':{q:'Trong "Tay không bắt lửa", để không bị bỏng, nguyên tắc bắt buộc là gì?',opts:[{k:'A',t:'Metan là khí lạnh nên không gây bỏng.'},{k:'B',t:'Phải làm ướt đẫm tay bằng nước lạnh trước để tạo màng tản nhiệt.'},{k:'C',t:'Đeo găng cách nhiệt dày.'}],ans:'B',fok:'<i class="fa-solid fa-circle-check" style="margin-right:5px;"></i><strong>Chuẩn!</strong> Nước lạnh hấp thụ nhiệt, bảo vệ da tuyệt đối!',fbad:'<i class="fa-solid fa-lightbulb" style="margin-right:5px;"></i><strong>Đáp án B:</strong> Làm ướt tay bằng nước lạnh tạo màng bảo vệ nhiệt!'},
+    'Ban Truyền Thông':{q:'Để ghi lại khoảnh khắc quả bóng vỡ trong 0.1 giây, kỹ thuật quay nào tốt nhất?',opts:[{k:'A',t:'Quay tua nhanh (Time-lapse).'},{k:'B',t:'Slow-motion 60/120fps kết hợp góc quay Macro cực cận.'},{k:'C',t:'Chụp một bức ảnh tĩnh bình thường.'}],ans:'B',fok:'<i class="fa-solid fa-circle-check" style="margin-right:5px;"></i><strong>Tư duy media chuẩn!</strong> Slow-mo 60/120fps bắt trọn khoảnh khắc!',fbad:'<i class="fa-solid fa-lightbulb" style="margin-right:5px;"></i><strong>Đáp án B:</strong> Slow-mo 60/120fps là bí quyết tạo thước phim đỉnh!'},
+    'Ban Tổ Chức':{q:'Trong "Chiếc lon bẹp dí", kỹ thuật viên đã làm gì?',opts:[{k:'A',t:'Đun nước sôi trong lon rồi úp ngược vào chậu nước lạnh.'},{k:'B',t:'Dùng búa đập mạnh vào lon.'},{k:'C',t:'Bơm khí nitơ lỏng vào lon.'}],ans:'A',fok:'<i class="fa-solid fa-circle-check" style="margin-right:5px;"></i><strong>Tư duy hậu cần chuẩn!</strong> Hơi nước ngưng tụ — áp suất giảm — lon bẹp!',fbad:'<i class="fa-solid fa-lightbulb" style="margin-right:5px;"></i><strong>Đáp án A:</strong> Đun nước + úp vào chậu lạnh tạo hiệu ứng áp suất thần kỳ!'}
+};
+
 var curChl=null;
 function buildS3(){
     curChl=sd.level==='THCS'?CHL.THCS:(CHL[sd.dept]||CHL['Ban Chuyên Môn']);
@@ -680,7 +675,12 @@ function buildS3(){
             var fb=document.getElementById('s3fb');
             fb.className='fb '+(key===curChl.ans?'ok':'bad');
             fb.innerHTML=key===curChl.ans?curChl.fok:curChl.fbad; fb.style.display='block';
-            box.querySelectorAll('.qopt').forEach(function(x){ var k=x.getAttribute('data-k'); x.classList.remove('correct','wrong'); if(k===curChl.ans) x.classList.add('correct'); else if(k===key&&key!==curChl.ans) x.classList.add('wrong'); });
+            box.querySelectorAll('.qopt').forEach(function(x){
+                var k=x.getAttribute('data-k');
+                x.classList.remove('correct','wrong');
+                if(k===curChl.ans) x.classList.add('correct');
+                else if(k===key&&key!==curChl.ans) x.classList.add('wrong');
+            });
             document.getElementById('btn4Next').disabled=false;
         };})(o.k));
         box.appendChild(b);
@@ -690,7 +690,10 @@ document.getElementById('btn4Bk').addEventListener('click',function(){showScr('s
 document.getElementById('btn4Next').addEventListener('click',function(){if(!this.disabled) showScr('screen5');});
 
 function customS5(){
-    if(sd.level==='THCS'){ document.getElementById('expL').innerHTML='💡 Sở thích hoặc thứ em từng tự làm <span class="req">*</span>'; document.getElementById('aspL').innerHTML='🚀 Thử thách nào của Funlab làm em hào hứng nhất? <span class="req">*</span>'; }
+    if(sd.level==='THCS'){
+        document.getElementById('expL').innerHTML='💡 Sở thích hoặc thứ em từng tự làm <span class="req">*</span>';
+        document.getElementById('aspL').innerHTML='🚀 Thử thách nào của Funlab làm em hào hứng nhất? <span class="req">*</span>';
+    }
 }
 document.getElementById('btn5Bk').addEventListener('click',function(){showScr('screen4');});
 document.getElementById('form5').addEventListener('submit',async function(e){
@@ -703,7 +706,9 @@ document.getElementById('form5').addEventListener('submit',async function(e){
     sd.ts=new Date().toLocaleString('vi-VN'); sd.code='FL-'+sd.level+'-'+Math.floor(1000+Math.random()*9000);
     showScr('screenLoad');
     try { localSubs.unshift(Object.assign({},sd)); localStorage.setItem('FUNLAB_SUBS',JSON.stringify(localSubs)); } catch(e2){}
-    try { await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:sd.name,student_class:sd.cls,level:sd.level,registration_type:sd.regType,department:sd.dept,vom_understanding:sd.vom,station1_answer:sd.s1,station2_answer:sd.s2,challenge_answer:sd.s3,experience:sd.exp,portfolio:sd.port,aspiration:sd.asp,agent_code:sd.code})}); } catch(fe){}
+    try {
+        await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:sd.name,student_class:sd.cls,level:sd.level,registration_type:sd.regType,department:sd.dept,vom_understanding:sd.vom,station1_answer:sd.s1,station2_answer:sd.s2,challenge_answer:sd.s3,experience:sd.exp,portfolio:sd.port,aspiration:sd.asp,agent_code:sd.code})});
+    } catch(fe){}
     document.getElementById('sMsg').innerHTML='Chào mừng <strong>'+esc(sd.name)+'</strong> đến với <strong>'+esc(sd.dept)+'</strong>! Ban tuyển chọn sẽ liên hệ bạn sớm.';
     document.getElementById('bCode').textContent=sd.code; document.getElementById('bName').textContent=sd.name;
     document.getElementById('bClass').textContent=sd.cls; document.getElementById('bDept').textContent=sd.dept; document.getElementById('bTime').textContent=sd.ts;
@@ -711,9 +716,14 @@ document.getElementById('form5').addEventListener('submit',async function(e){
 });
 
 document.getElementById('btnDL').addEventListener('click',function(){
-    var b=this; b.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Đang xuất...'; b.disabled=true;
-    html2canvas(document.getElementById('badgeEl'),{backgroundColor:'#ffffff',scale:2,useCORS:true}).then(function(c){var a=document.createElement('a');a.download='FUNLAB-'+sd.code+'.png';a.href=c.toDataURL('image/png');a.click();}).catch(function(){alert('Không thể tải ảnh!');}).finally(function(){b.innerHTML='<i class="fa-solid fa-download"></i> Tải Thẻ Thành Viên';b.disabled=false;});
+    var btn=this; btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Đang xuất...'; btn.disabled=true;
+    html2canvas(document.getElementById('badgeEl'),{backgroundColor:'#ffffff',scale:2,useCORS:true}).then(function(c){
+        var a=document.createElement('a'); a.download='FUNLAB-'+sd.code+'.png'; a.href=c.toDataURL('image/png'); a.click();
+    }).catch(function(){alert('Không thể tải thẻ, vui lòng thử lại sau!');}).finally(function(){
+        btn.innerHTML='<i class="fa-solid fa-download"></i> Tải Thẻ Thành Viên'; btn.disabled=false;
+    });
 });
+
 document.getElementById('btnReset').addEventListener('click',function(){
     sd={name:'',cls:'',level:'THCS',regType:'VOM KHOA HOC',dept:'',vom:'',s1:'',s2:'',s3:'',exp:'',port:'',asp:'',code:'',ts:''};
     document.getElementById('form1a').reset(); document.getElementById('form5').reset();
@@ -730,8 +740,15 @@ document.getElementById('btnCloseAuth').addEventListener('click',function(){docu
 document.getElementById('formPin').addEventListener('submit',function(e){
     e.preventDefault();
     var p=document.getElementById('pinIn').value.trim();
-    if(p===ADMIN_PIN||p==='123456'){ document.getElementById('modalAuth').classList.remove('on'); document.getElementById('adminDash').classList.add('on'); initAdmin(); }
-    else { var ee=document.getElementById('pinErr'); ee.style.display='flex'; document.getElementById('pinErrMsg').textContent='Mã PIN không đúng!'; document.getElementById('pinIn').value=''; document.getElementById('pinIn').focus(); }
+    if(p===ADMIN_PIN||p==='123456'){
+        document.getElementById('modalAuth').classList.remove('on');
+        document.getElementById('adminDash').classList.add('on');
+        initAdmin();
+    } else {
+        var ee=document.getElementById('pinErr'); ee.style.display='flex';
+        document.getElementById('pinErrMsg').textContent='Mã PIN không đúng!';
+        document.getElementById('pinIn').value=''; document.getElementById('pinIn').focus();
+    }
 });
 document.getElementById('btnCloseDash').addEventListener('click',function(){document.getElementById('adminDash').classList.remove('on');});
 document.getElementById('btnCloseDetail').addEventListener('click',function(){document.getElementById('modalDetail').classList.remove('on');});
@@ -763,8 +780,8 @@ function renderTbl(){
     subs.forEach(function(s,i){
         var tr=document.createElement('tr');
         var lp='<span class="bpill '+(s.level==='THPT'?'bthpt':'bthcs')+'">'+esc(s.level)+'</span>';
-        var c1=s.s1==='A'?'<span class="ck">✓</span>':'<span class="cx">'+esc(s.s1||'-')+'</span>';
-        var c2=s.s2==='A'?'<span class="ck">✓</span>':'<span class="cx">'+esc(s.s2||'-')+'</span>';
+        var c1=s.s1==='A'?'<span class="ck">&#10003;</span>':'<span class="cx">'+esc(s.s1||'-')+'</span>';
+        var c2=s.s2==='A'?'<span class="ck">&#10003;</span>':'<span class="cx">'+esc(s.s2||'-')+'</span>';
         var c3=(s.s3||'-').split(':')[0].trim();
         tr.innerHTML='<td style="color:var(--g400);">'+(i+1)+'</td><td style="font-weight:700;color:var(--blue);font-family:monospace;">'+esc(s.code)+'</td><td style="font-weight:600;">'+esc(s.name)+'</td><td style="color:var(--green);font-weight:600;">'+esc(s.cls)+'</td><td>'+lp+'</td><td>'+esc(s.dept)+'</td><td style="text-align:center;">'+c1+'</td><td style="text-align:center;">'+c2+'</td><td style="text-align:center;font-weight:700;color:var(--blue);">'+esc(c3)+'</td><td style="color:var(--g400);font-size:12px;">'+esc(s.ts)+'</td><td></td>';
         var td=tr.querySelector('td:last-child'); td.style.whiteSpace='nowrap';
@@ -793,26 +810,19 @@ function delSub(code){
     initAdmin();
 }
 function exportCSV(){
-    if(!localSubs.length){alert('Chua co du lieu!');return;}
+    if(!localSubs.length){alert('Chưa có dữ liệu!');return;}
     var cols=['STT','Ma','Ho Ten','Lop','Khoi','Hinh Thuc','Ban','Vom KH','T1','T2','T3','Kinh Nghiem','Portfolio','Nguyen Vong','Thoi Gian'];
     var rows=[cols.join(',')];
     localSubs.forEach(function(s,i){
-        var row=[i+1,s.code,s.name,s.cls,s.level,s.regType,s.dept,s.vom,s.s1,s.s2,s.s3,s.exp,s.port,s.asp,s.ts];
-        rows.push(row.map(function(v){
-            var x=(v||'').toString().replace(/"/g,'""').replace(//g,' ').replace(/
-/g,' ');
-            return '"'+x+'"';
+        rows.push([i+1,s.code,s.name,s.cls,s.level,s.regType,s.dept,s.vom,s.s1,s.s2,s.s3,s.exp,s.port,s.asp,s.ts].map(function(v){
+            return '"'+(v||'').toString().replace(/"/g,'""').replace(/\n/g,' ')+'"';
         }).join(','));
     });
     var CRLF='\r\n';
-    var BOM='\uFEFF';
-    var b=new Blob([BOM+rows.join(CRLF)],{type:'text/csv;charset=utf-8;'});
-    var a=document.createElement('a');
-    a.href=URL.createObjectURL(b);
-    a.download='FUNLAB_'+new Date().toISOString().slice(0,10)+'.csv';
-    a.click();
+    var b=new Blob(['\uFEFF'+rows.join(CRLF)],{type:'text/csv;charset=utf-8;'});
+    var a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='FUNLAB_'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
     setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
 }
-</script>
+<\/script>
 </body>
 </html>
