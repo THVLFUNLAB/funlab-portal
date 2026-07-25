@@ -536,7 +536,7 @@
 </div>
 
 <script>
-// ── INIT ──
+// === INIT ===
 function showScr(id){
     var ALL=['screen0','screen1a','screen1b','screen2','screen3','screen4','screen5','screenLoad','screen6'];
     ALL.forEach(function(s){ var el=document.getElementById(s); if(el) el.classList.remove('on'); });
@@ -562,21 +562,7 @@ function esc(s){ return (s||'').toString().replace(/&/g,'&amp;').replace(/</g,'&
 function showE(eId,mId,m){ var e=document.getElementById(eId); e.style.display='flex'; document.getElementById(mId).textContent=m; e.scrollIntoView({behavior:'smooth',block:'nearest'}); }
 function hideE(id){ document.getElementById(id).style.display='none'; }
 
-var SMETA = {
-    screen0:{step:null,pct:0},
-    screen1a:{step:'Bước 1 / 5 — Thông tin cá nhân',pct:15},
-    screen1b:{step:'Bước 2 / 5 — Hình thức tham gia',pct:30},
-    screen2:{step:'Bước 3 / 5 — Trạm 01',pct:50},
-    screen3:{step:'Bước 3 / 5 — Trạm 02',pct:65},
-    screen4:{step:'Bước 3 / 5 — Trạm 03',pct:80},
-    screen5:{step:'Bước 4 / 5 — Hồ sơ',pct:90},
-    screenLoad:{step:'Đang gửi...',pct:95},
-    screen6:{step:'Hoàn thành!',pct:100}
-};
-// showScr is defined above for early onclick access
-
-// btnStart handled via onclick attribute above
-
+// role data
 var ROLES_THCS=[{id:'Vòm Khoa Học',icon:'🔭',name:'Vòm Khoa Học',desc:'Thực hành T7 với GV KHTN'},{id:'Thí Nghiệm',icon:'🧪',name:'Thí Nghiệm',desc:'Pha chế & Mô hình STEM'},{id:'Media Nhí',icon:'📸',name:'Media Nhí',desc:'CapCut, Ảnh & Poster'},{id:'Sự Kiện',icon:'🎪',name:'Sự Kiện',desc:'Đạo cụ & Hỗ trợ trò chơi'}];
 var ROLES_THPT=[{id:'Ban Chuyên Môn',icon:'🧠',name:'Chuyên Môn',desc:'Nghiên cứu & Kịch bản'},{id:'Ban Kỹ Thuật',icon:'🔧',name:'Kỹ Thuật',desc:'Thí nghiệm & Sân khấu'},{id:'Ban Truyền Thông',icon:'🎬',name:'Truyền Thông',desc:'Quay, Dựng & Poster'},{id:'Ban Tổ Chức',icon:'📋',name:'Tổ Chức',desc:'Vật tư & Điều phối'}];
 
@@ -781,13 +767,20 @@ function delSub(code){
     initAdmin();
 }
 function exportCSV(){
-    if(!localSubs.length){alert('Chưa có dữ liệu!');return;}
-    var cols=['STT','Mã','Họ Tên','Lớp','Khối','Hình Thức','Ban','Vòm KH','T1','T2','T3','Kinh Nghiệm','Portfolio','Nguyện Vọng','Thời Gian'];
-    var rows=[cols.map(function(c){return '"'+c+'"';}).join(',')];
-    localSubs.forEach(function(s,i){ rows.push([i+1,s.code,s.name,s.cls,s.level,s.regType,s.dept,s.vom,s.s1,s.s2,s.s3,s.exp,s.port,s.asp,s.ts].map(function(v){return '"'+(v||'').toString().replace(/"/g,'""').replace(/
-/g,' ')+'"';}).join(',')); });
-    var b=new Blob(['﻿'+rows.join('
-')],{type:'text/csv;charset=utf-8;'}); var a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='FUNLAB_'+new Date().toISOString().slice(0,10)+'.csv'; a.click(); setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
+    if(!localSubs.length){alert("Chua co du lieu!");return;}
+    var cols=["STT","Ma","Ho Ten","Lop","Khoi","Hinh Thuc","Ban","Vom KH","T1","T2","T3","Kinh Nghiem","Portfolio","Nguyen Vong","Thoi Gian"];
+    var rows=[cols.join(",")];
+    localSubs.forEach(function(s,i){
+        var row=[i+1,s.code,s.name,s.cls,s.level,s.regType,s.dept,s.vom,s.s1,s.s2,s.s3,s.exp,s.port,s.asp,s.ts];
+        rows.push(row.map(function(v){return '"'+(v||"").toString().replace(/["
+]+/g," '").replace(/'/g,"'")+'"'}).join(","));
+    });
+    var crlf="\r\n";
+    var bom="\uFEFF";
+    var b=new Blob([bom+rows.join(crlf)],{type:"text/csv;charset=utf-8;"});
+    var a=document.createElement("a"); a.href=URL.createObjectURL(b);
+    a.download="FUNLAB_"+new Date().toISOString().slice(0,10)+".csv"; a.click();
+    setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
 }
 </script>
 </body>
