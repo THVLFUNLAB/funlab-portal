@@ -1,10 +1,11 @@
-import { createClient } from "@/utils/supabase/server";
+import { createAdminClient } from "@/utils/supabase/admin";
 import { NextRequest, NextResponse } from "next/server";
 
 /**
  * POST /api/recruitment/submit
- * Nhận dữ liệu từ form tuyển thành viên mới (HTML standalone)
+ * Nhận dữ liệu từ form tuyển thành viên (HTML standalone)
  * và lưu vào bảng recruitment_submissions trong Supabase
+ * Dùng service role key để bypass RLS
  */
 export async function POST(request: NextRequest) {
   try {
@@ -18,36 +19,45 @@ export async function POST(request: NextRequest) {
 
     // Validate bắt buộc
     if (!name || !student_class || !department) {
+      console.error("[recruitment/submit] Missing required fields:", { name, student_class, department });
       return NextResponse.json({ error: "Thiếu thông tin bắt buộc" }, { status: 400 });
     }
 
-    const supabase = await createClient();
+    console.log("[recruitment/submit] Inserting:", { name, student_class, level, department, agent_code });
 
-    const { error } = await supabase
+    const supabase = createAdminClient();
+
+    const { data, error } = await supabase
       .from("recruitment_submissions")
       .insert({
-        name:             name,
-        student_class:    student_class,
-        level:            level            || "THCS",
-        department:       department,
-        registration_type: registration_type || "VÒM KHOA HỌC",
+        name:              name,
+        student_class:     student_class,
+        level:             level             || "THCS",
+        department:        department,
+        registration_type: registration_type  || "VÒM KHOA HỌC",
         vom_understanding: vom_understanding  || null,
-        station1_answer:  station1_answer   || null,
-        station2_answer:  station2_answer   || null,
-        challenge_answer: challenge_answer  || null,
-        experience:       experience        || null,
-        portfolio:        portfolio         || null,
-        aspiration:       aspiration        || null,
-        agent_code:       agent_code        || null,
-      });
+        station1_answer:   station1_answer   || null,
+        station2_answer:   station2_answer   || null,
+        challenge_answer:  challenge_answer  || null,
+        experience:        experience        || null,
+        portfolio:         portfolio         || null,
+        aspiration:        aspiration        || null,
+        agent_code:        agent_code        || null,
+      })
+      .select("id, agent_code")
+      .single();
 
     if (error) {
-      console.error("[recruitment/submit] Supabase error:", error.message);
-      // Không fail request — form đã lưu local, đây là backup
-      return NextResponse.json({ warning: error.message }, { status: 200 });
+      console.error("[recruitment/submit] Supabase insert error:", error);
+      return NextResponse.json(
+        { error: "Lỗi ghi dữ liệu: " + error.message },
+        { status: 500 }
+      );
     }
 
-    return NextResponse.json({ success: true });
+    console.log("[recruitment/submit] Success, id:", data?.id);
+    return NextResponse.json({ success: true, id: data?.id });
+
   } catch (err) {
     console.error("[recruitment/submit] Unexpected error:", err);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
