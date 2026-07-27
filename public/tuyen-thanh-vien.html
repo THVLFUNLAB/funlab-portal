@@ -706,9 +706,34 @@ document.getElementById('form5').addEventListener('submit',async function(e){
     sd.ts=new Date().toLocaleString('vi-VN'); sd.code='FL-'+sd.level+'-'+Math.floor(1000+Math.random()*9000);
     showScr('screenLoad');
     try { localSubs.unshift(Object.assign({},sd)); localStorage.setItem('FUNLAB_SUBS',JSON.stringify(localSubs)); } catch(e2){}
+
+    var payload={name:sd.name,student_class:sd.cls,level:sd.level,registration_type:sd.regType,department:sd.dept,vom_understanding:sd.vom,station1_answer:sd.s1,station2_answer:sd.s2,challenge_answer:sd.s3,experience:sd.exp,portfolio:sd.port,aspiration:sd.asp,agent_code:sd.code};
+    var saved=false;
+
+    // === Cách 1: Gửi thẳng lên Supabase REST API (anon key, RLS cho phép INSERT) ===
     try {
-        await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:sd.name,student_class:sd.cls,level:sd.level,registration_type:sd.regType,department:sd.dept,vom_understanding:sd.vom,station1_answer:sd.s1,station2_answer:sd.s2,challenge_answer:sd.s3,experience:sd.exp,portfolio:sd.port,aspiration:sd.asp,agent_code:sd.code})});
-    } catch(fe){}
+        var SURL='https://xpvnbgmauvtoguoowwnn.supabase.co';
+        var SKEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhwdm5iZ21hdXZ0b2d1b293d25uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4OTgxMTQsImV4cCI6MjA4OTQ3NDExNH0.5ZjjF4qG_aoeh3EEmKZpuFXTpv3XhhvmNp47dEFm1ak';
+        var r1=await fetch(SURL+'/rest/v1/recruitment_submissions',{
+            method:'POST',
+            headers:{'Content-Type':'application/json','apikey':SKEY,'Authorization':'Bearer '+SKEY,'Prefer':'return=minimal'},
+            body:JSON.stringify(payload)
+        });
+        if(r1.status===201||r1.ok){saved=true;}
+        else{var t1=await r1.text();console.warn('[submit] Supabase direct fail:',r1.status,t1);}
+    } catch(e1){console.warn('[submit] Supabase direct error:',e1.message);}
+
+    // === Cách 2: Gửi qua API route Next.js (fallback) ===
+    if(!saved){
+        try {
+            var r2=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+            var d2=await r2.json();
+            if(d2.success){saved=true;}
+            else{console.warn('[submit] API route fail:',d2);}
+        } catch(e2){console.warn('[submit] API route error:',e2.message);}
+    }
+
+    if(!saved){console.error('[submit] Both submission methods failed - data only in localStorage');}
     document.getElementById('sMsg').innerHTML='Chào mừng <strong>'+esc(sd.name)+'</strong> đến với <strong>'+esc(sd.dept)+'</strong>! Ban tuyển chọn sẽ liên hệ bạn sớm.';
     document.getElementById('bCode').textContent=sd.code; document.getElementById('bName').textContent=sd.name;
     document.getElementById('bClass').textContent=sd.cls; document.getElementById('bDept').textContent=sd.dept; document.getElementById('bTime').textContent=sd.ts;
