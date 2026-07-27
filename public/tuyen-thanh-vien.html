@@ -267,7 +267,55 @@
                 </div>
                 <div>
                     <label class="fl" for="studentClass">Lớp <span class="req">*</span> <span class="lbadge" id="lbadge">Chưa xác định</span></label>
-                    <input type="text" id="studentClass" placeholder="6A1, 8B2, 10A3..." autocomplete="off" required>
+                    <select id="studentClass" required>
+                        <option value="">— Chọn lớp —</option>
+                        <optgroup label="Khối 6 (THCS)">
+                            <option value="6A1">6A1</option>
+                            <option value="6A2">6A2</option>
+                            <option value="6A3">6A3</option>
+                            <option value="6A4">6A4</option>
+                            <option value="6A5">6A5</option>
+                            <option value="6A6">6A6</option>
+                        </optgroup>
+                        <optgroup label="Khối 7 (THCS)">
+                            <option value="7B1">7B1</option>
+                            <option value="7B2">7B2</option>
+                            <option value="7B3">7B3</option>
+                            <option value="7B4">7B4</option>
+                            <option value="7B5">7B5</option>
+                            <option value="7B6">7B6</option>
+                        </optgroup>
+                        <optgroup label="Khối 8 (THCS)">
+                            <option value="8C1">8C1</option>
+                            <option value="8C2">8C2</option>
+                            <option value="8C3">8C3</option>
+                            <option value="8C4">8C4</option>
+                            <option value="8C5">8C5</option>
+                            <option value="8C6">8C6</option>
+                        </optgroup>
+                        <optgroup label="Khối 9 (THCS)">
+                            <option value="9D1">9D1</option>
+                            <option value="9D2">9D2</option>
+                            <option value="9D3">9D3</option>
+                            <option value="9D4">9D4</option>
+                            <option value="9D5">9D5</option>
+                        </optgroup>
+                        <optgroup label="Khối 10 (THPT)">
+                            <option value="10A1">10A1</option>
+                            <option value="10A2">10A2</option>
+                            <option value="10A3">10A3</option>
+                            <option value="10A4">10A4</option>
+                        </optgroup>
+                        <optgroup label="Khối 11 (THPT)">
+                            <option value="11B1">11B1</option>
+                            <option value="11B2">11B2</option>
+                        </optgroup>
+                        <optgroup label="Khối 12 (THPT)">
+                            <option value="12C1">12C1</option>
+                            <option value="12C2">12C2</option>
+                            <option value="12C3">12C3</option>
+                        </optgroup>
+                    </select>
                 </div>
             </div>
             <div class="errbox" id="err1a"><i class="fa-solid fa-circle-exclamation"></i><span id="err1aMsg"></span></div>
@@ -551,15 +599,25 @@ var ROLES_THPT=[
     {id:'Ban Tổ Chức',icon:'📋',name:'Tổ Chức',desc:'Vật tư & Điều phối'}
 ];
 
+// Bảng tra cứu chính xác theo danh sách lớp thật của Trường TH-THCS-THPT Việt Anh 2
+var CLASS_MAP = {
+    '6A1':'THCS','6A2':'THCS','6A3':'THCS','6A4':'THCS','6A5':'THCS','6A6':'THCS',
+    '7B1':'THCS','7B2':'THCS','7B3':'THCS','7B4':'THCS','7B5':'THCS','7B6':'THCS',
+    '8C1':'THCS','8C2':'THCS','8C3':'THCS','8C4':'THCS','8C5':'THCS','8C6':'THCS',
+    '9D1':'THCS','9D2':'THCS','9D3':'THCS','9D4':'THCS','9D5':'THCS',
+    '10A1':'THPT','10A2':'THPT','10A3':'THPT','10A4':'THPT',
+    '11B1':'THPT','11B2':'THPT',
+    '12C1':'THPT','12C2':'THPT','12C3':'THPT'
+};
 function detectGrade(){
-    var v=(document.getElementById('studentClass').value||'').trim();
-    var n=parseInt(v.replace(/[^0-9]/g,'').substring(0,2),10)||0;
+    var v=(document.getElementById('studentClass').value||'').trim().toUpperCase();
     var b=document.getElementById('lbadge');
-    if(n>=10&&n<=12){ sd.level='THPT'; b.textContent='Khối THPT'; b.className='lbadge thpt'; }
-    else if(n>=6&&n<=9){ sd.level='THCS'; b.textContent='Khối THCS'; b.className='lbadge thcs'; }
+    var lvl=CLASS_MAP[v];
+    if(lvl==='THPT'){ sd.level='THPT'; b.textContent='Khối THPT'; b.className='lbadge thpt'; }
+    else if(lvl==='THCS'){ sd.level='THCS'; b.textContent='Khối THCS'; b.className='lbadge thcs'; }
     else { sd.level='THCS'; b.textContent='Chưa xác định'; b.className='lbadge'; }
 }
-document.getElementById('studentClass').addEventListener('input', detectGrade);
+document.getElementById('studentClass').addEventListener('change', detectGrade);
 
 function renderRoles(){
     var c=document.getElementById('roleGrid'); c.innerHTML='';
@@ -584,7 +642,7 @@ document.getElementById('form1a').addEventListener('submit',function(e){
     e.preventDefault(); hideE('err1a');
     var n=document.getElementById('studentName').value.trim(), cl=document.getElementById('studentClass').value.trim();
     if(!n){showE('err1a','err1aMsg','Vui lòng nhập đầy đủ Họ và Tên!');return;}
-    if(!cl){showE('err1a','err1aMsg','Vui lòng nhập Lớp hiện tại!');return;}
+    if(!cl){showE('err1a','err1aMsg','Vui lòng chọn Lớp của bạn!');return;}
     sd.name=n; sd.cls=cl; detectGrade(); renderRoles();
     var tag=document.getElementById('agentTag'); document.getElementById('agentName').textContent=n.split(' ').pop()+' — '+cl.toUpperCase(); tag.classList.add('on');
     showScr('screen1b');
