@@ -90,6 +90,13 @@ export default async function RecruitAdminPage({
 
   const rows = (submissions ?? []) as Submission[];
 
+  const exportParams = new URLSearchParams();
+  if (params.level) exportParams.set("level", params.level);
+  if (params.dept) exportParams.set("dept", params.dept);
+  if (params.q) exportParams.set("q", params.q);
+  const exportQuery = exportParams.toString();
+  const exportUrl = `/api/admin/export-recruitment${exportQuery ? `?${exportQuery}` : ''}`;
+
   return (
     <div style={{ minHeight: "100vh", background: "#030712", color: "#e2e8f0", fontFamily: "'Inter', sans-serif" }}>
       <style>{`
@@ -125,7 +132,7 @@ export default async function RecruitAdminPage({
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           {/* [M-02] Nút xuất CSV — tải ngay về máy thầy, mở được bằng Excel */}
           <a
-            href={`/api/admin/export-recruitment${params.level ? `?level=${params.level}` : ''}${params.dept ? `&dept=${params.dept}` : ''}${params.q ? `&q=${params.q}` : ''}`}
+            href={exportUrl}
             download
             style={{ padding: "8px 14px", borderRadius: 6, border: "1px solid rgba(34,197,94,0.4)", color: "#4ade80", fontSize: 12, textDecoration: "none", fontFamily: "monospace", display: "flex", alignItems: "center", gap: 6, background: "rgba(21,128,61,0.1)" }}
           >
