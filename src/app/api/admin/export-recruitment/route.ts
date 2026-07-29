@@ -11,9 +11,7 @@ export async function GET(request: NextRequest) {
   // Auth check
   const cookieStore = await cookies();
   const adminToken   = cookieStore.get("admin_token")?.value;
-  const expectedCode = process.env.ADMIN_SECRET_CODE || process.env.NEXT_PUBLIC_ADMIN_CODE;
-
-  if (!adminToken || adminToken !== expectedCode) {
+  if (!adminToken || adminToken !== "authenticated") {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
