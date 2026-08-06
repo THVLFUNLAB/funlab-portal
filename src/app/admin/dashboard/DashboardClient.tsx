@@ -6,7 +6,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   getDashboardData, logoutAdmin, updateUserProfile, 
   addSystemScore, toggleEpisodeStatus, upsertEpisodeData,
-  saveGameCode as serverSaveGameCode
+  saveGameCode as serverSaveGameCode,
+  addCreatorScore, deleteCreatorScore
 } from '../actions';
 import { supabase } from "@/lib/supabase";
 import DynamicGameRenderer from '@/components/DynamicGameRenderer';
@@ -21,7 +22,7 @@ import {
 
 export default function AdminDashboardClient() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'users' | 'episodes' | 'analytics'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'episodes' | 'analytics' | 'creator' | 'recruitment'>('users');
   const [loading, setLoading] = useState(true);
   
   // Data States
@@ -29,6 +30,7 @@ export default function AdminDashboardClient() {
   const [episodes, setEpisodes] = useState<any[]>([]);
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [systemScores, setSystemScores] = useState<any[]>([]);
+  const [creatorScores, setCreatorScores] = useState<any[]>([]);
   
   // UI States
   const [searchTerm, setSearchTerm] = useState('');
@@ -36,6 +38,7 @@ export default function AdminDashboardClient() {
   // Modal States
   const [classModal, setClassModal] = useState({ open: false, userId: '', userName: '', fullName: '', className: '' });
   const [scoreModal, setScoreModal] = useState({ open: false, userId: '', userName: '', score: 0, reason: '' });
+  const [creatorModal, setCreatorModal] = useState({ open: false, userId: '', userName: '', episodeId: 1, role: 'main_actor', bonusScore: 50, notes: '' });
   const [episodeModal, setEpisodeModal] = useState({ 
     open: false, 
     id: 0, 
@@ -65,6 +68,7 @@ export default function AdminDashboardClient() {
     if (data.episodes) setEpisodes(data.episodes);
     if (data.leaderboard) setLeaderboard(data.leaderboard);
     if (data.systemScores) setSystemScores(data.systemScores);
+    if (data.creatorScores) setCreatorScores(data.creatorScores);
     setLoading(false);
   };
 
@@ -131,6 +135,22 @@ export default function AdminDashboardClient() {
       setScoreModal({ ...scoreModal, open: false });
       loadData();
     } else alert("Lỗi: " + res.error);
+  };
+
+  const submitCreatorScore = async () => {
+    const res = await addCreatorScore(creatorModal.userId, creatorModal.episodeId, creatorModal.role, creatorModal.bonusScore, creatorModal.notes);
+    if (res.success) {
+      setCreatorModal({ ...creatorModal, open: false });
+      loadData();
+    } else alert("Lỗi: " + res.error);
+  };
+
+  const handleDeleteCreatorScore = async (id: string) => {
+    if (confirm("Chắc chắn muốn xóa điểm cống hiến này?")) {
+      const res = await deleteCreatorScore(id);
+      if (res.success) loadData();
+      else alert("Lỗi: " + res.error);
+    }
   };
 
   const submitEpisode = async () => {
@@ -300,6 +320,9 @@ export default function AdminDashboardClient() {
          <button onClick={() => setActiveTab('analytics')} className={`flex items-center gap-2 px-6 py-3 rounded-lg font-bold text-sm tracking-wide transition-all ${activeTab === 'analytics' ? 'bg-slate-800 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}>
             <BarChart className="w-4 h-4" /> THỐNG KÊ
          </button>
+         <button onClick={() => setActiveTab('creator')} className={`flex items-center gap-2 px-6 py-3 rounded-lg font-bold text-sm tracking-wide transition-all ${activeTab === 'creator' ? 'bg-pink-900/60 text-pink-300 shadow-lg border border-pink-500/30' : 'text-slate-500 hover:text-pink-400'}`}>
+            <Video className="w-4 h-4" /> EKIP VIDEO
+         </button>
          {/* Recruitment Tab */}
          <button onClick={() => setActiveTab('recruitment' as any)} className={`flex items-center gap-2 px-6 py-3 rounded-lg font-bold text-sm tracking-wide transition-all ${(activeTab as string) === 'recruitment' ? 'bg-orange-900/60 text-orange-300 shadow-lg border border-orange-500/30' : 'text-slate-500 hover:text-orange-400'}`}>
             <ClipboardList className="w-4 h-4" /> TUYỂN DỤNG
@@ -353,6 +376,12 @@ export default function AdminDashboardClient() {
                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-900/30 text-emerald-400 border border-emerald-900 hover:bg-emerald-800 rounded-lg text-xs font-bold transition-colors"
                                  >
                                     <PlusCircle className="w-3.5 h-3.5" /> PHẠT/THƯỞNG
+                                 </button>
+                                 <button 
+                                   onClick={() => setCreatorModal({ open: true, userId: p.id, userName: p.full_name, episodeId: 1, role: 'main_actor', bonusScore: 50, notes: '' })} 
+                                   className="flex items-center gap-1.5 px-3 py-1.5 bg-pink-900/30 text-pink-400 border border-pink-900 hover:bg-pink-800 rounded-lg text-xs font-bold transition-colors"
+                                 >
+                                    <Video className="w-3.5 h-3.5" /> THƯỞNG EKIP
                                  </button>
                                  <button 
                                    onClick={() => handleDeleteUser(p.id, p.full_name)} 
@@ -507,6 +536,52 @@ export default function AdminDashboardClient() {
                 <Activity className="w-12 h-12 text-red-500 mb-4 drop-shadow-[0_0_10px_rgba(239,68,68,0.5)] relative z-10" />
                 <h4 className="text-sm font-bold text-red-400 uppercase tracking-widest mb-2 relative z-10">Lượt Gõ Cú -20 Điểm</h4>
                 <div className="text-5xl font-black text-white relative z-10">{systemScores.filter(s => s.score === -20).length}</div>
+             </div>
+           </motion.div>
+        )}
+
+        {/* TAB 5: ĐIỂM CỐNG HIẾN VIDEO */}
+        {activeTab === 'creator' && (
+          <motion.div key="creator" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+             <div className="bg-slate-900/40 border border-slate-800 rounded-2xl overflow-x-auto block">
+                <table className="w-full text-left border-collapse min-w-[700px]">
+                   <thead>
+                      <tr className="bg-slate-900/80 border-b border-slate-800 text-slate-400 text-xs uppercase tracking-widest">
+                         <th className="p-4 font-bold">Học sinh</th>
+                         <th className="p-4 font-bold">Tập số</th>
+                         <th className="p-4 font-bold">Vai trò</th>
+                         <th className="p-4 font-bold">Điểm thưởng HP</th>
+                         <th className="p-4 font-bold">Ghi chú</th>
+                         <th className="p-4 font-bold text-right">Thao tác</th>
+                      </tr>
+                   </thead>
+                   <tbody>
+                      {creatorScores.length === 0 && (
+                        <tr><td colSpan={6} className="p-8 text-center text-slate-500">Chưa có ai được thưởng. Quay lại tab Sĩ Tử để thêm!</td></tr>
+                      )}
+                      {creatorScores.map(score => (
+                        <tr key={score.id} className="border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors">
+                          <td className="p-4 font-bold text-slate-200">{score.profiles?.full_name || 'Vô danh'}</td>
+                          <td className="p-4 text-slate-400">Tập {score.episode_id}</td>
+                          <td className="p-4 text-slate-400">
+                            {score.role === 'main_actor' ? 'Diễn viên chính' : 
+                             score.role === 'support_actor' ? 'Diễn viên phụ' : 
+                             score.role === 'crew' ? 'Hậu cần / Quay phim' : 'Ý tưởng kịch bản'}
+                          </td>
+                          <td className="p-4 font-mono font-bold text-pink-400">+{score.bonus_score}</td>
+                          <td className="p-4 text-slate-400">{score.notes}</td>
+                          <td className="p-4 flex gap-2 justify-end">
+                             <button 
+                               onClick={() => handleDeleteCreatorScore(score.id)} 
+                               className="flex items-center gap-1.5 px-3 py-1.5 bg-red-900/30 text-red-500 border border-red-900 hover:bg-red-800 rounded-lg text-xs font-bold transition-colors"
+                             >
+                                <Trash2 className="w-3.5 h-3.5" /> XÓA
+                             </button>
+                          </td>
+                        </tr>
+                      ))}
+                   </tbody>
+                </table>
              </div>
           </motion.div>
         )}

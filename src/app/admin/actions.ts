@@ -54,7 +54,10 @@ export async function getDashboardData() {
   // Lấy tổng điểm từ view
   const { data: leaderboard } = await supabaseAdmin.from('overall_leaderboard').select('*');
 
-  return { profiles, episodes, systemScores, leaderboard };
+  // Lấy danh sách điểm cống hiến
+  const { data: creatorScores } = await supabaseAdmin.from('video_contributors').select('*, profiles(full_name, class_name)');
+
+  return { profiles, episodes, systemScores, leaderboard, creatorScores };
 }
 
 export async function updateUserProfile(userId: string, newClass: string, newFullName: string) {
@@ -118,6 +121,30 @@ export async function saveGameCode(episodeId: number, gameCode: string) {
   }).eq('id', episodeId);
   if (!error) {
     revalidatePath(`/episode/${episodeId}`);
+    revalidatePath('/admin/dashboard');
+  }
+  return { success: !error, error: error?.message };
+}
+
+export async function addCreatorScore(userId: string, episodeId: number, role: string, bonusScore: number, notes: string) {
+  const { error } = await supabaseAdmin.from('video_contributors').insert({
+    user_id: userId,
+    episode_id: episodeId,
+    role: role,
+    bonus_score: bonusScore,
+    notes: notes
+  });
+  if (!error) {
+    revalidatePath('/', 'layout');
+    revalidatePath('/admin/dashboard');
+  }
+  return { success: !error, error: error?.message };
+}
+
+export async function deleteCreatorScore(id: string) {
+  const { error } = await supabaseAdmin.from('video_contributors').delete().eq('id', id);
+  if (!error) {
+    revalidatePath('/', 'layout');
     revalidatePath('/admin/dashboard');
   }
   return { success: !error, error: error?.message };

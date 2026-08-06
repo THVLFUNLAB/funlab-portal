@@ -9,16 +9,17 @@ export const metadata: Metadata = {
   description: "Xem điểm số, huy hiệu và lịch sử thi đấu của bạn trên Funlab Challenge.",
 };
 
-// ── Badge definitions ──────────────────────────────────────────
-const BADGES = [
-  { id: "explorer",  label: "Nhà Thám Hiểm Sơ Cấp", min: 1,   max: 150,  icon: "🔭", color: "#22d3ee" },
-  { id: "engineer",  label: "Kỹ Sư Sáng Tạo",       min: 151, max: 300,  icon: "⚡", color: "#3b82f6" },
-  { id: "master",    label: "Chuyên Gia Funlab",     min: 301, max: 99999, icon: "🏆", color: "#f59e0b" },
-] as const;
+import { calculateRank, RankInfo } from "@/utils/rankHelper";
 
-function getBadge(score: number) {
-  return BADGES.findLast((b) => score >= b.min) ?? null;
-}
+// Mảng tĩnh phục vụ hiển thị toàn bộ huy hiệu
+const ALL_RANKS = [
+  { id: "rookie", label: "Tân Binh Khám Phá", min: 0, icon: "🔰", color: "#94a3b8" },
+  { id: "explorer", label: "Nhà Thám Hiểm Sơ Cấp", min: 100, icon: "🔭", color: "#34d399" },
+  { id: "engineer", label: "Kỹ Sư Sáng Tạo", min: 250, icon: "⚡", color: "#60a5fa" },
+  { id: "master", label: "Chuyên Gia Funlab", min: 450, icon: "🔮", color: "#c084fc" },
+  { id: "ambassador", label: "Đại Sứ Khoa Học", min: 700, icon: "🌌", color: "#f59e0b" },
+  { id: "legend", label: "Huyền Thoại STEM", min: 1000, icon: "👑", color: "#ef4444" },
+];
 
 function getInitials(name: string) {
   return name
@@ -60,7 +61,7 @@ export default async function ProfilePage() {
 
   const totalScore = yearlyRow?.total_score ?? episodeScores?.reduce((s, r) => s + r.score, 0) ?? 0;
   const rank = yearlyRow?.rank ?? null;
-  const badge = getBadge(totalScore);
+  const rankInfo = calculateRank(totalScore);
   const episodeCount = episodeScores?.length ?? 0;
   const avgScore = episodeCount > 0 ? Math.round(totalScore / episodeCount) : 0;
 
@@ -125,12 +126,11 @@ export default async function ProfilePage() {
               </span>
             </div>
             {/* Badge */}
-            {badge && (
-              <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 14px", borderRadius: 999, border: `1px solid ${badge.color}40`, background: `${badge.color}15`, fontSize: 13, fontWeight: 700, color: badge.color }}>
-                <span>{badge.icon}</span>
-                {badge.label}
-              </div>
-            )}
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 14px", borderRadius: 999, border: `1px solid ${ALL_RANKS.find(r => r.id === rankInfo.id)?.color}40`, background: `${ALL_RANKS.find(r => r.id === rankInfo.id)?.color}15`, fontSize: 13, fontWeight: 700, color: ALL_RANKS.find(r => r.id === rankInfo.id)?.color }}>
+              <span>{ALL_RANKS.find(r => r.id === rankInfo.id)?.icon}</span>
+              {rankInfo.badge}
+              {rankInfo.stars > 0 && <span style={{marginLeft: 4}}> {'⭐'.repeat(rankInfo.stars)} </span>}
+            </div>
           </div>
 
           {/* Score big */}
@@ -187,7 +187,7 @@ export default async function ProfilePage() {
             🎖️ Huy Hiệu
           </h2>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
-            {BADGES.map((b) => {
+            {ALL_RANKS.map((b) => {
               const unlocked = totalScore >= b.min;
               return (
                 <div key={b.id} style={{
@@ -203,7 +203,7 @@ export default async function ProfilePage() {
                   <div>
                     <div style={{ fontSize: 13, fontWeight: 700, color: unlocked ? b.color : "#475569" }}>{b.label}</div>
                     <div style={{ fontSize: 11, color: "#64748b", fontFamily: "monospace" }}>
-                      {unlocked ? "✅ Đã đạt" : `Cần ${b.min} điểm`}
+                      {unlocked ? "✅ Đã đạt" : `Cần ${b.min} HP`}
                     </div>
                   </div>
                 </div>

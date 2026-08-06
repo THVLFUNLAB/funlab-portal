@@ -51,14 +51,19 @@ export default function MandatoryProfileModal() {
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('full_name, class_name')
+        .select('full_name, class_name, last_season_confirmed')
         .eq('id', user.id)
         .single();
       
-      if (!profile || !profile.full_name || !profile.class_name) {
+      const isMissingInfo = !profile || !profile.full_name || !profile.class_name;
+      const needsSeasonUpdate = profile?.last_season_confirmed !== 'season_2026_1';
+
+      if (isMissingInfo || needsSeasonUpdate) {
         setShow(true);
         if (profile) {
           if (profile.full_name) setFullName(profile.full_name);
+          // Only pre-fill class if they are missing info (not for season update, we want them to explicitly pick new class)
+          // Wait, pre-filling is fine, they can change it if they moved to a new class.
           if (profile.class_name) setClassName(profile.class_name);
         }
       }
@@ -85,6 +90,7 @@ export default function MandatoryProfileModal() {
         id: userId,
         full_name: fullName.trim(),
         class_name: className,
+        last_season_confirmed: 'season_2026_1',
         updated_at: new Date().toISOString(),
       });
 
@@ -137,10 +143,10 @@ export default function MandatoryProfileModal() {
                </motion.div>
                
                <h2 className="text-3xl md:text-4xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-200 to-white uppercase mb-4">
-                 Ghi Danh Bảng Vàng
+                 Ghi Danh Mùa Giải Mới
                </h2>
                <p className="text-slate-400 text-base md:text-lg font-medium max-w-md mx-auto leading-relaxed">
-                 Chào mừng em đến với <span className="text-cyan-400 font-bold">Funlab Challenge</span>. Hãy hoàn thiện hồ sơ để bắt đầu cuộc đua khoa học nhé!
+                 Chào mừng em đến với <span className="text-cyan-400 font-bold">Funlab Challenge 2026-2027</span>. Hãy xác nhận lớp học mới của em để bắt đầu cuộc đua nhé!
                </p>
             </header>
 

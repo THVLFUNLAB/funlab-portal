@@ -24,16 +24,18 @@ const RANK_STYLE = (rank: number) => {
 export default async function LeaderboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ class?: string }>;
+  searchParams: Promise<{ class?: string, season?: string }>;
 }) {
   const supabase = await createClient();
   const params = await searchParams;
   const filterClass = params.class || "";
+  const filterSeason = params.season || "season_2026_1"; // Mặc định Mùa Giải mới nhất
 
   // Lấy leaderboard từ overall_leaderboard view
   let query = supabase
     .from("overall_leaderboard")
     .select("user_id, total_score, rank")
+    .eq("season_id", filterSeason)
     .order("total_score", { ascending: false })
     .limit(100);
 
@@ -140,13 +142,20 @@ export default async function LeaderboardPage({
           </div>
         )}
 
+        {/* Lọc theo mùa giải */}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16, alignItems: "center" }}>
+          <span style={{ fontSize: 12, color: "#64748b", fontFamily: "monospace", marginRight: 4 }}>MÙA GIẢI:</span>
+          <Link href={`/leaderboard?season=season_2026_1${filterClass ? '&class=' + filterClass : ''}`} className={`filter-btn ${filterSeason === 'season_2026_1' ? 'active' : ''}`}>Năm Học 2026-2027</Link>
+          <Link href={`/leaderboard?season=season_2025_1${filterClass ? '&class=' + filterClass : ''}`} className={`filter-btn ${filterSeason === 'season_2025_1' ? 'active' : ''}`}>Kho Lưu Trữ (25-26)</Link>
+        </div>
+
         {/* Filter theo lớp */}
         {allClasses.length > 0 && (
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 24, alignItems: "center" }}>
-            <span style={{ fontSize: 12, color: "#64748b", fontFamily: "monospace", marginRight: 4 }}>LỌC:</span>
-            <Link href="/leaderboard" className={`filter-btn ${!filterClass ? 'active' : ''}`}>Tất cả</Link>
+            <span style={{ fontSize: 12, color: "#64748b", fontFamily: "monospace", marginRight: 4 }}>LỚP:</span>
+            <Link href={`/leaderboard?season=${filterSeason}`} className={`filter-btn ${!filterClass ? 'active' : ''}`}>Tất cả</Link>
             {allClasses.map(c => (
-              <Link key={c} href={`/leaderboard?class=${c}`} className={`filter-btn ${filterClass === c ? 'active' : ''}`}>{c}</Link>
+              <Link key={c} href={`/leaderboard?season=${filterSeason}&class=${c}`} className={`filter-btn ${filterClass === c ? 'active' : ''}`}>{c}</Link>
             ))}
           </div>
         )}

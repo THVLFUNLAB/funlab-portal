@@ -60,21 +60,8 @@ export async function saveGameScore(
       return { success: false, error: `Lỗi DB: ${insertError.message || insertError.details || JSON.stringify(insertError)}` };
     }
 
-    // --- STEP 3: Increment yearly_leaderboard ---
-    const { error: rpcError } = await supabase.rpc('increment_yearly_score', {
-      p_user_id: userId,
-      p_score: validScore
-    });
-
-    if (rpcError) {
-      console.error('RPC Error:', rpcError);
-      // We don't fail the whole action if yearly update fails, but we should log it.
-      // The individual episode score IS saved.
-      return { 
-        success: true, 
-        message: 'Điểm tập đã lưu, nhưng có lỗi khi cộng dồn vào BXH Năm.' 
-      };
-    }
+    // --- STEP 3: Bỏ qua increment_yearly_score vì hệ thống đã dùng View overall_leaderboard ---
+    // (Bảng yearly_leaderboard cũ không còn dùng trong kiến trúc đa mùa giải)
 
     // --- STEP 4: Tự động cấp Badge nếu đủ điều kiện [P3-05] ---
     // Lấy tổng điểm mới nhất từ overall_leaderboard

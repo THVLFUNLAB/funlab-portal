@@ -276,6 +276,7 @@ export default function Home() {
   const [dbEpisodes, setDbEpisodes] = useState<any[]>([]);
   const [completedEpisodes, setCompletedEpisodes] = useState<number[]>([]);
   const [totalScore, setTotalScore] = useState(0);
+  const [activeEpisodeSeason, setActiveEpisodeSeason] = useState('season_2026_1');
 
   useEffect(() => {
     async function loadData() {
@@ -469,21 +470,47 @@ export default function Home() {
           <div className="lg:col-span-12 bg-slate-900/30 backdrop-blur-xl border border-white/5 rounded-[2rem] p-6 md:p-8 shadow-[0_8px_32px_rgba(0,0,0,0.4)] hover:shadow-[0_0_30px_rgba(34,211,238,0.15)] hover:border-cyan-500/30 transition-all duration-500 group relative overflow-hidden flex flex-col">
             <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <div className="relative z-10 flex-1 flex flex-col">
-              <div className="flex justify-between items-center mb-6 md:mb-8 border-b border-slate-800/50 pb-4 md:pb-6 flex-wrap gap-4 shrink-0">
+              <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-6 md:mb-8 border-b border-slate-800/50 pb-4 md:pb-6 gap-4 shrink-0">
                 <h3 className="text-2xl md:text-3xl font-bold flex items-center gap-3 text-slate-100">
                   <span className="text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]">▶</span> Các Tập FUNLAB Mới
                 </h3>
-                <div className="flex items-center gap-3">
-                  {/* Link đến Bảng Vàng Xếp Hạng */}
-                  <Link href="/leaderboard" className="flex items-center gap-1.5 text-amber-400 text-xs sm:text-sm font-bold tracking-widest uppercase hover:text-amber-300 transition-colors bg-amber-500/10 px-4 md:px-5 py-2 md:py-3 rounded-full border border-amber-500/20 min-h-[44px]">
+                
+                <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto justify-between xl:justify-end">
+                  {/* Tabs Mùa Giải */}
+                  <div className="flex items-center gap-1.5 bg-slate-950/80 p-1 rounded-xl border border-slate-700/50 order-2 sm:order-1 w-full sm:w-auto">
+                    <button 
+                      onClick={() => setActiveEpisodeSeason('season_2026_1')}
+                      className={`flex-1 sm:flex-none px-3 py-1.5 md:py-2 text-xs md:text-sm font-bold rounded-lg transition-all whitespace-nowrap ${
+                        activeEpisodeSeason === 'season_2026_1' 
+                          ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/50 shadow-[0_0_10px_rgba(34,211,238,0.2)]' 
+                          : 'text-slate-400 hover:text-slate-200 border border-transparent'
+                      }`}
+                    >
+                      Năm Học 26-27
+                    </button>
+                    <button 
+                      onClick={() => setActiveEpisodeSeason('season_2025_1')}
+                      className={`flex-1 sm:flex-none px-3 py-1.5 md:py-2 text-xs md:text-sm font-bold rounded-lg transition-all whitespace-nowrap ${
+                        activeEpisodeSeason === 'season_2025_1' 
+                          ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/50 shadow-[0_0_10px_rgba(34,211,238,0.2)]' 
+                          : 'text-slate-400 hover:text-slate-200 border border-transparent'
+                      }`}
+                    >
+                      Kho Lưu Trữ 25-26
+                    </button>
+                  </div>
+                  
+                  <Link href="/leaderboard" className="flex items-center justify-center gap-1.5 text-amber-400 text-xs sm:text-sm font-bold tracking-widest uppercase hover:text-amber-300 transition-colors bg-amber-500/10 px-4 md:px-5 py-2 md:py-3 rounded-full border border-amber-500/20 min-h-[44px] order-1 sm:order-2">
                     🏆 Bảng Vàng
                   </Link>
-                  <button className="text-cyan-400 text-xs sm:text-sm font-bold tracking-widest uppercase hover:text-cyan-300 transition-colors bg-cyan-500/10 px-4 md:px-5 py-2 md:py-3 rounded-full border border-cyan-500/20 min-h-[44px]">Xem Tất Cả</button>
                 </div>
               </div>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 h-full auto-rows-max">
-                {dbEpisodes.map((ep) => {
+                {dbEpisodes.filter(ep => {
+                  const epSeason = ep.season_id || 'season_2025_1';
+                  return epSeason === activeEpisodeSeason;
+                }).map((ep) => {
                   const isCompleted = completedEpisodes.includes(ep.id);
                   return (
                   <Link href={`/episode/${ep.id}`} key={ep.id} className="block h-full">

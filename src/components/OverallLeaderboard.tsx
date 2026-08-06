@@ -14,18 +14,18 @@ interface AggregatedUser {
 export default function OverallLeaderboard() {
   const [leaders, setLeaders] = useState<AggregatedUser[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeSeason, setActiveSeason] = useState('season_2026_1');
 
   useEffect(() => {
     async function fetchOverall() {
       setLoading(true);
+      
+      // Fetch directly from the view
       const { data, error } = await supabase
-        .from('yearly_leaderboard')
-        .select(`
-          user_id,
-          total_score,
-          profiles (full_name, class_name)
-        `)
-        .order('total_score', { ascending: false })
+        .from('overall_leaderboard')
+        .select('*')
+        .eq('season_id', activeSeason)
+        .order('rank', { ascending: true })
         .limit(30);
 
       if (error) {
@@ -33,8 +33,8 @@ export default function OverallLeaderboard() {
       } else if (data) {
         const sorted = data.map((row: any) => ({
           user_id: row.user_id,
-          full_name: row.profiles?.full_name || "Tuyển thủ Funlab",
-          class_name: row.profiles?.class_name || "Khách",
+          full_name: row.full_name || "Tuyển thủ Funlab",
+          class_name: row.class_name || "Khách",
           total_score: row.total_score
         }));
         setLeaders(sorted);
@@ -43,14 +43,14 @@ export default function OverallLeaderboard() {
     }
     
     fetchOverall();
-  }, []);
+  }, [activeSeason]);
 
   return (
     <div className="w-full bg-slate-900/80 backdrop-blur-2xl rounded-[2.5rem] border border-yellow-500/20 p-6 md:p-10 shadow-2xl relative overflow-hidden">
       {/* Hiệu ứng nền */}
       <div className="absolute -top-32 -right-32 w-64 h-64 bg-amber-500/20 blur-[60px] rounded-full mix-blend-screen pointer-events-none"></div>
       
-      <div className="flex justify-between items-center mb-8 border-b border-yellow-500/20 pb-6 relative z-10">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 border-b border-yellow-500/20 pb-6 relative z-10 gap-4">
         <div>
           <h3 className="text-3xl md:text-4xl font-black text-white flex items-center gap-3 tracking-tight">
             <Trophy className="w-10 h-10 text-yellow-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.6)]" />
@@ -62,6 +62,30 @@ export default function OverallLeaderboard() {
             Đỉnh cao tri thức Funlab
           </p>
         </div>
+
+        {/* Season Tabs */}
+        <div className="flex items-center gap-2 bg-slate-950 p-1.5 rounded-xl border border-slate-700/50 self-stretch md:self-auto">
+          <button 
+            onClick={() => setActiveSeason('season_2026_1')}
+            className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${
+              activeSeason === 'season_2026_1' 
+                ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/50 shadow-inner' 
+                : 'text-slate-400 hover:text-slate-200 border border-transparent'
+            }`}
+          >
+            Năm Học 2026-2027
+          </button>
+          <button 
+            onClick={() => setActiveSeason('season_2025_1')}
+            className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${
+              activeSeason === 'season_2025_1' 
+                ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/50 shadow-inner' 
+                : 'text-slate-400 hover:text-slate-200 border border-transparent'
+            }`}
+          >
+            Kho Lưu Trữ 2025-2026
+          </button>
+        </div>
       </div>
 
       {loading ? (
@@ -69,7 +93,7 @@ export default function OverallLeaderboard() {
           <div className="w-10 h-10 border-4 border-yellow-500/30 border-t-yellow-400 rounded-full animate-spin"></div>
         </div>
       ) : leaders.length === 0 ? (
-        <p className="text-center text-slate-500 py-10 font-medium">Chưa có dữ liệu tổng.</p>
+        <p className="text-center text-slate-500 py-10 font-medium">Chưa có dữ liệu cho mùa giải này.</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
           {leaders.map((s, index) => {
