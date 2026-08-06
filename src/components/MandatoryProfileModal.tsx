@@ -10,17 +10,17 @@ const CLASS_GROUPS = [
   {
     label: "KHỐI THCS",
     blocks: [
-      { name: "Khối 6", prefix: "6A", count: 7 },
-      { name: "Khối 7", prefix: "7B", count: 7 },
-      { name: "Khối 8", prefix: "8C", count: 7 },
-      { name: "Khối 9", prefix: "9D", count: 7 },
+      { name: "Khối 6", prefix: "6A", count: 6 },
+      { name: "Khối 7", prefix: "7B", count: 6 },
+      { name: "Khối 8", prefix: "8C", count: 6 },
+      { name: "Khối 9", prefix: "9D", count: 5 },
     ]
   },
   {
     label: "KHỐI THPT",
     blocks: [
-      { name: "Khối 10", prefix: "10A", count: 3 },
-      { name: "Khối 11", prefix: "11B", count: 3 },
+      { name: "Khối 10", prefix: "10A", count: 4 },
+      { name: "Khối 11", prefix: "11B", count: 2 },
       { name: "Khối 12", prefix: "12C", count: 3 },
     ]
   }
