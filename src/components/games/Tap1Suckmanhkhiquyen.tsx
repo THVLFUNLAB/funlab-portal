@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Wind, Thermometer, Trophy, ArrowRight, ShieldCheck, Activity, Zap, Play, Flame, Snowflake, ArrowDown } from 'lucide-react';
+import { Wind, Thermometer, Trophy, ArrowRight, ShieldCheck, Activity, Zap, Play, Flame, Snowflake, ArrowDown, Award, Target } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface Tap1Props {
