@@ -5,7 +5,6 @@ import { useParams, useRouter } from "next/navigation";
 import { LiveLeaderboard } from "@/components/LiveLeaderboard";
 import { createClient } from "@/utils/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
-import { submitEpisodeScore } from "@/lib/scoreLogic";
 import { saveGameScore } from "@/app/actions/gameActions";
 import { LogIn, Lock } from "lucide-react";
 import dynamic from "next/dynamic";
@@ -23,6 +22,7 @@ const GameLoading = () => (
 );
 
 const Tap1Suckmanhkhiquyen   = dynamic(() => import("@/components/games/Tap1Suckmanhkhiquyen"),   { loading: GameLoading, ssr: false });
+const Tap1Game_v2            = dynamic(() => import("@/components/games/Tap1Game_v2"),            { loading: GameLoading, ssr: false });
 const Tap2Game               = dynamic(() => import("@/components/games/Tap2Game"),               { loading: GameLoading, ssr: false });
 const Tap3Game               = dynamic(() => import("@/components/games/Tap3Game"),               { loading: GameLoading, ssr: false });
 const Tap4Game               = dynamic(() => import("@/components/games/Tap4Game"),               { loading: GameLoading, ssr: false });
@@ -33,7 +33,7 @@ const DynamicGameRenderer    = dynamic(() => import("@/components/DynamicGameRen
 
 // TỪ ĐIỂN MAPPER GAME - Thêm các tập khác vào đây
 const GAME_COMPONENTS: Record<number, React.ElementType> = {
-  1: Tap1Suckmanhkhiquyen,
+  1: Tap1Game_v2,
   2: Tap2Game,
   3: Tap3Game,
   4: Tap4Game,
@@ -88,27 +88,12 @@ export default function EpisodePage() {
 
   const finalVideoId = (dbEpisode?.video_url ? getValidYoutubeId(dbEpisode.video_url) : activeEpisode?.youtubeId) || 'RACbCcHf';
 
-  const checkBadgeUnlocks = async (studentName: string) => {
-    const isMock = !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL.includes("your_supabase");
-    if (isMock) {
-       setBadgeUnlock('Nhà Thám Hiểm Sơ Cấp');
-       setTimeout(() => setBadgeUnlock(null), 5000);
-       return;
-    }
-    const { data } = await supabase.from("leaderboard").select("score").eq("student_name", studentName);
-    if (!data) return;
-    
-    const totalScore = data.reduce((sum, row) => sum + row.score, 0);
-    const oldScore = totalScore - 10;
-    
-    if (totalScore >= 301 && oldScore < 301) setBadgeUnlock("Chuyên Gia Funlab: Master");
-    else if (totalScore >= 151 && oldScore < 151) setBadgeUnlock("Kỹ Sư Sáng Tạo");
-    else if (totalScore >= 50 && oldScore < 50) setBadgeUnlock("Nhà Thám Hiểm Sơ Cấp");
-    
-    if (totalScore >= 50 && oldScore < 50 || totalScore >= 151 && oldScore < 151 || totalScore >= 301 && oldScore < 301) {
-       setTimeout(() => setBadgeUnlock(null), 7000);
-    }
-  };
+  // [FIX lỗi #4 – audit 2026-08-21] Trước đây hàm này tự query bảng `leaderboard`
+  // (đã deprecated, không thuộc kiến trúc đa mùa), khớp theo student_name (dễ trùng
+  // tên) và đoán "điểm cũ = điểm mới - 10" — sai lệch với ngưỡng badge thật sự trong
+  // grant_badge_if_eligible (badge_schema.sql). Badge giờ được tính server-side ngay
+  // trong saveGameScore() (cùng season, cùng user_id, cùng ngưỡng với DB) và trả về
+  // qua res.badgeUnlocked — xem handleGameComplete bên dưới.
 
   // Helper hiển thị toast notification
   const showToast = (type: 'success' | 'error' | 'warning', message: string) => {
@@ -141,7 +126,10 @@ export default function EpisodePage() {
       const successMsg = `[Realtime] Đã gửi điểm số thành công về hệ thống Admin Funlab!`;
       setMessages(prev => [successMsg, ...prev].slice(0, 5));
       showToast('success', `🎉 ${res.message}`);
-      checkBadgeUnlocks(studentName);
+      if (res.badgeUnlocked) {
+        setBadgeUnlock(res.badgeUnlocked);
+        setTimeout(() => setBadgeUnlock(null), 7000);
+      }
     } else if (res.alreadySubmitted) {
       setMessages(prev => [`[Blocked] ${res.error}`, ...prev].slice(0, 5));
       showToast('warning', `⚠️ ${res.error}`);
