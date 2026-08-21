@@ -1,0 +1,449 @@
+// [FGC] Tập 9 - THẦN ĐÈN KHÓI TRẮNG - FGC v1.0
+// Chủ đề: Phản ứng H2O2 + KMnO4 (oxi hóa - khử, tỏa nhiệt)
+// Diễn viên: Khánh Ngân & Quỳnh Như (CLB Khoa Học FunLab)
+// Quy ước FGC: không dùng module system hay client directive của Next.js, chỉ dùng CSS thuần cho animation, chỉ dùng thẻ img/a gốc.
+// Icon (Flame, Beaker, ...) và Icons.X đều được DynamicGameRenderer tiêm sẵn, dùng trực tiếp.
+
+// --- NGÂN HÀNG 20 CÂU HỎI (10 THCS + 10 THPT, 5 mức độ nhận thức) ---
+// Lưu ý soạn đề (sửa 2026-08-21): độ dài 4 phương án trong MỖI câu được cân bằng
+// tương đối, và vị trí đáp án đúng được rải đều A/B/C/D — tránh kiểu "phương án dài
+// nhất luôn đúng" hoặc "đáp án hay rơi vào vị trí B" khiến học sinh đoán mẹo thay vì
+// hiểu bài.
+const QUESTION_BANK = [
+  // ===== THCS (10 câu) =====
+  { id: 'thcs-1', cap: 'THCS', level: 'Nhận biết', safety: false,
+    q: 'Khi cho tinh thể thuốc tím (KMnO4) vào dung dịch oxy già (H2O2) đậm đặc, hiện tượng quan sát được là gì?',
+    options: ['Dung dịch trong suốt, không hiện tượng gì', 'Dung dịch đông đặc lại thành khối rắn', 'Sủi khí mạnh, khói trắng bốc cao, kèm tỏa nhiệt', 'Dung dịch chuyển hẳn sang màu xanh lam đậm'],
+    ans: 2, explain: 'Phản ứng giữa KMnO4 và H2O2 giải phóng khí O2 rất mạnh, cuốn theo hơi nước tạo thành cột "khói trắng" bốc cao, đồng thời tỏa nhiệt lớn.' },
+  { id: 'thcs-2', cap: 'THCS', level: 'Nhận biết', safety: false,
+    q: 'Chất khí chủ yếu sinh ra trong phản ứng giữa H2O2 và KMnO4 là gì?',
+    options: ['Khí Oxi (O2), khí duy trì sự cháy', 'Khí Hiđro (H2), khí rất dễ cháy', 'Khí Cacbonic (CO2), khí gây ngạt', 'Khí Nitơ (N2), khí trơ về hóa học'],
+    ans: 0, explain: 'H2O2 bị phân hủy/oxi hóa giải phóng khí Oxi (O2) — đây chính là dòng khí áp lực cao tạo nên cột khói trong thí nghiệm.' },
+  { id: 'thcs-3', cap: 'THCS', level: 'Thông hiểu', safety: false,
+    q: 'Vì sao que đóm còn tàn đỏ đưa vào miệng bình sau phản ứng lại bùng cháy sáng rực trở lại?',
+    options: ['Vì khí CO2 sinh ra hỗ trợ sự cháy mạnh', 'Vì nhiệt độ trong bình khi đó quá thấp', 'Vì có khí H2 dễ cháy sinh ra khi đó', 'Vì nồng độ khí O2 trong bình rất cao'],
+    ans: 3, explain: 'Đây là cách nhận biết khí O2 kinh điển: nồng độ O2 cao làm que đóm tàn đỏ bùng cháy trở lại.' },
+  { id: 'thcs-4', cap: 'THCS', level: 'Thông hiểu', safety: false,
+    q: 'Phản ứng giữa H2O2 và KMnO4 tỏa ra lượng nhiệt rất lớn. Phản ứng như vậy được gọi là gì?',
+    options: ['Phản ứng thu nhiệt từ môi trường', 'Phản ứng tỏa nhiệt ra môi trường', 'Phản ứng trung hòa axit - bazơ', 'Phản ứng không kèm năng lượng'],
+    ans: 1, explain: 'Phản ứng giải phóng năng lượng ra môi trường dưới dạng nhiệt được gọi là phản ứng tỏa nhiệt (thể hiện rõ qua hơi nước bốc lên và bình nóng lên nhanh).' },
+  { id: 'thcs-5', cap: 'THCS', level: 'Vận dụng', safety: true,
+    q: 'Vì sao oxy già (H2O2) bán ngoài hiệu thuốc thường được đựng trong chai nhựa màu sẫm (nâu, đen) thay vì chai trong suốt?',
+    options: ['Để hạn chế ánh sáng, nhiệt làm H2O2 phân hủy', 'Để chai nhựa trông đẹp mắt và sang trọng hơn', 'Vì H2O2 gây ăn mòn mạnh chai nhựa trong suốt', 'Để tránh nhầm lẫn oxy già với nước uống'],
+    ans: 0, explain: 'H2O2 kém bền, dễ tự phân hủy khi gặp ánh sáng/nhiệt. Chai sẫm màu giúp hạn chế ánh sáng chiếu vào, kéo dài thời gian bảo quản.' },
+  { id: 'thcs-6', cap: 'THCS', level: 'Vận dụng', safety: false,
+    q: 'Khi bôi oxy già lên vết thương ngoài da, ta thấy sủi bọt trắng. Chất nào trong máu đã xúc tác cho hiện tượng này?',
+    options: ['Hemoglobin, sắc tố đỏ vận chuyển oxy', 'Bạch cầu, tế bào miễn dịch trong máu', 'Tiểu cầu, tế bào giúp đông máu nhanh', 'Enzyme Catalase có sẵn trong máu người'],
+    ans: 3, explain: 'Enzyme Catalase trong máu xúc tác phân hủy H2O2 thành H2O và O2 (chính là bọt khí quan sát được), đồng thời giúp diệt một số vi khuẩn kỵ khí.' },
+  { id: 'thcs-7', cap: 'THCS', level: 'Vận dụng cao', safety: false,
+    q: 'Nếu tăng gấp đôi nồng độ H2O2 nhưng giữ nguyên khối lượng KMnO4, cột khói trắng trong thí nghiệm sẽ thay đổi thế nào?',
+    options: ['Không đổi vì KMnO4 mới là yếu tố quyết định', 'Cột khói thấp hơn vì phản ứng chậm lại', 'Cột khói cao hơn do phản ứng xảy ra mạnh hơn', 'Phản ứng dừng lại hoàn toàn, hết khói'],
+    ans: 2, explain: 'Nồng độ chất phản ứng tăng làm phản ứng xảy ra nhanh và mạnh hơn, sinh nhiều khí + nhiệt hơn trong cùng thời gian → cột khói cao hơn.' },
+  { id: 'thcs-8', cap: 'THCS', level: 'Vận dụng cao', safety: true,
+    q: 'Vì sao thí nghiệm bắt buộc dùng bình thủy tinh chịu nhiệt (Borosilicate) mà không dùng bình nhựa thông thường?',
+    options: ['Không có gì khác biệt giữa hai loại bình', 'Bình nhựa có thể chảy hoặc nứt vỡ vì nhiệt', 'Phản ứng sẽ không thể xảy ra trong bình nhựa', 'Khói trắng sẽ đổi màu nếu dùng bình nhựa'],
+    ans: 1, explain: 'Nhiệt tỏa ra đột ngột và lớn có thể làm nhựa biến dạng/chảy hoặc làm thủy tinh thường bị sốc nhiệt nứt vỡ — cần bình Borosilicate chịu nhiệt chuyên dụng.' },
+  { id: 'thcs-9', cap: 'THCS', level: 'Phân tích', safety: false,
+    q: 'Số liệu thực nghiệm: giữ nguyên nồng độ H2O2, khi tăng khối lượng KMnO4 từ 1g lên 3g thì chiều cao cột khói tăng từ 40cm lên 110cm. Nhận xét nào đúng?',
+    options: ['KMnO4 tăng thì cột khói cũng tăng theo', 'Khối lượng KMnO4 không ảnh hưởng cột khói', 'KMnO4 tỉ lệ nghịch với chiều cao cột khói', 'Cột khói chỉ phụ thuộc nồng độ H2O2 duy nhất'],
+    ans: 0, explain: 'Số liệu cho thấy mối quan hệ đồng biến: KMnO4 tăng → chiều cao cột khói tăng, phù hợp vai trò của KMnO4 là chất phản ứng chính tạo phản ứng oxi hóa - khử.' },
+  { id: 'thcs-10', cap: 'THCS', level: 'Phân tích', safety: true,
+    q: 'Tại sao thí nghiệm luôn yêu cầu đeo kính bảo hộ và găng tay nitrile, dù sản phẩm chính chỉ là khói trắng và khí O2 (không độc)?',
+    options: ['Vì khí O2 sinh ra có thể gây ngạt thở', 'Vì màu trắng của khói có hại cho mắt', 'Chỉ là quy định hình thức, không cần thiết', 'Vì dung dịch có thể bắn ra và gây bỏng'],
+    ans: 3, explain: 'Rủi ro thực sự không đến từ khí O2 mà từ phản ứng dữ dội (bắn dung dịch) và nhiệt độ tăng đột ngột — kính bảo hộ và găng tay bảo vệ mắt/da khỏi hai rủi ro này.' },
+
+  // ===== THPT (10 câu) =====
+  { id: 'thpt-1', cap: 'THPT', level: 'Nhận biết', safety: false,
+    q: 'Trong phản ứng 2KMnO4 + 3H2O2 → 2MnO2 + 2KOH + 3O2 + 2H2O, số oxi hóa của Mn thay đổi như thế nào?',
+    options: ['Từ +4 lên +7, Mn nhường electron', 'Từ +7 xuống +4, Mn nhận electron', 'Từ +2 lên +7, Mn nhường electron', 'Không thay đổi, vẫn giữ nguyên +7'],
+    ans: 1, explain: 'Mn trong KMnO4 có số oxi hóa +7, trong sản phẩm MnO2 có số oxi hóa +4 → Mn nhận electron, số oxi hóa giảm từ +7 xuống +4.' },
+  { id: 'thpt-2', cap: 'THPT', level: 'Nhận biết', safety: false,
+    q: 'Trong phản ứng trên, nguyên tố/hợp chất nào đóng vai trò chất oxi hóa?',
+    options: ['H trong phân tử H2O2 ban đầu', 'O trong phân tử H2O2 ban đầu', 'KMnO4, do Mn có số oxi hóa +7', 'K trong phân tử KMnO4 ban đầu'],
+    ans: 2, explain: 'Chất oxi hóa là chất nhận electron (số oxi hóa giảm). Mn trong KMnO4 giảm từ +7 xuống +4 → KMnO4 là chất oxi hóa.' },
+  { id: 'thpt-3', cap: 'THPT', level: 'Thông hiểu', safety: false,
+    q: 'Số oxi hóa của O trong H2O2 là -1, trong sản phẩm O2 là 0. Quá trình O đi từ -1 lên 0 được gọi là gì?',
+    options: ['Quá trình oxi hóa, O đã nhường electron', 'Quá trình khử, O đã nhận electron', 'Quá trình trung hòa điện tích của O', 'Không phải phản ứng oxi hóa - khử'],
+    ans: 0, explain: 'Số oxi hóa tăng (từ -1 lên 0) nghĩa là nguyên tử đã nhường electron → đây là quá trình oxi hóa; H2O2 đóng vai trò chất khử trong phản ứng này.' },
+  { id: 'thpt-4', cap: 'THPT', level: 'Thông hiểu', safety: false,
+    q: 'Vì sao trong phản ứng với KMnO4, H2O2 thể hiện vai trò là chất khử?',
+    options: ['Vì H2O2 luôn là chất khử trong mọi phản ứng', 'Vì KMnO4 không đủ khả năng oxi hóa chất khác', 'Vì phản ứng này không có trao đổi electron', 'Vì O trong H2O2 nhường electron cho Mn+7'],
+    ans: 3, explain: 'H2O2 nhường electron (O: -1 → 0) cho Mn (+7 → +4) nhận electron — đúng bản chất phản ứng oxi hóa khử, H2O2 là chất khử trong cặp phản ứng này.' },
+  { id: 'thpt-5', cap: 'THPT', level: 'Vận dụng', safety: false,
+    q: 'Cân bằng phương trình 2KMnO4 + 3H2O2 → 2MnO2 + 2KOH + 3O2 + 2H2O bằng phương pháp thăng bằng electron. Hệ số của H2O2 là bao nhiêu?',
+    options: ['Hệ số bằng 1', 'Hệ số bằng 3', 'Hệ số bằng 2', 'Hệ số bằng 5'],
+    ans: 1, explain: '2 Mn (+7→+4) nhận 2×3=6e-. Mỗi H2O2 nhường 2e- (2 nguyên tử O, mỗi O nhường 1e-) → cần 3 H2O2 để nhường đủ 6e-. Hệ số H2O2 = 3.' },
+  { id: 'thpt-6', cap: 'THPT', level: 'Vận dụng', safety: false,
+    q: 'Nếu thay môi trường trung tính bằng môi trường axit (H2SO4 loãng), sản phẩm khử của Mn+7 thường là gì thay vì MnO2?',
+    options: ['Mn kim loại, tức Mn ở mức 0', 'MnO2 vẫn giữ nguyên, không đổi', 'Mn2+ tan trong dung dịch (MnSO4)', 'MnO4- vẫn giữ nguyên, không đổi'],
+    ans: 2, explain: 'Trong môi trường axit mạnh, KMnO4 bị khử sâu hơn (nhận nhiều electron hơn) xuống Mn2+ tan trong dung dịch, thay vì chỉ dừng ở MnO2 kết tủa như môi trường trung tính/kiềm nhẹ.' },
+  { id: 'thpt-7', cap: 'THPT', level: 'Vận dụng cao', safety: false,
+    q: 'Dùng 0,2 mol KMnO4 phản ứng vừa đủ theo phương trình 2KMnO4 + 3H2O2 → 2MnO2 + 2KOH + 3O2 + 2H2O. Thể tích khí O2 sinh ra ở đktc (22,4 lít/mol) là bao nhiêu?',
+    options: ['6,72 lít', '4,48 lít', '8,96 lít', '3,36 lít'],
+    ans: 0, explain: 'Tỉ lệ mol KMnO4 : O2 = 2 : 3 → n(O2) = 0,2 × 3/2 = 0,3 mol → V = 0,3 × 22,4 = 6,72 lít.' },
+  { id: 'thpt-8', cap: 'THPT', level: 'Vận dụng cao', safety: false,
+    q: 'Với 0,2 mol KMnO4 phản ứng hết (M của MnO2 = 87 g/mol), khối lượng kết tủa MnO2 (màu nâu đen) thu được là bao nhiêu?',
+    options: ['8,7 gam', '26,1 gam', '34,8 gam', '17,4 gam'],
+    ans: 3, explain: 'Tỉ lệ mol KMnO4 : MnO2 = 2 : 2 = 1 : 1 → n(MnO2) = 0,2 mol → m = 0,2 × 87 = 17,4 gam.' },
+  { id: 'thpt-9', cap: 'THPT', level: 'Phân tích', safety: false,
+    q: 'H2O2 có thể vừa là chất oxi hóa, vừa là chất khử tùy chất phản ứng cùng. Nhận định nào đúng khi so sánh vai trò của H2O2 với KMnO4 (chất oxi hóa mạnh) so với một chất khử mạnh hơn?',
+    options: ['H2O2 luôn là chất khử mạnh nhất', 'Vai trò H2O2 tùy thuộc chất phản ứng cùng', 'KMnO4 không bao giờ oxi hóa được H2O2', 'Vai trò của H2O2 không phụ thuộc gì cả'],
+    ans: 1, explain: 'H2O2 có tính lưỡng tính oxi hóa-khử (do O ở mức -1, trung gian giữa -2 và 0), thể hiện vai trò tùy theo đối tác phản ứng.' },
+  { id: 'thpt-10', cap: 'THPT', level: 'Phân tích', safety: false,
+    q: 'Phân tích dữ liệu thực nghiệm: cùng khối lượng KMnO4, khi tăng nồng độ H2O2 từ 10% lên 30%, thời gian phản ứng hoàn toàn giảm từ 25s xuống 8s. Giải thích phù hợp nhất về mặt động học phản ứng là gì?',
+    options: ['Sự thay đổi thời gian này hoàn toàn ngẫu nhiên', 'H2O2 đặc hơn làm tăng độ nhớt, phản ứng chậm', 'Nồng độ tăng làm tần suất va chạm hiệu quả tăng', 'Không thể giải thích bằng lý thuyết va chạm'],
+    ans: 2, explain: 'Theo thuyết va chạm, nồng độ chất phản ứng càng cao thì mật độ phân tử càng dày, số va chạm hiệu quả trong một đơn vị thời gian càng nhiều → tốc độ phản ứng tăng, thời gian phản ứng giảm.' },
+];
+
+// --- Điểm mỗi câu đúng (10 câu × 5đ = tối đa 50đ, khớp giới hạn hệ thống) ---
+const POINTS_PER_QUESTION = 5;
+const MAX_SCORE = 50;
+const PERFECT_TIME_LIMIT = 120; // giây — điều kiện huy hiệu "Thần Đèn Hóa Học"
+
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// Mô phỏng chiều cao cột khói (cm) — công thức minh họa trực quan, KHÔNG phải
+// công thức động học chính xác tuyệt đối, chỉ nhằm thể hiện xu hướng đồng biến
+// với nồng độ H2O2 và khối lượng KMnO4 (đúng với nội dung kiến thức đã dạy).
+function computeSmokeHeight(concentration, mass) {
+  const raw = concentration * 1.2 + mass * 18;
+  return Math.max(8, Math.min(150, Math.round(raw)));
+}
+
+function Game({ onGameComplete }) {
+  const [phase, setPhase] = useState('intro'); // intro -> lab -> quiz -> result
+  const [level, setLevel] = useState('THCS');
+  const [concentration, setConcentration] = useState(15);
+  const [mass, setMass] = useState(2);
+  const [smokeHeight, setSmokeHeight] = useState(0);
+  const [isReacting, setIsReacting] = useState(false);
+  const [hasTriggeredOnce, setHasTriggeredOnce] = useState(false);
+
+  const [questions, setQuestions] = useState([]);
+  const [qIndex, setQIndex] = useState(0);
+  const [selected, setSelected] = useState(null);
+  const [isChecked, setIsChecked] = useState(false);
+  const [score, setScore] = useState(0);
+  const [answersLog, setAnswersLog] = useState([]);
+
+  const [startedAt, setStartedAt] = useState(null);
+  const [elapsed, setElapsed] = useState(0);
+
+  useEffect(() => {
+    if (!startedAt) return;
+    const timer = setInterval(() => {
+      setElapsed(Math.floor((Date.now() - startedAt) / 1000));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [startedAt]);
+
+  const handleStart = (chosenLevel) => {
+    setLevel(chosenLevel);
+    const pool = QUESTION_BANK.filter((q) => q.cap === chosenLevel);
+    setQuestions(shuffleArray(pool));
+    setStartedAt(Date.now());
+    setPhase('lab');
+  };
+
+  const handleTriggerReaction = () => {
+    if (isReacting) return;
+    setIsReacting(true);
+    setSmokeHeight(0);
+    setTimeout(() => {
+      setSmokeHeight(computeSmokeHeight(concentration, mass));
+      setHasTriggeredOnce(true);
+      setIsReacting(false);
+    }, 900);
+  };
+
+  const handleGoToQuiz = () => {
+    setPhase('quiz');
+    setQIndex(0);
+    setSelected(null);
+    setIsChecked(false);
+  };
+
+  const currentQuestion = questions[qIndex];
+
+  const handleSelectOption = (optIndex) => {
+    if (isChecked) return;
+    setSelected(optIndex);
+  };
+
+  const handleCheckAnswer = () => {
+    if (selected === null || !currentQuestion) return;
+    const isCorrect = selected === currentQuestion.ans;
+    if (isCorrect) setScore((s) => s + POINTS_PER_QUESTION);
+    setAnswersLog((log) => [...log, { qId: currentQuestion.id, isCorrect, level: currentQuestion.level, safety: currentQuestion.safety }]);
+    setIsChecked(true);
+  };
+
+  const handleNextQuestion = () => {
+    if (qIndex + 1 < questions.length) {
+      setQIndex((i) => i + 1);
+      setSelected(null);
+      setIsChecked(false);
+    } else {
+      setPhase('result');
+    }
+  };
+
+  const finalTimeInSeconds = elapsed;
+  const safetyQuestionsInSet = questions.filter((q) => q.safety);
+  const safetyAllCorrect =
+    safetyQuestionsInSet.length > 0 &&
+    safetyQuestionsInSet.every((sq) => answersLog.find((a) => a.qId === sq.id)?.isCorrect);
+  const isPerfect = score === MAX_SCORE && finalTimeInSeconds <= PERFECT_TIME_LIMIT;
+
+  const badges = [];
+  if (isPerfect) badges.push({ id: 'than-den', label: 'Thần Đèn Hóa Học', icon: '🧞' });
+  if (safetyAllCorrect) badges.push({ id: 'an-toan', label: 'Bậc Thầy An Toàn', icon: '🛡️' });
+
+  const handleSubmit = () => {
+    onGameComplete({
+      score,
+      timeInSeconds: finalTimeInSeconds,
+      level,
+      answersLog,
+    });
+    setPhase('submitted');
+  };
+
+  // ============================== INTRO ==============================
+  if (phase === 'intro') {
+    return (
+      <div style={{ minHeight: 480, background: 'linear-gradient(180deg,#0f172a,#020617)', borderRadius: 24, padding: 32, color: '#e2e8f0', fontFamily: 'sans-serif', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: -80, right: -80, width: 240, height: 240, borderRadius: '50%', background: 'radial-gradient(circle, rgba(34,211,238,0.18), transparent 70%)' }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+          <Sparkles size={22} color="#22d3ee" />
+          <span style={{ fontSize: 12, letterSpacing: 2, fontWeight: 800, color: '#22d3ee', textTransform: 'uppercase' }}>Tập 9 · FunLab Challenge</span>
+        </div>
+        <h1 style={{ fontSize: 28, fontWeight: 900, margin: '4px 0 6px', lineHeight: 1.2 }}>🧞 THẦN ĐÈN KHÓI TRẮNG</h1>
+        <p style={{ color: '#94a3b8', margin: '0 0 4px', fontSize: 14 }}>Phản ứng phân hủy tỏa nhiệt: H₂O₂ + KMnO₄</p>
+        <p style={{ color: '#67e8f9', fontStyle: 'italic', margin: '4px 0 20px', fontSize: 13 }}>"Hãy làm cho khoa học không chỉ để hiểu, mà còn để ngắm nhìn!"</p>
+
+        <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.35)', borderRadius: 16, padding: 16, marginBottom: 20, display: 'flex', gap: 12 }}>
+          <ShieldCheck size={22} color="#f87171" style={{ flexShrink: 0, marginTop: 2 }} />
+          <div style={{ fontSize: 13, color: '#fecaca', lineHeight: 1.6 }}>
+            <strong style={{ color: '#fca5a5' }}>An toàn thí nghiệm thật:</strong> luôn đeo kính bảo hộ, găng tay nitrile và dùng bình thủy tinh chịu nhiệt Borosilicate. Trò chơi mô phỏng dưới đây hoàn toàn an toàn để khám phá.
+          </div>
+        </div>
+
+        <p style={{ fontSize: 13, color: '#cbd5e1', marginBottom: 12 }}>Chọn cấp học để bắt đầu hành trình:</p>
+        <div style={{ display: 'flex', gap: 14 }}>
+          <button onClick={() => handleStart('THCS')} style={{ flex: 1, padding: '18px 16px', borderRadius: 16, border: '1px solid rgba(34,211,238,0.4)', background: 'rgba(34,211,238,0.08)', color: '#e2e8f0', cursor: 'pointer', textAlign: 'left' }}>
+            <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 4 }}>🔬 THCS</div>
+            <div style={{ fontSize: 12, color: '#94a3b8' }}>Hiện tượng, tính chất, ứng dụng đời sống</div>
+          </button>
+          <button onClick={() => handleStart('THPT')} style={{ flex: 1, padding: '18px 16px', borderRadius: 16, border: '1px solid rgba(168,85,247,0.4)', background: 'rgba(168,85,247,0.08)', color: '#e2e8f0', cursor: 'pointer', textAlign: 'left' }}>
+            <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 4 }}>⚗️ THPT</div>
+            <div style={{ fontSize: 12, color: '#94a3b8' }}>Số oxi hóa, cân bằng electron, tính toán mol</div>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ============================== LAB (SIMULATION) ==============================
+  if (phase === 'lab') {
+    const barHeightPx = Math.round((smokeHeight / 150) * 220);
+    return (
+      <div style={{ minHeight: 480, background: 'linear-gradient(180deg,#0f172a,#020617)', borderRadius: 24, padding: 28, color: '#e2e8f0', fontFamily: 'sans-serif' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Beaker size={20} color="#22d3ee" />
+            <span style={{ fontWeight: 800, fontSize: 14 }}>Phòng Thí Nghiệm Ảo</span>
+          </div>
+          <div style={{ fontSize: 11, padding: '4px 10px', borderRadius: 999, background: 'rgba(148,163,184,0.15)', color: '#cbd5e1' }}>
+            <Clock size={12} style={{ verticalAlign: -2, marginRight: 4 }} />{elapsed}s
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+          <div style={{ flex: '1 1 220px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', background: 'rgba(15,23,42,0.6)', borderRadius: 16, padding: 16, minHeight: 260, position: 'relative' }}>
+            <div style={{
+              width: 46, height: Math.max(20, barHeightPx), borderRadius: '10px 10px 4px 4px',
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.9), rgba(203,213,225,0.4))',
+              boxShadow: '0 0 24px rgba(255,255,255,0.5)',
+              transition: 'height 0.9s ease-out', marginBottom: 6,
+            }} />
+            <div style={{ width: 64, height: 34, borderRadius: '4px 4px 12px 12px', background: 'rgba(103,232,249,0.25)', border: '2px solid rgba(103,232,249,0.5)' }} />
+            <p style={{ marginTop: 10, fontSize: 12, color: '#94a3b8' }}>
+              {isReacting ? 'Đang phản ứng... 💨' : hasTriggeredOnce ? `Cột khói: ${smokeHeight} cm` : 'Chỉnh thông số rồi bấm "Châm phản ứng"'}
+            </p>
+          </div>
+
+          <div style={{ flex: '1 1 260px' }}>
+            <div style={{ marginBottom: 18 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 6 }}>
+                <span style={{ color: '#94a3b8' }}>Nồng độ H₂O₂</span>
+                <span style={{ fontWeight: 700, color: '#22d3ee' }}>{concentration}%</span>
+              </div>
+              <input type="range" min="3" max="35" value={concentration}
+                onChange={(e) => setConcentration(Number(e.target.value))}
+                style={{ width: '100%' }} />
+            </div>
+            <div style={{ marginBottom: 18 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 6 }}>
+                <span style={{ color: '#94a3b8' }}>Khối lượng KMnO₄</span>
+                <span style={{ fontWeight: 700, color: '#a855f7' }}>{mass} g</span>
+              </div>
+              <input type="range" min="0.5" max="5" step="0.5" value={mass}
+                onChange={(e) => setMass(Number(e.target.value))}
+                style={{ width: '100%' }} />
+            </div>
+
+            <button onClick={handleTriggerReaction} disabled={isReacting} style={{
+              width: '100%', padding: '12px 16px', borderRadius: 14, border: 'none',
+              background: isReacting ? '#334155' : 'linear-gradient(90deg,#f97316,#ef4444)',
+              color: '#fff', fontWeight: 800, fontSize: 14, cursor: isReacting ? 'default' : 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            }}>
+              <Flame size={16} /> {isReacting ? 'Đang châm...' : 'Châm phản ứng'}
+            </button>
+
+            {hasTriggeredOnce && (
+              <button onClick={handleGoToQuiz} style={{
+                width: '100%', marginTop: 12, padding: '12px 16px', borderRadius: 14,
+                border: '1px solid rgba(34,211,238,0.5)', background: 'rgba(34,211,238,0.1)',
+                color: '#67e8f9', fontWeight: 800, fontSize: 14, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              }}>
+                Vào phần câu hỏi <ArrowRight size={16} />
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ============================== QUIZ ==============================
+  if (phase === 'quiz' && currentQuestion) {
+    return (
+      <div style={{ minHeight: 480, background: 'linear-gradient(180deg,#0f172a,#020617)', borderRadius: 24, padding: 28, color: '#e2e8f0', fontFamily: 'sans-serif' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+          <span style={{ fontSize: 11, fontWeight: 800, color: '#94a3b8', letterSpacing: 1 }}>
+            CÂU {qIndex + 1}/{questions.length} · {currentQuestion.level.toUpperCase()}
+          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12 }}>
+            <span style={{ color: '#fbbf24', fontWeight: 800 }}><Zap size={12} style={{ verticalAlign: -2 }} /> {score} đ</span>
+            <span style={{ color: '#94a3b8' }}><Clock size={12} style={{ verticalAlign: -2 }} /> {elapsed}s</span>
+          </div>
+        </div>
+
+        <div style={{ width: '100%', height: 6, borderRadius: 999, background: 'rgba(148,163,184,0.15)', marginBottom: 20, overflow: 'hidden' }}>
+          <div style={{ width: `${((qIndex + (isChecked ? 1 : 0)) / questions.length) * 100}%`, height: '100%', background: '#22d3ee', transition: 'width 0.4s' }} />
+        </div>
+
+        <p style={{ fontSize: 16, fontWeight: 700, lineHeight: 1.5, marginBottom: 18 }}>{currentQuestion.q}</p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 18 }}>
+          {currentQuestion.options.map((opt, idx) => {
+            const isSelected = selected === idx;
+            const isCorrectOpt = idx === currentQuestion.ans;
+            let border = 'rgba(148,163,184,0.25)';
+            let bg = 'rgba(15,23,42,0.5)';
+            if (isChecked && isCorrectOpt) { border = '#22c55e'; bg = 'rgba(34,197,94,0.12)'; }
+            else if (isChecked && isSelected && !isCorrectOpt) { border = '#ef4444'; bg = 'rgba(239,68,68,0.12)'; }
+            else if (!isChecked && isSelected) { border = '#22d3ee'; bg = 'rgba(34,211,238,0.1)'; }
+            return (
+              <button key={idx} onClick={() => handleSelectOption(idx)} disabled={isChecked} style={{
+                textAlign: 'left', padding: '12px 14px', borderRadius: 12, border: `1.5px solid ${border}`,
+                background: bg, color: '#e2e8f0', fontSize: 13.5, cursor: isChecked ? 'default' : 'pointer',
+                display: 'flex', alignItems: 'center', gap: 10,
+              }}>
+                {isChecked && isCorrectOpt && <CheckCircle2 size={16} color="#22c55e" />}
+                {isChecked && isSelected && !isCorrectOpt && <XCircle size={16} color="#ef4444" />}
+                <span>{opt}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {isChecked && (
+          <div style={{ background: 'rgba(34,211,238,0.06)', border: '1px solid rgba(34,211,238,0.25)', borderRadius: 12, padding: 14, marginBottom: 18, fontSize: 12.5, color: '#cbd5e1', lineHeight: 1.6 }}>
+            <strong style={{ color: '#67e8f9' }}>Giải thích: </strong>{currentQuestion.explain}
+          </div>
+        )}
+
+        {!isChecked ? (
+          <button onClick={handleCheckAnswer} disabled={selected === null} style={{
+            width: '100%', padding: '12px 16px', borderRadius: 14, border: 'none',
+            background: selected === null ? '#334155' : 'linear-gradient(90deg,#22d3ee,#0891b2)',
+            color: '#fff', fontWeight: 800, fontSize: 14, cursor: selected === null ? 'default' : 'pointer',
+          }}>Kiểm tra đáp án</button>
+        ) : (
+          <button onClick={handleNextQuestion} style={{
+            width: '100%', padding: '12px 16px', borderRadius: 14, border: 'none',
+            background: 'linear-gradient(90deg,#a855f7,#7c3aed)', color: '#fff', fontWeight: 800, fontSize: 14, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+          }}>
+            {qIndex + 1 < questions.length ? 'Câu tiếp theo' : 'Xem kết quả'} <ArrowRight size={16} />
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  // ============================== RESULT ==============================
+  if (phase === 'result' || phase === 'submitted') {
+    return (
+      <div style={{ minHeight: 480, background: 'linear-gradient(180deg,#0f172a,#020617)', borderRadius: 24, padding: 32, color: '#e2e8f0', fontFamily: 'sans-serif', textAlign: 'center' }}>
+        <PartyPopper size={40} color="#fbbf24" style={{ marginBottom: 10 }} />
+        <h2 style={{ fontSize: 22, fontWeight: 900, marginBottom: 6 }}>Hoàn thành Tập 9!</h2>
+        <p style={{ color: '#94a3b8', fontSize: 13, marginBottom: 22 }}>Cấp {level} · {elapsed} giây</p>
+
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginBottom: 22, flexWrap: 'wrap' }}>
+          <div style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.3)', borderRadius: 16, padding: '16px 24px' }}>
+            <div style={{ fontSize: 28, fontWeight: 900, color: '#fbbf24' }}>{score}/{MAX_SCORE}</div>
+            <div style={{ fontSize: 11, color: '#94a3b8' }}>Điểm số</div>
+          </div>
+          <div style={{ background: 'rgba(34,211,238,0.08)', border: '1px solid rgba(34,211,238,0.3)', borderRadius: 16, padding: '16px 24px' }}>
+            <div style={{ fontSize: 28, fontWeight: 900, color: '#22d3ee' }}>{elapsed}s</div>
+            <div style={{ fontSize: 11, color: '#94a3b8' }}>Thời gian</div>
+          </div>
+        </div>
+
+        {badges.length > 0 && (
+          <div style={{ marginBottom: 24 }}>
+            <p style={{ fontSize: 12, color: '#94a3b8', marginBottom: 10 }}>🎉 Huy hiệu đạt được trong lượt chơi này:</p>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 12, flexWrap: 'wrap' }}>
+              {badges.map((b) => (
+                <div key={b.id} style={{ background: 'rgba(168,85,247,0.1)', border: '1px solid rgba(168,85,247,0.4)', borderRadius: 14, padding: '10px 16px', fontSize: 13, fontWeight: 700 }}>
+                  <span style={{ marginRight: 6 }}>{b.icon}</span>{b.label}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {phase === 'result' ? (
+          <button onClick={handleSubmit} style={{
+            padding: '14px 32px', borderRadius: 16, border: 'none',
+            background: 'linear-gradient(90deg,#22d3ee,#a855f7)', color: '#fff',
+            fontWeight: 900, fontSize: 15, cursor: 'pointer',
+            display: 'inline-flex', alignItems: 'center', gap: 8,
+          }}>
+            <Trophy size={18} /> Nộp kết quả về Bảng Vàng
+          </button>
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, color: '#22c55e', fontWeight: 700, fontSize: 14 }}>
+            <CheckCircle2 size={18} /> Đã nộp điểm thành công!
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return null;
+}
+
+return Game;

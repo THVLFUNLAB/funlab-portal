@@ -95,7 +95,7 @@ export async function toggleEpisodeStatus(episodeId: number, isActive: boolean) 
   return { success: !error, error: error?.message };
 }
 
-export async function upsertEpisodeData(ep: { id: number, title: string, thumbnail_url: string, video_url: string, description: string, is_active: boolean }) {
+export async function upsertEpisodeData(ep: { id: number, title: string, thumbnail_url: string, video_url: string, description: string, is_active: boolean, season_id?: string }) {
   const { error } = await supabaseAdmin.from('episodes').upsert({ 
     id: ep.id,
     title: ep.title,
@@ -103,6 +103,7 @@ export async function upsertEpisodeData(ep: { id: number, title: string, thumbna
     video_url: ep.video_url,
     description: ep.description,
     is_active: ep.is_active,
+    season_id: ep.season_id || 'season_2026_1',
     updated_at: new Date().toISOString()
   });
   if (!error) {

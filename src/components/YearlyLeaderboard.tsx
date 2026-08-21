@@ -143,7 +143,7 @@ export default function YearlyLeaderboard() {
           </div>
           <div className="px-4 py-2 bg-slate-950 rounded-lg border border-yellow-500/20 text-xs font-mono text-yellow-400 flex flex-col items-center shadow-inner">
              <span className="text-slate-500">MAX POSSIBLE</span>
-             <span className="text-lg font-black tracking-widest text-white drop-shadow-[0_0_5px_yellow]">1200</span>
+             <span className="text-lg font-black tracking-widest text-white drop-shadow-[0_0_5px_yellow]">2000</span>
           </div>
         </div>
       </div>

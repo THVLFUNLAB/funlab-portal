@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
-import { Search, Lightbulb, Atom, Target, Lock, LogOut, User as UserIcon, CheckCircle } from "lucide-react";
+import { Search, Lightbulb, Atom, Target, Lock, Star, LogOut, User as UserIcon, CheckCircle } from "lucide-react";
 import YearlyLeaderboard from "@/components/YearlyLeaderboard";
 
 // --- Particle Background Component ---
@@ -65,38 +65,83 @@ const BadgeCollection = ({ userPoints }: { userPoints: number }) => {
 
   const badges = [
     {
-      id: "badge-1",
-      title: "Nhà Thám Hiểm Sơ Cấp",
-      points: "0 - 50đ",
-      desc: "Đã hoàn thành nhiệm vụ đầu tiên, thể hiện tinh thần khám phá.",
+      id: "badge-rookie",
+      title: "Tân Binh Funlab",
+      titleEN: "FUNLAB ROOKIE",
+      points: "1 – 199đ",
+      desc: "Ngọn lửa đam mê khoa học vừa được thắp sáng. Hãy tiếp tục khám phá!",
+      imgSrc: "/badge-rookie.png",
+      requiredMin: 1,
+      requiredMax: 199,
+      glow: "#f59e0b",
+      color: "text-amber-400",
+      starCount: 5,
+    },
+    {
+      id: "badge-explorer",
+      title: "Nhà Thám Hiểm",
+      titleEN: "FUNLAB EXPLORER",
+      points: "200 – 499đ",
+      desc: "Bước vào hành trình khám phá vũ trụ khoa học rộng lớn!",
       imgSrc: "/badge-explorer.png",
-      Icon: Search,
-      requiredMin: 0,
-      gradient: "from-blue-400 to-cyan-500",
-      glow: "#22d3ee" // Xanh lơ sáng
+      requiredMin: 200,
+      requiredMax: 499,
+      glow: "#10b981",
+      color: "text-emerald-400",
+      starCount: 5,
     },
     {
-      id: "badge-2",
+      id: "badge-innovator",
+      title: "Nhà Cải Mới",
+      titleEN: "FUNLAB INNOVATOR",
+      points: "500 – 799đ",
+      desc: "Kết hợp lý thuyết và thực hành – tư duy đột phá đang hình thành!",
+      imgSrc: "/badge-innovator.png",
+      requiredMin: 500,
+      requiredMax: 799,
+      glow: "#06b6d4",
+      color: "text-cyan-400",
+      starCount: 5,
+    },
+    {
+      id: "badge-engineer",
       title: "Kỹ Sư Sáng Tạo",
-      points: "151 - 300đ",
-      desc: "Bài dự thi có yếu tố sáng tạo, bứt phá giới hạn.",
+      titleEN: "FUNLAB ENGINEER",
+      points: "800 – 1199đ",
+      desc: "Chế tạo tương lai bằng tư duy kỹ thuật xuất chúng!",
       imgSrc: "/badge-engineer.png",
-      Icon: Lightbulb,
-      requiredMin: 151,
-      gradient: "from-blue-500 to-indigo-500",
-      glow: "#3b82f6" // Xanh điện (Electric Blue)
+      requiredMin: 800,
+      requiredMax: 1199,
+      glow: "#3b82f6",
+      color: "text-blue-400",
+      starCount: 5,
     },
     {
-      id: "badge-3",
+      id: "badge-master",
       title: "Chuyên Gia Funlab",
-      points: "301+ đ",
-      desc: "Kiến thức và kỹ năng vượt trội, thuộc TOP xuất sắc nhất.",
+      titleEN: "FUNLAB MASTER",
+      points: "1200 – 1599đ",
+      desc: "Đứng trên đỉnh cao kiến thức – TOP Bảng Vàng toàn trường!",
       imgSrc: "/badge-master.png",
-      Icon: Atom,
-      requiredMin: 301,
-      gradient: "from-amber-400 to-yellow-500",
-      glow: "#fbbf24" // Vàng kim (Gold)
-    }
+      requiredMin: 1200,
+      requiredMax: 1599,
+      glow: "#a855f7",
+      color: "text-purple-400",
+      starCount: 5,
+    },
+    {
+      id: "badge-legend",
+      title: "Huyền Thoại Funlab",
+      titleEN: "FUNLAB LEGEND",
+      points: "1600+ đ",
+      desc: "Danh hiệu tối thượng – Huyền thoại khoa học của Funlab! Chưa ai đạt được!",
+      imgSrc: "/badge-legend.png",
+      requiredMin: 1600,
+      requiredMax: 2000,
+      glow: "#ef4444",
+      color: "text-red-400",
+      starCount: 5,
+    },
   ];
 
   return (
@@ -112,93 +157,136 @@ const BadgeCollection = ({ userPoints }: { userPoints: number }) => {
           KHO BÁU HUY HIỆU
           <span className="w-16 h-[1px] bg-gradient-to-l from-transparent to-cyan-500"></span>
         </h3>
+        <p className="text-slate-400 mt-3 text-sm tracking-widest uppercase">Tổng điểm tối đa: <span className="text-yellow-400 font-black">2.000 điểm</span> · 6 Cấp độ</p>
       </div>
 
-      <div className="bg-slate-900/40 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-6 md:p-12 shadow-[0_20px_50px_rgba(0,0,0,0.6)] relative overflow-visible group mx-2 sm:mx-4 md:mx-0">
+      <div className="bg-slate-900/40 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-6 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.6)] relative overflow-visible group mx-2 sm:mx-4 md:mx-0">
         <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-purple-500/5 pointer-events-none rounded-[2.5rem]"></div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10 md:gap-12 relative z-10 place-items-center">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-10 relative z-10">
           {badges.map((badge, idx) => {
             const isUnlocked = userPoints >= badge.requiredMin;
-            const IconComponent = badge.Icon;
+            const range = badge.requiredMax - badge.requiredMin;
+            const pointsIn = Math.max(0, userPoints - badge.requiredMin);
+            const progressPct = isUnlocked ? Math.min(100, Math.round((pointsIn / range) * 100)) : 0;
+            const starsEarned = isUnlocked ? Math.min(badge.starCount, Math.ceil((pointsIn / range) * badge.starCount)) : 0;
 
             return (
               <motion.div 
                 key={badge.id}
                 className="relative flex flex-col items-center group/badge cursor-pointer"
-                animate={{ y: [0, -10, 0] }}
+                animate={isUnlocked ? { y: [0, -8, 0] } : {}}
                 transition={{ 
                   duration: 4, 
                   repeat: Infinity, 
                   ease: "easeInOut", 
-                  delay: idx * 0.4 
+                  delay: idx * 0.35
                 }}
               >
-                {/* Khu vực năng lượng phát sáng chứa huy hiệu */}
-                <div className={`relative w-40 h-40 rounded-full flex items-center justify-center mb-4 transition-all duration-500 ${isUnlocked ? 'scale-100 group-hover/badge:scale-110' : 'grayscale opacity-50 scale-95 group-hover/badge:grayscale-0 group-hover/badge:opacity-100 border border-slate-700'}`}>
-                  
+                {/* Huy hiệu image container */}
+                <div className={`relative w-36 h-36 flex items-center justify-center mb-3 transition-all duration-500
+                  ${isUnlocked ? 'scale-100 group-hover/badge:scale-110' : 'grayscale opacity-40 scale-90'}`}>
+
                   {/* Vòng quay năng lượng viền đứt */}
-                  <div className={`absolute inset-0 rounded-full border-[3px] border-dashed ${isUnlocked ? 'animate-[spin_10s_linear_infinite] opacity-100' : 'border-slate-500/50 opacity-0'} transition-all duration-700`}
-                       style={{ borderColor: isUnlocked ? badge.glow : 'transparent', filter: isUnlocked ? `drop-shadow(0 0 8px ${badge.glow})` : 'none' }}
-                  ></div>
-                  
-                  {/* Glow mờ Aura lan toả phía sau lõi khi hover */}
                   {isUnlocked && (
-                    <div className="absolute inset-1 opacity-50 blur-xl rounded-full transition-all duration-500 group-hover/badge:opacity-80 group-hover/badge:blur-2xl"
-                         style={{ backgroundColor: badge.glow }}
-                    ></div>
+                    <div
+                      className="absolute inset-0 rounded-full border-[3px] border-dashed animate-[spin_12s_linear_infinite]"
+                      style={{ borderColor: badge.glow, filter: `drop-shadow(0 0 8px ${badge.glow})` }}
+                    />
                   )}
 
-                  {/* Lõi Huy Hiệu chính chứa Hình Ảnh or Icon */}
-                  <div className={`relative z-10 w-[7.5rem] h-[7.5rem] rounded-full flex items-center justify-center transition-all duration-500`}>
-                    {badge.imgSrc ? (
-                      <Image 
-                        src={badge.imgSrc} 
-                        alt={badge.title} 
-                        width={120} 
-                        height={120} 
-                        style={{ 
-                          width: 'auto', 
-                          height: 'auto',
-                          filter: isUnlocked ? `drop-shadow(0 0 15px ${badge.glow})` : 'none'
-                        }}
-                        className="object-contain relative z-10 transition-all duration-300 group-hover/badge:scale-110 group-hover/badge:brightness-125 group-hover/badge:drop-shadow-[0_0_25px_rgba(255,255,255,0.4)]" 
-                      />
-                    ) : (
-                      <div className={`w-[6.5rem] h-[6.5rem] rounded-full flex items-center justify-center shadow-inner transition-all duration-500 border border-white/20 ${isUnlocked ? 'bg-gradient-to-br ' + badge.gradient : 'bg-slate-800 border-slate-700'}`}>
-                        <IconComponent className={`w-12 h-12 ${isUnlocked ? 'text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]' : 'text-slate-500'}`} strokeWidth={isUnlocked ? 2.5 : 2} />
-                      </div>
-                    )}
-                    
-                    {/* Ổ Khóa Huyền Bí khi chưa đạt */}
-                    {!isUnlocked && (
-                      <div className="absolute bottom-0 right-0 w-10 h-10 rounded-full bg-slate-900 border border-slate-700 flex items-center justify-center shadow-[0_4px_10px_rgba(0,0,0,0.9)] z-20">
-                        <Lock className="w-5 h-5 text-slate-400" />
-                      </div>
-                    )}
-                    
-                    {/* Hiệu ứng Shine Lấp Lánh (chỉ dành cho mode fallback SVG) */}
-                    {isUnlocked && !badge.imgSrc && (
-                      <>
-                        <div className="absolute top-2 left-4 w-2 h-2 bg-white rounded-full animate-ping opacity-70"></div>
-                        <div className="absolute bottom-4 right-3 w-1.5 h-1.5 bg-white rounded-full animate-ping opacity-70" style={{ animationDelay: "1.5s" }}></div>
-                      </>
-                    )}
-                  </div>
+                  {/* Glow aura */}
+                  {isUnlocked && (
+                    <div
+                      className="absolute inset-4 blur-xl rounded-full opacity-40 group-hover/badge:opacity-70 transition-opacity duration-500"
+                      style={{ backgroundColor: badge.glow }}
+                    />
+                  )}
+
+                  {/* Hình ảnh huy hiệu */}
+                  <Image
+                    src={badge.imgSrc}
+                    alt={badge.title}
+                    width={130}
+                    height={130}
+                    style={{
+                      width: 'auto', height: 'auto',
+                      filter: isUnlocked
+                        ? `drop-shadow(0 0 18px ${badge.glow}) drop-shadow(0 0 6px ${badge.glow})`
+                        : 'grayscale(100%) brightness(0.4)'
+                    }}
+                    className="object-contain relative z-10 transition-all duration-300 group-hover/badge:brightness-125"
+                  />
+
+                  {/* Khoá khi chưa mở */}
+                  {!isUnlocked && (
+                    <div className="absolute bottom-1 right-1 w-9 h-9 rounded-full bg-slate-900/90 border border-slate-700 flex items-center justify-center z-20">
+                      <Lock className="w-4 h-4 text-slate-400" />
+                    </div>
+                  )}
+
+                  {/* Huy hiệu đã đạt: hiệu ứng lấp lánh */}
+                  {isUnlocked && (
+                    <>
+                      <div className="absolute top-3 left-5 w-1.5 h-1.5 bg-white rounded-full animate-ping opacity-80" style={{ animationDelay: `${idx * 0.3}s` }} />
+                      <div className="absolute bottom-5 right-4 w-1 h-1 bg-white rounded-full animate-ping opacity-60" style={{ animationDelay: `${idx * 0.3 + 0.8}s` }} />
+                    </>
+                  )}
                 </div>
 
-                <h4 className={`text-xl font-bold text-center mb-1 transition-colors drop-shadow-md ${isUnlocked ? 'text-slate-100 group-hover/badge:text-cyan-300' : 'text-slate-500'}`}>
-                  {badge.title}
+                {/* Tên huy hiệu */}
+                <h4 className={`text-sm md:text-base font-black text-center mb-0.5 tracking-wider transition-colors
+                  ${isUnlocked ? 'text-slate-100' : 'text-slate-600'}`}
+                  style={{ textShadow: isUnlocked ? `0 0 10px ${badge.glow}` : 'none' }}
+                >
+                  {badge.titleEN}
                 </h4>
-                <p className={`text-sm font-black tracking-widest uppercase transition-colors ${isUnlocked ? 'text-cyan-400 drop-shadow-[0_0_5px_rgba(34,211,238,0.5)]' : 'text-slate-600'}`}>
+                <p className={`text-xs font-bold tracking-widest uppercase mb-2 ${isUnlocked ? badge.color : 'text-slate-700'}`}>
                   {badge.points}
                 </p>
 
-                {/* Cyber Tooltip Giải thích */}
-                <div className="absolute top-[110%] left-1/2 -translate-x-1/2 mt-4 w-64 opacity-0 group-hover/badge:opacity-100 group-hover/badge:translate-y-2 pointer-events-none transition-all duration-300 z-50">
-                  <div className="bg-slate-900/95 backdrop-blur-xl p-5 rounded-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.8)] text-center relative">
-                    <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-slate-900/95 border-t border-l border-white/10 rotate-45"></div>
-                    <p className={`text-sm ${isUnlocked ? 'text-slate-200' : 'text-slate-400'} leading-relaxed font-medium`}>
+                {/* Sao rating */}
+                <div className="flex gap-0.5 mb-3">
+                  {[...Array(badge.starCount)].map((_, i) => (
+                    <motion.span
+                      key={i}
+                      initial={{ scale: 0.5, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ delay: 0.1 * i }}
+                    >
+                      <Star
+                        className={`w-3.5 h-3.5 ${
+                          i < starsEarned
+                            ? `fill-current ${badge.color}`
+                            : 'text-slate-700 fill-slate-800'
+                        }`}
+                        style={i < starsEarned ? { filter: `drop-shadow(0 0 4px ${badge.glow})` } : {}}
+                      />
+                    </motion.span>
+                  ))}
+                </div>
+
+                {/* Progress bar */}
+                <div className="w-full max-w-[140px]">
+                  <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                    <motion.div
+                      className="h-full rounded-full"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${isUnlocked ? progressPct : 0}%` }}
+                      transition={{ duration: 1, delay: idx * 0.1 + 0.5 }}
+                      style={{ backgroundColor: isUnlocked ? badge.glow : '#334155', boxShadow: isUnlocked ? `0 0 6px ${badge.glow}` : 'none' }}
+                    />
+                  </div>
+                  <p className={`text-center text-[10px] mt-1 ${isUnlocked ? 'text-slate-400' : 'text-slate-700'}`}>
+                    {isUnlocked ? `${Math.min(pointsIn, range)} / ${range} đ` : `Cần ${badge.requiredMin} điểm`}
+                  </p>
+                </div>
+
+                {/* Tooltip */}
+                <div className="absolute bottom-[105%] left-1/2 -translate-x-1/2 mb-2 w-56 opacity-0 group-hover/badge:opacity-100 pointer-events-none transition-all duration-300 z-50">
+                  <div className="bg-slate-900/95 backdrop-blur-xl p-4 rounded-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.8)] text-center relative">
+                    <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-slate-900/95 border-b border-r border-white/10 rotate-45"></div>
+                    <p className={`text-xs ${isUnlocked ? 'text-slate-200' : 'text-slate-400'} leading-relaxed`}>
                       {badge.desc}
                     </p>
                   </div>
@@ -208,11 +296,12 @@ const BadgeCollection = ({ userPoints }: { userPoints: number }) => {
           })}
         </div>
 
-        {/* Thông điệp Cuộc đua */}
-        <div className="mt-16 text-center relative z-10 border-t border-slate-700/50 pt-8">
-          <p className="text-slate-300 text-lg font-medium tracking-wide flex items-center justify-center gap-3">
-            <span className="w-3 h-3 rounded-full bg-cyan-500 animate-pulse shadow-[0_0_8px_rgba(34,211,238,0.8)]"></span>
-            Điểm tích lũy sẽ được reset vào tháng mới để bắt đầu cuộc đua mới!
+        {/* Thông điệp cuộc đua */}
+        <div className="mt-10 text-center relative z-10 border-t border-slate-700/50 pt-6">
+          <p className="text-slate-300 text-sm font-medium tracking-wide flex items-center justify-center gap-3">
+            <span className="w-2.5 h-2.5 rounded-full bg-yellow-400 animate-pulse shadow-[0_0_8px_rgba(250,204,21,0.8)]"></span>
+            Điểm tích lũy theo mùa giải – Reset mỗi năm học để bắt đầu cuộc đua mới!
+            <span className="w-2.5 h-2.5 rounded-full bg-yellow-400 animate-pulse shadow-[0_0_8px_rgba(250,204,21,0.8)]" style={{animationDelay:'0.5s'}}></span>
           </p>
         </div>
       </div>
@@ -508,7 +597,8 @@ export default function Home() {
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 h-full auto-rows-max">
                 {dbEpisodes.filter(ep => {
-                  const epSeason = ep.season_id || 'season_2025_1';
+                  // Mặc định: tập mới không có season_id → thuộc mùa hiện tại (2026-27)
+                  const epSeason = ep.season_id || 'season_2026_1';
                   return epSeason === activeEpisodeSeason;
                 }).map((ep) => {
                   const isCompleted = completedEpisodes.includes(ep.id);
@@ -520,7 +610,7 @@ export default function Home() {
                         : 'bg-slate-800/40 border-slate-700/30 hover:bg-slate-800/80 hover:border-cyan-500/30 hover:shadow-[0_0_20px_rgba(34,211,238,0.1)]'
                     }`}>
                        {/* Thumbnail / Image Map */}
-                       <div className={`w-full sm:w-24 shrink-0 rounded-xl flex-shrink-0 overflow-hidden relative border aspect-[4/3] sm:aspect-auto sm:h-auto ${isCompleted ? 'border-green-500/30 bg-slate-900/50' : 'border-slate-700/50 bg-slate-900'}`}>
+                       <div className={`w-full sm:w-44 shrink-0 self-start rounded-xl flex-shrink-0 overflow-hidden relative border aspect-video ${isCompleted ? 'border-green-500/30 bg-slate-900/50' : 'border-slate-700/50 bg-slate-900'}`}>
                         {isCompleted && (
                           <div className="absolute top-1.5 right-1.5 bg-green-500/90 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-1 z-20 backdrop-blur-sm shadow-[0_0_10px_rgba(34,197,94,0.5)]">
                             <CheckCircle className="w-2.5 h-2.5" /> XONG

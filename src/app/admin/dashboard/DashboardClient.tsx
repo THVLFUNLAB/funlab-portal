@@ -12,12 +12,13 @@ import {
 import { supabase } from "@/lib/supabase";
 import DynamicGameRenderer from '@/components/DynamicGameRenderer';
 import QuestionTemplateGenerator from '@/components/admin/QuestionTemplateGenerator';
+import FGCValidator from '@/components/admin/FGCValidator';
 import { 
   Users, PlaySquare, BarChart, LogOut, Search, Settings, ShieldAlert,
   Edit2, PlusCircle, CheckCircle, XCircle, Activity, Trophy, Bot, Plus, Save, X, 
   Image as ImageIcon, Video, FileText, Trash2, Code2, Calculator, Eye, EyeOff,
   Wand2, ArrowUpDown, Star, Sparkles, ChevronDown, ChevronUp, Copy, Check, Play,
-  ClipboardList, ExternalLink, QrCode
+  ClipboardList, ExternalLink, QrCode, Upload
 } from 'lucide-react';
 
 export default function AdminDashboardClient() {
@@ -47,7 +48,8 @@ export default function AdminDashboardClient() {
     video_url: '', 
     description: '', 
     is_active: false,
-    game_code: '' 
+    game_code: '',
+    season_id: 'season_2026_1'  // mặc định mùa hiện tại
   });
   const [uploadingImage, setUploadingImage] = useState(false);
 
@@ -103,18 +105,36 @@ export default function AdminDashboardClient() {
     const fileName = `ep${episodeModal.id}_${Date.now()}.${ext}`;
 
     try {
-       const { data, error } = await supabase.storage
+       // Timeout 15 giây — tránh bị treo vô tận nếu bucket không tồn tại
+       const uploadPromise = supabase.storage
           .from('thumbnails')
           .upload(fileName, file, { cacheControl: '3600', upsert: true });
 
+       const timeoutPromise = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('Upload timeout — kiểm tra bucket "thumbnails" trong Supabase Storage')), 15000)
+       );
+
+       const { data, error } = await Promise.race([uploadPromise, timeoutPromise]) as any;
+
        if (error) {
-          alert("Lỗi tải ảnh lên đám mây: " + error.message);
+          setEpisodeModal(prev => ({...prev, thumbnail_url: ''}));
+          const hint = error.message?.includes('Bucket not found') || error.message?.includes('not found')
+            ? '\n\n📦 Cần tạo bucket:\nSupabase → Storage → New Bucket\n→ Name: thumbnails\n→ ✅ Public bucket → Create'
+            : error.message?.includes('security') || error.message?.includes('policy')
+            ? '\n\n🔐 Cần thêm policy:\nSupabase → Storage → thumbnails → Policies → Allow uploads'
+            : '';
+          alert(`❌ Lỗi tải ảnh:\n${error.message}${hint}`);
        } else {
           const { data: publicUrlData } = supabase.storage.from('thumbnails').getPublicUrl(fileName);
           setEpisodeModal(prev => ({...prev, thumbnail_url: publicUrlData.publicUrl}));
        }
     } catch(err: any) {
-       alert("Lỗi không xác định khi upload: " + err.message);
+       setEpisodeModal(prev => ({...prev, thumbnail_url: ''}));
+       const isTimeout = err.message?.includes('timeout');
+       alert(isTimeout
+         ? `⏱️ Upload quá 15 giây không phản hồi.\n\n📦 Cần tạo bucket:\nSupabase → Storage → New Bucket\n→ Name: thumbnails  →  ✅ Public bucket  →  Create`
+         : `❌ Lỗi upload: ${err.message}`
+       );
     } finally {
        setUploadingImage(false);
     }
@@ -160,7 +180,8 @@ export default function AdminDashboardClient() {
       thumbnail_url: episodeModal.thumbnail_url,
       video_url: episodeModal.video_url,
       description: episodeModal.description,
-      is_active: episodeModal.is_active
+      is_active: episodeModal.is_active,
+      season_id: episodeModal.season_id || 'season_2026_1'
     });
     if (res.success) {
       // Also save game_code if present
@@ -412,7 +433,8 @@ export default function AdminDashboardClient() {
                       video_url: '', 
                       description: '', 
                       is_active: false,
-                      game_code: '' 
+                      game_code: '',
+                      season_id: 'season_2026_1' 
                     }); setActiveEpisodeTab('info'); }}
                     className="flex items-center gap-2 px-5 py-3 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl font-bold shadow-[0_0_15px_rgba(8,145,178,0.5)] transition-all"
                  >
@@ -438,7 +460,7 @@ export default function AdminDashboardClient() {
                          <div className="flex items-center gap-2 text-sm text-slate-400 truncate"><Video className="w-4 h-4 shrink-0" /> Video URL: <span className="text-slate-500 font-mono text-xs truncate bg-black/30 px-2 py-1 rounded w-full">{ep.video_url || 'Chưa cấu hình'}</span></div>
                       </div>
 
-                      <button onClick={() => { setEpisodeModal({ open: true, ...ep, game_code: ep.game_code || '' }); setActiveEpisodeTab('info'); }} className="w-full flex items-center justify-center gap-2 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold border border-slate-600 transition-colors mt-auto">
+                      <button onClick={() => { setEpisodeModal({ open: true, ...ep, game_code: ep.game_code || '', season_id: ep.season_id || 'season_2026_1' }); setActiveEpisodeTab('info'); }} className="w-full flex items-center justify-center gap-2 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold border border-slate-600 transition-colors mt-auto">
                          <Settings className="w-4 h-4" /> CẤU HÌNH TẬP
                       </button>
                    </div>
@@ -727,6 +749,21 @@ export default function AdminDashboardClient() {
                                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2"><FileText className="w-3.5 h-3.5" /> Mô tả</label>
                                  <textarea rows={3} value={episodeModal.description} onChange={e => setEpisodeModal({...episodeModal, description: e.target.value})} className="w-full bg-black/50 border border-slate-700 focus:border-cyan-500 rounded-lg p-3 text-slate-200 transition-colors" placeholder="Mô tả ngắn về tập..." />
                               </div>
+                              {/* Chọn mùa giải */}
+                              <div>
+                                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                   <span>📅</span> Mùa Giải
+                                 </label>
+                                 <select
+                                   value={episodeModal.season_id || 'season_2026_1'}
+                                   onChange={e => setEpisodeModal({...episodeModal, season_id: e.target.value})}
+                                   className="w-full bg-black/50 border border-slate-700 focus:border-cyan-500 rounded-lg p-3 text-white transition-colors cursor-pointer"
+                                 >
+                                   <option value="season_2026_1">🆕 Năm Học 2026–2027 (Hiện tại)</option>
+                                   <option value="season_2025_1">🗄️ Kho Lưu Trữ 2025–2026</option>
+                                 </select>
+                                 <p className="text-xs text-slate-500 mt-1">Xác định tập này xuất hiện ở tab nào trên trang chủ</p>
+                              </div>
                            </div>
                            <div className="w-full md:w-5/12 shrink-0 flex flex-col">
                               <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Live Preview</label>
@@ -760,6 +797,25 @@ export default function AdminDashboardClient() {
                                  <h4 className="text-lg font-black text-white uppercase tracking-widest">Game Component Code</h4>
                               </div>
                               <div className="flex gap-2">
+                                 <label className="flex items-center gap-2 px-4 py-2 bg-emerald-900/40 text-emerald-400 border border-emerald-700 hover:bg-emerald-800 rounded-lg text-xs font-bold transition-colors cursor-pointer" title="Tải file .tsx lên thẳng">
+                                    <Upload className="w-3.5 h-3.5" /> TẢI FILE .TSX
+                                    <input
+                                       type="file"
+                                       accept=".tsx,.ts,.jsx,.js"
+                                       className="hidden"
+                                       onChange={e => {
+                                         const file = e.target.files?.[0];
+                                         if (!file) return;
+                                         const reader = new FileReader();
+                                         reader.onload = ev => {
+                                           const content = ev.target?.result as string;
+                                           if (content) setEpisodeModal(prev => ({ ...prev, game_code: content }));
+                                         };
+                                         reader.readAsText(file);
+                                         e.target.value = '';
+                                       }}
+                                    />
+                                 </label>
                                  <button onClick={() => setShowTemplateGen(!showTemplateGen)} className="flex items-center gap-2 px-4 py-2 bg-purple-900/40 text-purple-400 border border-purple-700 hover:bg-purple-800 rounded-lg text-xs font-bold transition-colors">
                                     <Wand2 className="w-3.5 h-3.5" /> {showTemplateGen ? 'ẨN FORM' : 'TẠO ĐỀ TỰ ĐỘNG'}
                                  </button>
@@ -780,24 +836,20 @@ export default function AdminDashboardClient() {
                                  onChange={e => setEpisodeModal(prev => ({ ...prev, game_code: e.target.value }))}
                                  rows={20}
                                  className="w-full bg-black/80 border border-slate-700 rounded-xl p-4 text-green-400 font-mono text-sm leading-relaxed focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/30 transition-colors resize-y"
-                                 placeholder={'// Dán code game vào đây...\n// Hoặc bấm "TẠO ĐỀ TỰ ĐỘNG" để generate.\n//\n// Các biến có sẵn:\n// React, useState, useEffect, useMemo, useCallback, useRef\n// Icons (Flame, Award, Play, Star, Trophy, ...)\n// createClient (Supabase client)\n//\n// Code phải kết thúc bằng: return Game;\n\nfunction Game({ onGameComplete }) {\n  // ... logic game ...\n  return React.createElement(\'div\', null, \'Hello!\');\n}\n\nreturn Game;'}
+                                 placeholder={'// === CÁCH 1: Dán thẳng file .tsx (khuyên dùng) ===\n// Copy toàn bộ nội dung file .tsx và dán vào đây.\n// Hệ thống sẽ tự xử lý: import, TypeScript, export default...\n//\n// === CÁCH 2: Code sandbox (format cũ) ===\n// Không có import. Kết thúc bằng: return Game;\n//\n// Biến có sẵn: React, useState, useEffect, useMemo, useCallback, useRef\n// Icons: Rocket, Star, Trophy, Award, ... (dùng trực tiếp hoặc qua Icons.X)\n// createClient (Supabase client)\n\nfunction Game({ onGameComplete }) {\n  return React.createElement(\'div\', null, \'Hello!\');\n}\n\nreturn Game;'}
                                  spellCheck={false}
                               />
                            </div>
 
+                           <FGCValidator
+                              code={episodeModal.game_code || ''}
+                              onAutoFix={fixedCode => setEpisodeModal(prev => ({ ...prev, game_code: fixedCode }))}
+                           />
+
                            <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-4">
-                              <h5 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Hướng dẫn nhanh</h5>
+                              <h5 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Cần giúp đỡ? — Chuẩn FGC v1.0</h5>
                               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-slate-500">
-                                 <div className="bg-black/30 p-3 rounded-lg">
-                                    <p className="font-bold text-cyan-400 mb-1">1. Dán code</p>
-                                    <p>Copy code game, dán vào ô trên. Kết thúc bằng <code className="text-green-400">return Game;</code></p>
-                                 </div>
-                                 <div className="bg-black/30 p-3 rounded-lg">
-                                    <p className="font-bold text-cyan-400 mb-1">2. Template</p>
-                                    <p>Bấm <span className="text-purple-400">TẠO ĐỀ TỰ ĐỘNG</span> → nhập câu hỏi → GENERATE</p>
-                                 </div>
-                                 <div className="bg-black/30 p-3 rounded-lg">
-                                    <p className="font-bold text-cyan-400 mb-1">3. Test</p>
+                                 <div className="bg-emerald-950/40 border border-emerald-800/50 p-3 rounded-lg">
                                     <p>Chuyển tab <span className="text-cyan-400">XEM THỬ GAME</span> để chạy thử trước.</p>
                                  </div>
                               </div>
