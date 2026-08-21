@@ -89,6 +89,26 @@ export default function AdminDashboardClient() {
     else alert("Lỗi: " + res.error);
   };
 
+  // Nén ảnh trước khi upload — giảm kích thước file lớn, tránh timeout
+  const compressImage = (file: File, maxWidth = 1280, quality = 0.85): Promise<Blob> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const scale = Math.min(1, maxWidth / img.width);
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        const ctx = canvas.getContext('2d')!;
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob(blob => resolve(blob || file), 'image/jpeg', quality);
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+      img.src = url;
+    });
+  };
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -99,19 +119,18 @@ export default function AdminDashboardClient() {
     const objectUrl = URL.createObjectURL(file);
     setEpisodeModal(prev => ({...prev, thumbnail_url: objectUrl}));
 
-    // Standardize file name: id_timestamp.ext
-    let ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-    if (ext === 'jgp') ext = 'jpg'; // Fix common typo
-    const fileName = `ep${episodeModal.id}_${Date.now()}.${ext}`;
+    // Nén ảnh (max 1280px wide, JPEG 85%) — giảm từ vài MB xuống ~100-200KB
+    const compressed = await compressImage(file);
+    const fileName = `ep${episodeModal.id}_${Date.now()}.jpg`;
 
     try {
-       // Timeout 15 giây — tránh bị treo vô tận nếu bucket không tồn tại
+       // Timeout 60 giây (tăng từ 15s — đủ cho ảnh đã nén trên mọi đường truyền)
        const uploadPromise = supabase.storage
           .from('thumbnails')
-          .upload(fileName, file, { cacheControl: '3600', upsert: true });
+          .upload(fileName, compressed, { cacheControl: '3600', upsert: true, contentType: 'image/jpeg' });
 
        const timeoutPromise = new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('Upload timeout — kiểm tra bucket "thumbnails" trong Supabase Storage')), 15000)
+          setTimeout(() => reject(new Error('Upload timeout — kiểm tra bucket "thumbnails" trong Supabase Storage')), 60000)
        );
 
        const { data, error } = await Promise.race([uploadPromise, timeoutPromise]) as any;
@@ -132,7 +151,7 @@ export default function AdminDashboardClient() {
        setEpisodeModal(prev => ({...prev, thumbnail_url: ''}));
        const isTimeout = err.message?.includes('timeout');
        alert(isTimeout
-         ? `⏱️ Upload quá 15 giây không phản hồi.\n\n📦 Cần tạo bucket:\nSupabase → Storage → New Bucket\n→ Name: thumbnails  →  ✅ Public bucket  →  Create`
+         ? `⏱️ Upload quá 60 giây không phản hồi.\nẢnh đã được nén tự động — vui lòng kiểm tra kết nối mạng và thử lại.`
          : `❌ Lỗi upload: ${err.message}`
        );
     } finally {
