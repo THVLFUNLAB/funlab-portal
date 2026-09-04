@@ -23,7 +23,10 @@ import {
 
 export default function AdminDashboardClient() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'users' | 'episodes' | 'analytics' | 'creator' | 'recruitment'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'episodes' | 'analytics' | 'creator' | 'recruitment' | 'roller_coaster'>('users');
+  const [rcTeams, setRcTeams] = useState<any[]>([]);
+  const [rcLoading, setRcLoading] = useState(false);
+  const [rcSearch, setRcSearch] = useState('');
   const [loading, setLoading] = useState(true);
   
   // Data States
@@ -77,6 +80,36 @@ export default function AdminDashboardClient() {
   useEffect(() => {
     loadData();
   }, []);
+
+  const loadRcTeams = useCallback(async () => {
+    setRcLoading(true);
+    const { data, error } = await supabase
+      .from('roller_coaster_registrations')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (!error && data) setRcTeams(data);
+    setRcLoading(false);
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === 'roller_coaster') loadRcTeams();
+  }, [activeTab, loadRcTeams]);
+
+  const exportRcCsv = () => {
+    const headers = ['STT','Tên Đội','Slogan','Bảng','Đội Trưởng','Lớp','Email','Điện Thoại','TV2','TV3','TV4','TV5','Thời Gian'];
+    const rows = rcTeams.map((t, i) => [
+      i + 1, t.team_name, t.slogan || '', t.division,
+      t.leader_name, t.leader_class, t.leader_email, t.leader_phone || '',
+      t.member2, t.member3, t.member4 || '', t.member5 || '',
+      new Date(t.created_at).toLocaleString('vi-VN')
+    ]);
+    const csv = [headers, ...rows].map(r => r.map((c: any) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url;
+    a.download = `roller_coaster_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click(); URL.revokeObjectURL(url);
+  };
 
   const handleLogout = async () => {
     await logoutAdmin();
@@ -367,6 +400,10 @@ export default function AdminDashboardClient() {
          <button onClick={() => setActiveTab('recruitment' as any)} className={`flex items-center gap-2 px-6 py-3 rounded-lg font-bold text-sm tracking-wide transition-all ${(activeTab as string) === 'recruitment' ? 'bg-orange-900/60 text-orange-300 shadow-lg border border-orange-500/30' : 'text-slate-500 hover:text-orange-400'}`}>
             <ClipboardList className="w-4 h-4" /> TUYỂN DỤNG
          </button>
+         {/* Roller Coaster Tab */}
+         <button onClick={() => setActiveTab('roller_coaster')} className={`flex items-center gap-2 px-6 py-3 rounded-lg font-bold text-sm tracking-wide transition-all ${activeTab === 'roller_coaster' ? 'bg-cyan-900/60 text-cyan-300 shadow-lg border border-cyan-500/30' : 'text-slate-500 hover:text-cyan-400'}`}>
+            <span className="text-base leading-none">🎢</span> ROLLER COASTER
+         </button>
       </div>
 
       <AnimatePresence mode="wait">
@@ -580,6 +617,144 @@ export default function AdminDashboardClient() {
              </div>
            </motion.div>
         )}
+
+         {/* TAB: 🎢 ROLLER COASTER */}
+         {activeTab === 'roller_coaster' && (
+           <motion.div key="roller_coaster" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+             {/* Header */}
+             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+               <div>
+                 <h2 className="text-xl font-black text-white flex items-center gap-2">
+                   🎢 Danh Sách Đội Đăng Ký
+                   <span className="text-sm font-normal text-slate-400">
+                     ({rcTeams.filter(t =>
+                       t.team_name.toLowerCase().includes(rcSearch.toLowerCase()) ||
+                       t.leader_name.toLowerCase().includes(rcSearch.toLowerCase()) ||
+                       t.division.toUpperCase().includes(rcSearch.toUpperCase())
+                     ).length} đội)
+                   </span>
+                 </h2>
+                 <p className="text-xs text-slate-500 mt-1">Paper Roller Coaster Showdown — STEM Challenge</p>
+               </div>
+               <div className="flex flex-wrap gap-2">
+                 <button onClick={loadRcTeams} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 text-sm font-bold hover:bg-slate-700 transition-colors">
+                   ↻ Làm mới
+                 </button>
+                 <button onClick={exportRcCsv} disabled={rcTeams.length === 0} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-700 hover:bg-cyan-600 disabled:opacity-40 text-white text-sm font-bold transition-colors">
+                   <Upload className="w-4 h-4" /> Xuất CSV
+                 </button>
+                 <a href="/dang-ky-roller-coaster" target="_blank"
+                   className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm font-bold transition-colors">
+                   <ExternalLink className="w-4 h-4" /> Mở Form
+                 </a>
+               </div>
+             </div>
+
+             {/* Summary cards */}
+             <div className="grid grid-cols-3 gap-3 mb-6">
+               {[
+                 { div: 'A', label: 'Bảng A', grade: 'Khối 6–7', icon: '🏗️', color: 'green' },
+                 { div: 'B', label: 'Bảng B', grade: 'Khối 8–9', icon: '🔄', color: 'cyan'  },
+                 { div: 'C', label: 'Bảng C', grade: 'Khối 10–11', icon: '⚙️', color: 'purple' },
+               ].map(d => (
+                 <button key={d.div} onClick={() => setRcSearch(rcSearch === d.div ? '' : d.div)}
+                   className={`rounded-xl p-4 text-center border transition-all ${rcSearch === d.div ? `bg-${d.color}-500/10 border-${d.color}-500/40` : 'bg-slate-900/60 border-slate-800 hover:border-slate-700'}`}>
+                   <div className="text-2xl mb-1">{d.icon}</div>
+                   <div className={`text-2xl font-black ${rcSearch === d.div ? `text-${d.color}-400` : 'text-white'}`}>
+                     {rcTeams.filter(t => t.division === d.div).length}
+                   </div>
+                   <div className="text-xs font-bold text-slate-300">{d.label}</div>
+                   <div className="text-xs text-slate-600">{d.grade}</div>
+                 </button>
+               ))}
+             </div>
+
+             {/* Search bar */}
+             <div className="relative mb-4">
+               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+               <input type="text" value={rcSearch} onChange={e => setRcSearch(e.target.value)}
+                 placeholder="Tìm tên đội, đội trưởng… hoặc nhập A/B/C để lọc bảng"
+                 className="w-full bg-slate-800/60 border border-slate-700/50 rounded-xl pl-10 pr-10 py-3 text-sm text-slate-200 placeholder:text-slate-600 outline-none focus:border-cyan-500/50" />
+               {rcSearch && (
+                 <button onClick={() => setRcSearch('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white">
+                   <X className="w-4 h-4" />
+                 </button>
+               )}
+             </div>
+
+             {/* Table */}
+             {rcLoading ? (
+               <div className="text-center py-16 text-slate-500">
+                 <Activity className="w-6 h-6 animate-spin mx-auto mb-2" /> Đang tải...
+               </div>
+             ) : rcTeams.length === 0 ? (
+               <div className="text-center py-16 text-slate-600 border border-dashed border-slate-800 rounded-2xl">
+                 <span className="text-4xl block mb-3">🎢</span>
+                 Chưa có đội nào đăng ký.
+               </div>
+             ) : (
+               <div className="overflow-x-auto rounded-2xl border border-slate-800">
+                 <table className="w-full text-sm min-w-[900px]">
+                   <thead>
+                     <tr className="bg-slate-800/80 text-slate-400 text-xs uppercase tracking-widest">
+                       <th className="px-4 py-3 text-left">#</th>
+                       <th className="px-4 py-3 text-left">Tên Đội / Slogan</th>
+                       <th className="px-4 py-3 text-left">Bảng</th>
+                       <th className="px-4 py-3 text-left">Đội Trưởng</th>
+                       <th className="px-4 py-3 text-left">Lớp</th>
+                       <th className="px-4 py-3 text-left">Thành Viên (2–5)</th>
+                       <th className="px-4 py-3 text-left">Email / SĐT</th>
+                       <th className="px-4 py-3 text-left">Đăng Ký Lúc</th>
+                     </tr>
+                   </thead>
+                   <tbody className="divide-y divide-slate-800/60">
+                     {rcTeams
+                       .filter(t =>
+                         t.team_name.toLowerCase().includes(rcSearch.toLowerCase()) ||
+                         t.leader_name.toLowerCase().includes(rcSearch.toLowerCase()) ||
+                         t.division.toUpperCase().includes(rcSearch.toUpperCase())
+                       )
+                       .map((t, i) => {
+                         const colMap: Record<string, string> = { A: 'green', B: 'cyan', C: 'purple' };
+                         const col = colMap[t.division] ?? 'slate';
+                         const members = [t.member2, t.member3, t.member4, t.member5].filter(Boolean);
+                         return (
+                           <tr key={t.id} className="bg-slate-900/40 hover:bg-slate-800/40 transition-colors">
+                             <td className="px-4 py-3 text-slate-500 font-mono text-xs">{i + 1}</td>
+                             <td className="px-4 py-3">
+                               <div className="font-bold text-white">{t.team_name}</div>
+                               {t.slogan && <div className="text-xs text-slate-500 italic">"{t.slogan}"</div>}
+                             </td>
+                             <td className="px-4 py-3">
+                               <span className={`text-xs font-black px-2.5 py-1 rounded-full bg-${col}-500/10 text-${col}-400 border border-${col}-500/30`}>
+                                 Bảng {t.division}
+                               </span>
+                             </td>
+                             <td className="px-4 py-3 font-medium text-slate-200 whitespace-nowrap">{t.leader_name}</td>
+                             <td className="px-4 py-3 text-slate-400 font-mono text-xs">{t.leader_class}</td>
+                             <td className="px-4 py-3">
+                               <div className="flex flex-col gap-0.5">
+                                 {members.map((m: string, mi: number) => (
+                                   <span key={mi} className="text-xs text-slate-400">{m}</span>
+                                 ))}
+                               </div>
+                             </td>
+                             <td className="px-4 py-3">
+                               <div className="text-xs text-slate-300">{t.leader_email}</div>
+                               {t.leader_phone && <div className="text-xs text-slate-500">{t.leader_phone}</div>}
+                             </td>
+                             <td className="px-4 py-3 text-xs text-slate-500 whitespace-nowrap">
+                               {new Date(t.created_at).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                             </td>
+                           </tr>
+                         );
+                       })}
+                   </tbody>
+                 </table>
+               </div>
+             )}
+           </motion.div>
+         )}
 
         {/* TAB 5: ĐIỂM CỐNG HIẾN VIDEO */}
         {activeTab === 'creator' && (
