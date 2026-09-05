@@ -14,6 +14,7 @@ import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
 import { useEffect, useCallback, useState } from 'react';
 import { marked } from 'marked';
+import katex from 'katex';
 import {
   Bold, Italic, UnderlineIcon, Strikethrough,
   Heading1, Heading2, Heading3,
@@ -109,15 +110,34 @@ export default function TipTapEditor({ content, onChange, placeholder }: TipTapE
       } else {
         prevWasTableRow = false;
         inTable = false;
-        // Xoá công thức LaTeX inline $...$ vì TipTap không render được
-        const cleaned = line
-          .replace(/\$([^$]+)\$/g, (_m, p1) => p1) // $công thức$ → text thuần
-          .replace(/\$\$[\s\S]+?\$\$/g, ''); // $$block$$ → xoá
-        result.push(cleaned);
+        result.push(line);
       }
     }
 
-    return result.join('\n');
+    // Sau khi gộp bảng xong, render công thức LaTeX bằng KaTeX
+    let joined = result.join('\n');
+
+    // Block math: $$...$$
+    joined = joined.replace(/\$\$([\s\S]+?)\$\$/g, (_m, formula) => {
+      try {
+        return '<div class="katex-block">' +
+          katex.renderToString(formula.trim(), { displayMode: true, throwOnError: false }) +
+          '</div>';
+      } catch {
+        return formula;
+      }
+    });
+
+    // Inline math: $...$  (không phải $$ và không chứa newline)
+    joined = joined.replace(/\$([^$\n]+?)\$/g, (_m, formula) => {
+      try {
+        return katex.renderToString(formula.trim(), { displayMode: false, throwOnError: false });
+      } catch {
+        return formula;
+      }
+    });
+
+    return joined;
   };
 
   // ── Markdown Paste Modal ──────────────────────────────────────

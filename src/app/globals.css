@@ -771,3 +771,34 @@ h1, h2, h3, h4, h5, h6 {
   .document-content th { background: #f0f0f0 !important; color: #000; }
   .document-content td { color: #333; border-color: #ccc; }
 }
+
+/* ================================================================
+   KATEX — CÔNG THỨC TOÁN HỌC
+   ================================================================ */
+
+/* Block display math ($$...$$) */
+.katex-block {
+  display: block;
+  text-align: center;
+  margin: 1rem 0;
+  overflow-x: auto;
+  padding: 0.5rem;
+}
+
+/* Inline math — hòa vào dòng văn bản */
+.katex {
+  font-size: 1.05em;
+  color: #e2e8f0;
+}
+
+/* Trong bảng */
+.document-content .katex,
+.tiptap-content .katex {
+  color: inherit;
+}
+
+/* Dark background — đảm bảo ký hiệu toán trắng/sáng */
+.katex .mord, .katex .mop, .katex .mbin, .katex .mrel,
+.katex .mopen, .katex .mclose, .katex .mpunct {
+  color: inherit;
+}

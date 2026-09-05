@@ -64,6 +64,10 @@ export default async function RootLayout({
   return (
     // [FIX P-02] lang="vi" — website tiếng Việt phải khai báo đúng ngôn ngữ
     <html lang="vi">
+      <head>
+        {/* KaTeX CSS — render công thức toán học LaTeX */}
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
+      </head>
       {/* [FIX T-07] font-sans → Inter (sans-serif thực sự), giữ notoSerif cho heading */}
       <body
         className={`${inter.variable} ${notoSerif.variable} font-sans antialiased bg-slate-950 text-slate-50 relative`}
