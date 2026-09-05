@@ -66,105 +66,131 @@ export default function TipTapEditor({ content, onChange, placeholder }: TipTapE
     editor?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
   }, [editor]);
 
-  // ── Tiền xử lý Markdown từ Gemini ────────────────────────────────────────
-  // Xử lý 3 trường hợp:
-  //  1. Bảng ASCII box (┌─│) — khi copy bằng Ctrl+C từ Gemini chat
-  //  2. Bảng pipe (|cell|) nhiều dòng trong 1 ô — marked không hỗ trợ
-  //  3. Công thức LaTeX $...$ → KaTeX HTML
-  const preprocessMarkdown = (md: string): string => {
+  // ═══════════════════════════════════════════════════════════════
+  // preprocessMarkdown — xử lý markdown từ Gemini
+  // Trả về [text đã xử lý, map placeholder→KaTeX HTML]
+  // Math được thay bằng placeholder TRƯỚC khi marked.parse()
+  // để marked không đụng vào KaTeX HTML
+  // ═══════════════════════════════════════════════════════════════
+  const preprocessMarkdown = (md: string): [string, Record<string, string>] => {
     let text = md;
+    const mathMap: Record<string, string> = {};
+    let mi = 0;
 
-    // ── BƯỚC 1: Chuyển bảng ASCII box-drawing (┌─│├) thành Markdown pipe table ──
-    // Phát hiện block có ký tự vẽ khung
-    text = text.replace(
-      /((?:^[┌├└│].*\n?)+)/gm,
-      (block) => {
-        const rows: string[][] = [];
-        const lines = block.split('\n').filter(l => l.trim());
-        for (const line of lines) {
-          const trimmed = line.trim();
-          // Chỉ xử lý dòng nội dung (bắt đầu bằng │), bỏ qua ─ ┌ ├ └
-          if (trimmed.startsWith('│')) {
-            const cells = trimmed
-              .split('│')
-              .map(c => c.trim())
-              .filter(c => c.length > 0);
-            if (cells.length > 0) rows.push(cells);
-          }
+    // ── BƯỚC 1: Bảo vệ công thức LaTeX bằng placeholder ──────────
+    // Block math $$...$$  (xử lý TRƯỚC inline để không xung đột)
+    text = text.replace(/\$\$([\s\S]+?)\$\$/g, (_m, f) => {
+      const k = `\u00ABmath${mi++}\u00BB`;
+      try {
+        mathMap[k] = `<div class="katex-block">${katex.renderToString(f.trim(), { displayMode: true, throwOnError: false })}</div>`;
+      } catch { mathMap[k] = f; }
+      return k;
+    });
+
+    // Inline math $...$ (không chứa newline, không phải $$)
+    text = text.replace(/\$([^$\n]+?)\$/g, (_m, f) => {
+      const k = `\u00ABmath${mi++}\u00BB`;
+      try {
+        mathMap[k] = katex.renderToString(f.trim(), { displayMode: false, throwOnError: false });
+      } catch { mathMap[k] = f; }
+      return k;
+    });
+
+    // ── BƯỚC 2: Chuyển bảng ASCII box-drawing (┌─│├) → pipe table ─
+    text = text.replace(/((?:^[┌├└│].*\n?)+)/gm, (block) => {
+      const rows: string[][] = [];
+      for (const line of block.split('\n')) {
+        const t = line.trim();
+        if (t.startsWith('│')) {
+          const cells = t.split('│').map(c => c.trim()).filter(c => c);
+          if (cells.length) rows.push(cells);
         }
-        if (rows.length === 0) return block;
-        // Build markdown table
-        const maxCols = Math.max(...rows.map(r => r.length));
-        const header = rows[0];
-        const separator = Array(maxCols).fill('---').join(' | ');
-        const dataRows = rows.slice(1);
-        const mdRows = [
-          '| ' + header.join(' | ') + ' |',
-          '| ' + separator + ' |',
-          ...dataRows.map(r => '| ' + r.join(' | ') + ' |'),
-        ];
-        return mdRows.join('\n') + '\n';
       }
-    );
+      if (!rows.length) return block;
+      const maxCols = Math.max(...rows.map(r => r.length));
+      const sep = Array(maxCols).fill('---').join(' | ');
+      return [
+        '| ' + rows[0].join(' | ') + ' |',
+        '| ' + sep + ' |',
+        ...rows.slice(1).map(r => '| ' + r.join(' | ') + ' |'),
+      ].join('\n') + '\n';
+    });
 
-    // ── BƯỚC 2: Gộp dòng nối tiếp trong ô bảng pipe (|cell| nhiều dòng) ──
+    // ── BƯỚC 3: Chuẩn hoá pipe tables ─────────────────────────────
+    // 3a. Xoá duplicate separator rows (giữ chỉ cái đầu tiên)
+    // 3b. Gộp dòng continuation vào ô đúng (trước ô cuối cùng)
+    // 3c. Bỏ qua blank lines TRONG table (không reset inTable)
+    const isSep = (s: string) =>
+      /^\|[\s\-:|]+\|$/.test(s) && !s.replace(/[\|\-:\s]/g, '').length;
+    const isRow = (s: string) =>
+      s.startsWith('|') && s.endsWith('|') && (s.match(/\|/g) || []).length >= 2;
+
     const lines = text.split('\n');
     const result: string[] = [];
     let inTable = false;
-    let prevWasTableRow = false;
+    let seenSep = false;
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
-      const trimmed = line.trim();
-      const isSeparator = /^\|[\s\-:|]+\|/.test(trimmed) && !trimmed.replace(/[\|\-:\s]/g, '').length;
-      const isTableRow = trimmed.startsWith('|') && trimmed.includes('|');
+      const t = line.trim();
 
-      if (isTableRow || isSeparator) {
+      if (isRow(t)) {
         inTable = true;
-        prevWasTableRow = true;
         result.push(line);
-      } else if (inTable && trimmed === '') {
-        inTable = false;
-        prevWasTableRow = false;
-        result.push(line);
-      } else if (inTable && prevWasTableRow && trimmed !== '') {
-        // Dòng nối tiếp trong ô → gộp vào row trước bằng <br>
+      } else if (isSep(t) && inTable) {
+        if (!seenSep) {
+          result.push(line); // giữ separator đầu tiên
+          seenSep = true;
+        }
+        // bỏ qua các separator sau
+      } else if (t === '') {
+        // blank line — nhìn trước: nếu dòng kế tiếp vẫn là table row/continuation → ở lại trong table
+        let nextMeaningful = '';
+        for (let j = i + 1; j < lines.length; j++) {
+          if (lines[j].trim()) { nextMeaningful = lines[j].trim(); break; }
+        }
+        if (inTable && !nextMeaningful.startsWith('#') &&
+            !nextMeaningful.startsWith('##') &&
+            nextMeaningful !== '' &&
+            !isRow(nextMeaningful) === false) {
+          // Dòng kế là table row → bỏ qua blank line
+        } else if (inTable && !isRow(nextMeaningful) && nextMeaningful !== '' &&
+                   !nextMeaningful.startsWith('#')) {
+          // Dòng kế là continuation → giữ inTable, bỏ blank line
+        } else {
+          inTable = false;
+          seenSep = false;
+          result.push(line);
+        }
+      } else if (inTable && !isRow(t) && t !== '') {
+        // Continuation line → chèn vào TRƯỚC ô cuối cùng của dòng trước
         const lastIdx = result.length - 1;
-        if (lastIdx >= 0) {
+        if (lastIdx >= 0 && isRow(result[lastIdx].trim())) {
           const lastLine = result[lastIdx];
-          if (lastLine.trim().endsWith('|')) {
-            result[lastIdx] = lastLine.replace(/\s*\|\s*$/, '') + '<br>' + trimmed + ' |';
+          // Tìm | cuối và | trước đó (để chèn vào ô penultimate)
+          const trailingPipe = lastLine.lastIndexOf('|');
+          const beforeTrailing = lastLine.lastIndexOf('|', trailingPipe - 1);
+          if (beforeTrailing >= 0) {
+            result[lastIdx] =
+              lastLine.slice(0, beforeTrailing) +
+              '<br>' + t +
+              lastLine.slice(beforeTrailing);
           } else {
-            result[lastIdx] = lastLine + '<br>' + trimmed;
+            result[lastIdx] = lastLine.replace(/\|\s*$/, '') + '<br>' + t + ' |';
           }
+        } else {
+          inTable = false;
+          seenSep = false;
+          result.push(line);
         }
       } else {
-        prevWasTableRow = false;
         inTable = false;
+        seenSep = false;
         result.push(line);
       }
     }
 
-    // ── BƯỚC 3: Render công thức LaTeX bằng KaTeX ──
-    let joined = result.join('\n');
-
-    // Block math: $$...$$
-    joined = joined.replace(/\$\$([\s\S]+?)\$\$/g, (_m, formula) => {
-      try {
-        return '<div class="katex-block">' +
-          katex.renderToString(formula.trim(), { displayMode: true, throwOnError: false }) +
-          '</div>';
-      } catch { return formula; }
-    });
-
-    // Inline math: $...$ (không chứa newline)
-    joined = joined.replace(/\$([^$\n]+?)\$/g, (_m, formula) => {
-      try {
-        return katex.renderToString(formula.trim(), { displayMode: false, throwOnError: false });
-      } catch { return formula; }
-    });
-
-    return joined;
+    return [result.join('\n'), mathMap];
   };
 
   // ── Markdown Paste Modal ──────────────────────────────────────
@@ -176,9 +202,13 @@ export default function TipTapEditor({ content, onChange, placeholder }: TipTapE
     if (!markdownText.trim() || !editor) return;
     setConverting(true);
     try {
-      const preprocessed = preprocessMarkdown(markdownText);
+      const [processed, mathMap] = preprocessMarkdown(markdownText);
       marked.setOptions({ gfm: true, breaks: false } as any);
-      const html = await marked.parse(preprocessed);
+      let html = await marked.parse(processed);
+      // Khôi phục KaTeX HTML SAU khi marked đã xử lý xong
+      for (const [k, v] of Object.entries(mathMap)) {
+        html = html.split(k).join(v);
+      }
       editor.commands.setContent(html);
       onChange(html);
       setShowMarkdownModal(false);
@@ -235,7 +265,6 @@ export default function TipTapEditor({ content, onChange, placeholder }: TipTapE
               <button onClick={() => editor.chain().focus().deleteRow().run()} className="text-xs px-2 py-1 rounded bg-red-900/60 text-red-400 hover:bg-red-900 transition-colors">- Hàng</button>
             </>
           )}
-
           {/* ── Nút Dán Markdown từ Gemini/ChatGPT ── */}
           <div className="ml-auto">
             <button
@@ -263,7 +292,9 @@ export default function TipTapEditor({ content, onChange, placeholder }: TipTapE
                   <ClipboardPaste className="w-5 h-5 text-violet-400" />
                   Dán Nội Dung Từ Gemini / ChatGPT
                 </h3>
-                <p className="text-xs text-slate-500 mt-1">Copy toàn bộ từ Gemini → Paste vào đây → Bấm Chuyển đổi — định dạng tự giữ nguyên</p>
+                <p className="text-xs text-slate-500 mt-1">
+                  Dùng nút copy <strong>⧉</strong> trong Gemini (không bôi đen) → Paste vào đây → Bấm Chuyển đổi
+                </p>
               </div>
               <button onClick={() => { setShowMarkdownModal(false); setMarkdownText(''); }} className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-slate-800 transition-colors">
                 <X className="w-5 h-5" />
@@ -276,11 +307,11 @@ export default function TipTapEditor({ content, onChange, placeholder }: TipTapE
                 onChange={e => setMarkdownText(e.target.value)}
                 rows={14}
                 className="w-full bg-slate-950 border border-slate-700 focus:border-violet-500 rounded-xl p-4 text-slate-300 font-mono text-sm resize-none focus:outline-none transition-colors"
-                placeholder={`# KẾ HOẠCH TỔ CHỨC NGÀY HỘI STEM\n\n## I. MỤC ĐÍCH\n\n**1. Mục đích & Ý nghĩa:**\n- Chuyển hóa bài học lý thuyết...\n- Xây dựng văn hóa học tập...\n\n## II. NỘI DUNG\n...`}
+                placeholder={`# KẾ HOẠCH TỔ CHỨC NGÀY HỘI STEM\n\n## I. MỤC ĐÍCH\n\n**1. Mục đích & Ý nghĩa:**\n- Chuyển hóa bài học lý thuyết...\n\n| STT | Tiêu chí | Nội dung | Điểm |\n|---|---|---|---|\n| 1 | Vận hành | - Bi hoàn thành... | 35 |`}
               />
               <div className="flex items-center justify-between mt-2">
                 <span className="text-xs text-slate-600">{markdownText.length} ký tự</span>
-                <span className="text-xs text-slate-600">Hỗ trợ: # Tiêu đề · **đậm** · *nghiêng* · - danh sách · | bảng |</span>
+                <span className="text-xs text-slate-600">Hỗ trợ: # Tiêu đề · **đậm** · $LaTeX$ · | bảng |</span>
               </div>
             </div>
             <div className="flex gap-3 px-5 pb-5">
