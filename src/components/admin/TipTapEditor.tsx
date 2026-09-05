@@ -65,6 +65,61 @@ export default function TipTapEditor({ content, onChange, placeholder }: TipTapE
     editor?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
   }, [editor]);
 
+  // ── Tiền xử lý Markdown từ Gemini ────────────────────────────
+  // Gemini tạo bảng với nhiều dòng trong 1 ô — marked không hỗ trợ
+  // Giải pháp: gộp các dòng continuation vào ô trước, ngăn cách bằng <br>
+  const preprocessMarkdown = (md: string): string => {
+    const lines = md.split('\n');
+    const result: string[] = [];
+    let inTable = false;
+    let prevWasTableRow = false;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const trimmed = line.trim();
+
+      // Dòng separator của bảng (---|---|---)
+      const isSeparator = /^\|[\s\-:|]+\|/.test(trimmed) && !trimmed.replace(/[\|\-:\s]/g, '').length;
+      // Dòng table row (bắt đầu và kết thúc bằng |)
+      const isTableRow = trimmed.startsWith('|') && (trimmed.endsWith('|') || trimmed.includes('|'));
+
+      if (isTableRow || isSeparator) {
+        inTable = true;
+        prevWasTableRow = true;
+        result.push(line);
+      } else if (inTable && trimmed === '') {
+        // Dòng trống → kết thúc bảng
+        inTable = false;
+        prevWasTableRow = false;
+        result.push(line);
+      } else if (inTable && prevWasTableRow && trimmed !== '') {
+        // Dòng nội dung tiếp theo TRONG ô bảng (không bắt đầu bằng |)
+        // → Gộp vào dòng bảng trước bằng <br>
+        const lastIdx = result.length - 1;
+        if (lastIdx >= 0) {
+          // Tìm ô cuối cùng trong dòng và append
+          const lastLine = result[lastIdx];
+          if (lastLine.trim().endsWith('|')) {
+            // Chèn nội dung vào trước dấu | cuối
+            result[lastIdx] = lastLine.replace(/\s*\|\s*$/, '') + '<br>' + trimmed + ' |';
+          } else {
+            result[lastIdx] = lastLine + '<br>' + trimmed;
+          }
+        }
+      } else {
+        prevWasTableRow = false;
+        inTable = false;
+        // Xoá công thức LaTeX inline $...$ vì TipTap không render được
+        const cleaned = line
+          .replace(/\$([^$]+)\$/g, (_m, p1) => p1) // $công thức$ → text thuần
+          .replace(/\$\$[\s\S]+?\$\$/g, ''); // $$block$$ → xoá
+        result.push(cleaned);
+      }
+    }
+
+    return result.join('\n');
+  };
+
   // ── Markdown Paste Modal ──────────────────────────────────────
   const [showMarkdownModal, setShowMarkdownModal] = useState(false);
   const [markdownText, setMarkdownText] = useState('');
@@ -74,8 +129,9 @@ export default function TipTapEditor({ content, onChange, placeholder }: TipTapE
     if (!markdownText.trim() || !editor) return;
     setConverting(true);
     try {
-      marked.setOptions({ gfm: true, breaks: true } as any);
-      const html = await marked.parse(markdownText);
+      const preprocessed = preprocessMarkdown(markdownText);
+      marked.setOptions({ gfm: true, breaks: false } as any);
+      const html = await marked.parse(preprocessed);
       editor.commands.setContent(html);
       onChange(html);
       setShowMarkdownModal(false);
