@@ -280,6 +280,31 @@ export default function EpisodePage() {
             {/* Dynamic Game Component (Tập 8+ - render từ game_code trong DB) */}
             <DynamicGameRenderer gameCode={dbEpisode.game_code} onGameComplete={handleGameComplete} />
           </div>
+        ) : dbEpisode?.document_slug ? (
+          /* Tài liệu dự án — hiển thị thay game khi tập có document_slug */
+          <div className="w-full h-full flex flex-col bg-slate-950 border-l border-slate-800/50 z-10 relative overflow-hidden">
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-slate-800 bg-slate-900/80 backdrop-blur-md shrink-0 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">📄</span>
+                <span className="text-sm font-bold text-slate-300 uppercase tracking-wider">Tài Liệu Dự Án</span>
+              </div>
+              <a
+                href={`/du-an/${dbEpisode.document_slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1 transition-colors"
+              >
+                Mở rộng ↗
+              </a>
+            </div>
+            {/* Embedded document */}
+            <iframe
+              src={`/du-an/${dbEpisode.document_slug}?embed=1`}
+              className="w-full flex-1 border-0"
+              title="Tài liệu dự án"
+            />
+          </div>
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center p-8 bg-slate-900 rounded-tl-none md:rounded-tl-3xl border-l border-slate-800/50 z-10 relative">
              <div className="absolute top-4 right-4 z-10 bg-slate-800 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-bold shadow-2xl border border-slate-700 opacity-90 backdrop-blur flex items-center gap-2 pointer-events-none">

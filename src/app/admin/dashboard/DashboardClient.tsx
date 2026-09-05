@@ -54,7 +54,8 @@ export default function AdminDashboardClient() {
     description: '', 
     is_active: false,
     game_code: '',
-    season_id: 'season_2026_1'  // mặc định mùa hiện tại
+    season_id: 'season_2026_1',  // mặc định mùa hiện tại
+    document_slug: ''  // slug tài liệu hiển thị cột phải
   });
   const [uploadingImage, setUploadingImage] = useState(false);
 
@@ -235,8 +236,9 @@ export default function AdminDashboardClient() {
       video_url: episodeModal.video_url,
       description: episodeModal.description,
       is_active: episodeModal.is_active,
-      season_id: episodeModal.season_id || 'season_2026_1'
-    });
+      season_id: episodeModal.season_id || 'season_2026_1',
+      document_slug: episodeModal.document_slug || null,
+    } as any);
     if (res.success) {
       // Also save game_code if present
       if (episodeModal.game_code) {
@@ -496,8 +498,9 @@ export default function AdminDashboardClient() {
                       description: '', 
                       is_active: false,
                       game_code: '',
-                      season_id: 'season_2026_1' 
-                    }); setActiveEpisodeTab('info'); }}
+                      season_id: 'season_2026_1',
+                       document_slug: ''
+                    } as any); setActiveEpisodeTab('info'); }}
                     className="flex items-center gap-2 px-5 py-3 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl font-bold shadow-[0_0_15px_rgba(8,145,178,0.5)] transition-all"
                  >
                     <Plus className="w-5 h-5" /> THÊM TẬP MỚI
@@ -522,7 +525,7 @@ export default function AdminDashboardClient() {
                          <div className="flex items-center gap-2 text-sm text-slate-400 truncate"><Video className="w-4 h-4 shrink-0" /> Video URL: <span className="text-slate-500 font-mono text-xs truncate bg-black/30 px-2 py-1 rounded w-full">{ep.video_url || 'Chưa cấu hình'}</span></div>
                       </div>
 
-                      <button onClick={() => { setEpisodeModal({ open: true, ...ep, game_code: ep.game_code || '', season_id: ep.season_id || 'season_2026_1' }); setActiveEpisodeTab('info'); }} className="w-full flex items-center justify-center gap-2 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold border border-slate-600 transition-colors mt-auto">
+                      <button onClick={() => { setEpisodeModal({ open: true, ...ep, game_code: ep.game_code || '', season_id: ep.season_id || 'season_2026_1', document_slug: (ep as any).document_slug || '' } as any); setActiveEpisodeTab('info'); }} className="w-full flex items-center justify-center gap-2 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold border border-slate-600 transition-colors mt-auto">
                          <Settings className="w-4 h-4" /> CẤU HÌNH TẬP
                       </button>
                    </div>
