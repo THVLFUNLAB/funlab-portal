@@ -966,8 +966,23 @@ export default function AdminDashboardClient() {
                                    <option value="season_2025_1">🗄️ Kho Lưu Trữ 2025–2026</option>
                                  </select>
                                  <p className="text-xs text-slate-500 mt-1">Xác định tập này xuất hiện ở tab nào trên trang chủ</p>
-                              </div>
-                           </div>
+                               </div>
+                               <div>
+                                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                    <FileText className="w-3.5 h-3.5 text-indigo-400" />
+                                    Tài liệu cột phải
+                                    <span className="text-indigo-400/60 font-normal normal-case tracking-normal text-xs">(thay thế game)</span>
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={(episodeModal as any).document_slug || ''}
+                                    onChange={e => setEpisodeModal({...episodeModal, document_slug: e.target.value} as any)}
+                                    className="w-full bg-black/50 border border-indigo-700/40 focus:border-indigo-500 rounded-lg p-3 text-indigo-300 font-mono text-sm transition-colors"
+                                    placeholder="VD: paper-roller-coaster-showdown"
+                                  />
+                                  <p className="text-xs text-slate-600 mt-1">Nhập slug tài liệu trong tab 📄 TÀI LIỆU. Để trống nếu tập này dùng game.</p>
+                               </div>
+                            </div>
                            <div className="w-full md:w-5/12 shrink-0 flex flex-col">
                               <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Live Preview</label>
                               <div className="w-full aspect-video rounded-xl bg-black border-2 border-slate-800 border-dashed overflow-hidden relative flex items-center justify-center group mb-4">
