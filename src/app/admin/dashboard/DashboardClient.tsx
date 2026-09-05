@@ -13,6 +13,8 @@ import { supabase } from "@/lib/supabase";
 import DynamicGameRenderer from '@/components/DynamicGameRenderer';
 import QuestionTemplateGenerator from '@/components/admin/QuestionTemplateGenerator';
 import FGCValidator from '@/components/admin/FGCValidator';
+import DocumentManager from '@/components/admin/DocumentManager';
+import { getAllDocuments } from '@/app/admin/document-actions';
 import { 
   Users, PlaySquare, BarChart, LogOut, Search, Settings, ShieldAlert,
   Edit2, PlusCircle, CheckCircle, XCircle, Activity, Trophy, Bot, Plus, Save, X, 
@@ -403,6 +405,10 @@ export default function AdminDashboardClient() {
          {/* Roller Coaster Tab */}
          <button onClick={() => setActiveTab('roller_coaster')} className={`flex items-center gap-2 px-6 py-3 rounded-lg font-bold text-sm tracking-wide transition-all ${activeTab === 'roller_coaster' ? 'bg-cyan-900/60 text-cyan-300 shadow-lg border border-cyan-500/30' : 'text-slate-500 hover:text-cyan-400'}`}>
             <span className="text-base leading-none">🎢</span> ROLLER COASTER
+         </button>
+         {/* Documents Tab */}
+         <button onClick={() => setActiveTab('documents' as any)} className={`flex items-center gap-2 px-6 py-3 rounded-lg font-bold text-sm tracking-wide transition-all ${(activeTab as string) === 'documents' ? 'bg-indigo-900/60 text-indigo-300 shadow-lg border border-indigo-500/30' : 'text-slate-500 hover:text-indigo-400'}`}>
+            <FileText className="w-4 h-4" /> TÀI LIỆU
          </button>
       </div>
 
@@ -1167,7 +1173,36 @@ export default function AdminDashboardClient() {
                </motion.div>
             </motion.div>
          )}
+
+         {/* TAB: 📄 TÀI LIỆU */}
+         {(activeTab as string) === 'documents' && (
+           <motion.div key="documents" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+             <DocumentManagerWrapper />
+           </motion.div>
+         )}
       </AnimatePresence>
     </div>
   );
+}
+
+// Wrapper để load documents server-side khi tab mở
+function DocumentManagerWrapper() {
+  const [docs, setDocs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getAllDocuments().then(({ documents }) => {
+      setDocs(documents);
+      setLoading(false);
+    });
+  }, []);
+
+  if (loading) return (
+    <div className="text-center py-20 text-slate-500">
+      <Activity className="w-6 h-6 animate-spin mx-auto mb-2" />
+      Đang tải tài liệu...
+    </div>
+  );
+
+  return <DocumentManager initialDocs={docs} />;
 }
