@@ -66,11 +66,49 @@ export default function TipTapEditor({ content, onChange, placeholder }: TipTapE
     editor?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
   }, [editor]);
 
-  // ── Tiền xử lý Markdown từ Gemini ────────────────────────────
-  // Gemini tạo bảng với nhiều dòng trong 1 ô — marked không hỗ trợ
-  // Giải pháp: gộp các dòng continuation vào ô trước, ngăn cách bằng <br>
+  // ── Tiền xử lý Markdown từ Gemini ────────────────────────────────────────
+  // Xử lý 3 trường hợp:
+  //  1. Bảng ASCII box (┌─│) — khi copy bằng Ctrl+C từ Gemini chat
+  //  2. Bảng pipe (|cell|) nhiều dòng trong 1 ô — marked không hỗ trợ
+  //  3. Công thức LaTeX $...$ → KaTeX HTML
   const preprocessMarkdown = (md: string): string => {
-    const lines = md.split('\n');
+    let text = md;
+
+    // ── BƯỚC 1: Chuyển bảng ASCII box-drawing (┌─│├) thành Markdown pipe table ──
+    // Phát hiện block có ký tự vẽ khung
+    text = text.replace(
+      /((?:^[┌├└│].*\n?)+)/gm,
+      (block) => {
+        const rows: string[][] = [];
+        const lines = block.split('\n').filter(l => l.trim());
+        for (const line of lines) {
+          const trimmed = line.trim();
+          // Chỉ xử lý dòng nội dung (bắt đầu bằng │), bỏ qua ─ ┌ ├ └
+          if (trimmed.startsWith('│')) {
+            const cells = trimmed
+              .split('│')
+              .map(c => c.trim())
+              .filter(c => c.length > 0);
+            if (cells.length > 0) rows.push(cells);
+          }
+        }
+        if (rows.length === 0) return block;
+        // Build markdown table
+        const maxCols = Math.max(...rows.map(r => r.length));
+        const header = rows[0];
+        const separator = Array(maxCols).fill('---').join(' | ');
+        const dataRows = rows.slice(1);
+        const mdRows = [
+          '| ' + header.join(' | ') + ' |',
+          '| ' + separator + ' |',
+          ...dataRows.map(r => '| ' + r.join(' | ') + ' |'),
+        ];
+        return mdRows.join('\n') + '\n';
+      }
+    );
+
+    // ── BƯỚC 2: Gộp dòng nối tiếp trong ô bảng pipe (|cell| nhiều dòng) ──
+    const lines = text.split('\n');
     const result: string[] = [];
     let inTable = false;
     let prevWasTableRow = false;
@@ -78,30 +116,23 @@ export default function TipTapEditor({ content, onChange, placeholder }: TipTapE
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       const trimmed = line.trim();
-
-      // Dòng separator của bảng (---|---|---)
       const isSeparator = /^\|[\s\-:|]+\|/.test(trimmed) && !trimmed.replace(/[\|\-:\s]/g, '').length;
-      // Dòng table row (bắt đầu và kết thúc bằng |)
-      const isTableRow = trimmed.startsWith('|') && (trimmed.endsWith('|') || trimmed.includes('|'));
+      const isTableRow = trimmed.startsWith('|') && trimmed.includes('|');
 
       if (isTableRow || isSeparator) {
         inTable = true;
         prevWasTableRow = true;
         result.push(line);
       } else if (inTable && trimmed === '') {
-        // Dòng trống → kết thúc bảng
         inTable = false;
         prevWasTableRow = false;
         result.push(line);
       } else if (inTable && prevWasTableRow && trimmed !== '') {
-        // Dòng nội dung tiếp theo TRONG ô bảng (không bắt đầu bằng |)
-        // → Gộp vào dòng bảng trước bằng <br>
+        // Dòng nối tiếp trong ô → gộp vào row trước bằng <br>
         const lastIdx = result.length - 1;
         if (lastIdx >= 0) {
-          // Tìm ô cuối cùng trong dòng và append
           const lastLine = result[lastIdx];
           if (lastLine.trim().endsWith('|')) {
-            // Chèn nội dung vào trước dấu | cuối
             result[lastIdx] = lastLine.replace(/\s*\|\s*$/, '') + '<br>' + trimmed + ' |';
           } else {
             result[lastIdx] = lastLine + '<br>' + trimmed;
@@ -114,7 +145,7 @@ export default function TipTapEditor({ content, onChange, placeholder }: TipTapE
       }
     }
 
-    // Sau khi gộp bảng xong, render công thức LaTeX bằng KaTeX
+    // ── BƯỚC 3: Render công thức LaTeX bằng KaTeX ──
     let joined = result.join('\n');
 
     // Block math: $$...$$
@@ -123,18 +154,14 @@ export default function TipTapEditor({ content, onChange, placeholder }: TipTapE
         return '<div class="katex-block">' +
           katex.renderToString(formula.trim(), { displayMode: true, throwOnError: false }) +
           '</div>';
-      } catch {
-        return formula;
-      }
+      } catch { return formula; }
     });
 
-    // Inline math: $...$  (không phải $$ và không chứa newline)
+    // Inline math: $...$ (không chứa newline)
     joined = joined.replace(/\$([^$\n]+?)\$/g, (_m, formula) => {
       try {
         return katex.renderToString(formula.trim(), { displayMode: false, throwOnError: false });
-      } catch {
-        return formula;
-      }
+      } catch { return formula; }
     });
 
     return joined;
